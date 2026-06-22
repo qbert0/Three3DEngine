@@ -1,0 +1,27 @@
+@import '@photo-sphere-viewer/core/index.css';
+@import '@photo-sphere-viewer/markers-plugin/index.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#__nuxt {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f7f3ec;
+  color: #141414;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.psv-container {
+  font-family: inherit;
+}
