@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+
+definePageMeta({ ssr: false });
 import type { PlaceExperience, PlaceHotspot, PlaceScene } from '~/types/place';
 
 const { data, pending, error } = await useFetch<{ item: PlaceExperience }>('/api/places/heritage-ridge');
@@ -61,9 +63,11 @@ watch(activeScene, (scene) => {
             Drag to look around
           </div>
         </div>
-        <ClientOnly>
-          <SceneViewer class="flex-1" :scene="activeScene" @hotspot="selectedHotspotId = $event" />
-        </ClientOnly>
+        <SceneViewer
+          :scene="activeScene"
+          @hotspot="selectedHotspotId = $event"
+          @navigate="activeSceneId = $event"
+        />
       </section>
     </div>
   </main>

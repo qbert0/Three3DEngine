@@ -18,7 +18,7 @@ interface _GlobalComponents {
   SceneGraph: typeof import("../../components/SceneGraph.vue")['default']
   SceneGraphNode: typeof import("../../components/SceneGraphNode.vue")['default']
   SceneList: typeof import("../../components/SceneList.vue")['default']
-  SceneViewer: typeof import("../../components/SceneViewer.client.vue")['default']
+  SceneViewer: typeof import("../../components/SceneViewer.vue")['default']
   TourSidebar: typeof import("../../components/TourSidebar.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -47,7 +47,7 @@ interface _GlobalComponents {
   LazySceneGraph: LazyComponent<typeof import("../../components/SceneGraph.vue")['default']>
   LazySceneGraphNode: LazyComponent<typeof import("../../components/SceneGraphNode.vue")['default']>
   LazySceneList: LazyComponent<typeof import("../../components/SceneList.vue")['default']>
-  LazySceneViewer: LazyComponent<typeof import("../../components/SceneViewer.client.vue")['default']>
+  LazySceneViewer: LazyComponent<typeof import("../../components/SceneViewer.vue")['default']>
   LazyTourSidebar: LazyComponent<typeof import("../../components/TourSidebar.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>

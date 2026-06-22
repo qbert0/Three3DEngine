@@ -2209,7 +2209,22 @@ _IUzsoUA93K60YASEe0I2h44TtPPB44dUuxIQoFr5XDQ,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"6f1ca-T9D/+y0aUup1x6fUqm9HkOwmGM0\"",
+    "mtime": "2026-06-22T18:08:39.279Z",
+    "size": 455114,
+    "path": "index.mjs.map"
+  },
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"1bef4-HGrynV2OVZVdCT6AX5Z5N9p6G2g\"",
+    "mtime": "2026-06-22T18:08:39.279Z",
+    "size": 114420,
+    "path": "index.mjs"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -3115,7 +3130,7 @@ const places = [
         id: "ridge-lookout",
         title: "Ridge Lookout",
         subtitle: "Start above the valley and scan the trail markers.",
-        panorama: "/panoramas/cobblestone_parish_road.jpg",
+        panorama: "/panoramas/scene-entrance.jpg",
         thumbnail: "/thumbnails/scene-entrance.jpg",
         initialYaw: 0,
         initialPitch: -0.08,
@@ -3132,7 +3147,8 @@ const places = [
             label: "Watch point",
             yaw: -1.1,
             pitch: 0.02,
-            note: "The guide recommends stopping here at sunrise for clear valley light."
+            note: "The guide recommends stopping here at sunrise for clear valley light.",
+            targetSceneId: "timber-gallery"
           }
         ]
       },
@@ -3157,7 +3173,8 @@ const places = [
             label: "Craft table",
             yaw: 2.75,
             pitch: -0.22,
-            note: "The table is used for weaving demonstrations during weekend tours."
+            note: "The table is used for weaving demonstrations during weekend tours.",
+            targetSceneId: "lantern-court"
           }
         ]
       },
@@ -3182,7 +3199,8 @@ const places = [
             label: "Lantern line",
             yaw: -1.95,
             pitch: 0.18,
-            note: "The lanterns are lit each evening to guide visitors through the courtyard."
+            note: "The lanterns are lit each evening to guide visitors through the courtyard.",
+            targetSceneId: "ridge-lookout"
           }
         ]
       }

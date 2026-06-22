@@ -4,6 +4,7 @@ export interface PlaceHotspot {
   yaw: number;
   pitch: number;
   note: string;
+  targetSceneId?: string;
 }
 
 export interface PlaceScene {

@@ -1,0 +1,29 @@
+# Build output & caches
+.nuxt/
+.output/
+.cache/
+
+# Dependencies — never need to read
+node_modules/
+
+# Lock files — too large, no value to read
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Static assets — binary, not code
+public/panoramas/
+public/thumbnails/
+public/*.exr
+public/*.jpg
+public/*.png
+public/*.webp
+
+# Docker & infra — rarely relevant
+Dockerfile
+docker-compose.yml
+
+# Type-gen artifacts — derived, not authored
+.nuxt/components.d.ts
+.nuxt/imports.d.ts
+.nuxt/nuxt.d.ts

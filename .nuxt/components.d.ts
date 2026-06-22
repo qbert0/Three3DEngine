@@ -18,7 +18,7 @@ export const HotspotPanel: typeof import("../components/HotspotPanel.vue")['defa
 export const SceneGraph: typeof import("../components/SceneGraph.vue")['default']
 export const SceneGraphNode: typeof import("../components/SceneGraphNode.vue")['default']
 export const SceneList: typeof import("../components/SceneList.vue")['default']
-export const SceneViewer: typeof import("../components/SceneViewer.client.vue")['default']
+export const SceneViewer: typeof import("../components/SceneViewer.vue")['default']
 export const TourSidebar: typeof import("../components/TourSidebar.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -47,7 +47,7 @@ export const LazyHotspotPanel: LazyComponent<typeof import("../components/Hotspo
 export const LazySceneGraph: LazyComponent<typeof import("../components/SceneGraph.vue")['default']>
 export const LazySceneGraphNode: LazyComponent<typeof import("../components/SceneGraphNode.vue")['default']>
 export const LazySceneList: LazyComponent<typeof import("../components/SceneList.vue")['default']>
-export const LazySceneViewer: LazyComponent<typeof import("../components/SceneViewer.client.vue")['default']>
+export const LazySceneViewer: LazyComponent<typeof import("../components/SceneViewer.vue")['default']>
 export const LazyTourSidebar: LazyComponent<typeof import("../components/TourSidebar.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
