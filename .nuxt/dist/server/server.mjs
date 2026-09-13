@@ -1,15 +1,15 @@
 import { shallowReactive, reactive, effectScope, getCurrentScope, hasInjectionContext, getCurrentInstance, inject, toRef, shallowRef, isReadonly, isRef, isShallow, isReactive, toRaw, defineComponent, provide, h, ref, Suspense, Fragment, useSSRContext, defineAsyncComponent, unref, mergeProps, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, createApp } from "vue";
-import { $fetch } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ofetch/dist/node.mjs";
+import { $fetch as $fetch$1 } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ofetch/dist/node.mjs";
 import { baseURL } from "#internal/nuxt/paths";
-import { createHooks, createDebugger } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/hookable/dist/index.mjs";
+import { createHooks } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/hookable/dist/index.mjs";
 import { getContext, executeAsync } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/unctx/dist/index.mjs";
 import { sanitizeStatusCode, createError as createError$1 } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/h3/dist/index.mjs";
 import { START_LOCATION, createMemoryHistory, createRouter, RouterView } from "vue-router";
 import { defu } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/defu/dist/defu.mjs";
-import { hasProtocol, joinURL, withQuery, parseURL, encodePath, decodePath, isScriptProtocol } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ufo/dist/index.mjs";
+import { hasProtocol, joinURL, parseURL, encodePath, decodePath, withQuery, isScriptProtocol } from "/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ufo/dist/index.mjs";
 import { ssrRenderComponent, ssrRenderSuspense, ssrRenderVNode } from "vue/server-renderer";
 if (!globalThis.$fetch) {
-  globalThis.$fetch = $fetch.create({
+  globalThis.$fetch = $fetch$1.create({
     baseURL: baseURL()
   });
 }
@@ -422,11 +422,34 @@ function getRouteRules(arg) {
     return {};
   }
 }
+const __nuxt_page_meta$3 = { ssr: false };
+const __nuxt_page_meta$2 = { ssr: false };
+const __nuxt_page_meta$1 = { ssr: false };
+const __nuxt_page_meta = { ssr: false };
 const _routes = [
   {
     name: "index",
     path: "/",
-    component: () => import("./_nuxt/index-BcW2ebiw.js")
+    meta: __nuxt_page_meta$3 || {},
+    component: () => import("./_nuxt/index-Bn8DKTE3.js")
+  },
+  {
+    name: "admin",
+    path: "/admin",
+    meta: __nuxt_page_meta$2 || {},
+    component: () => import("./_nuxt/index-B8ziKtAK.js")
+  },
+  {
+    name: "admin-slug",
+    path: "/admin/:slug()",
+    meta: __nuxt_page_meta$1 || {},
+    component: () => import("./_nuxt/index-CuaQbRi9.js")
+  },
+  {
+    name: "admin-slug-sceneId",
+    path: "/admin/:slug()/:sceneId()",
+    meta: __nuxt_page_meta || {},
+    component: () => import("./_nuxt/_sceneId_-DcabmLE5.js")
   }
 ];
 const ROUTE_KEY_PARENTHESES_RE = /(:\w+)\([^)]+\)/g;
@@ -771,13 +794,6 @@ const plugin = /* @__PURE__ */ defineNuxtPlugin({
     return { provide: { router } };
   }
 });
-const debug_hooks_hyXe6laRLyyi6S6XoqeItfe9HTFGNswlS09LT9GQbmQ = /* @__PURE__ */ defineNuxtPlugin({
-  name: "nuxt:debug:hooks",
-  enforce: "pre",
-  setup(nuxtApp) {
-    createDebugger(nuxtApp.hooks, { tag: "nuxt-app" });
-  }
-});
 function definePayloadReducer(name, reduce) {
   {
     useNuxtApp().ssrContext["~payloadReducers"][name] = reduce;
@@ -806,7 +822,6 @@ const components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4 = /* @__PURE
 const plugins = [
   unhead_k2P3m_ZDyjlr2mMYnoDPwavjsDN8hBlk9cFai0bbopU,
   plugin,
-  debug_hooks_hyXe6laRLyyi6S6XoqeItfe9HTFGNswlS09LT9GQbmQ,
   revive_payload_server_MVtmlZaQpj6ApFmshWfUWl5PehCebzaBf2NuRMiIbms,
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
@@ -926,7 +941,7 @@ const _sfc_main$1 = {
     const statusText = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = defineAsyncComponent(() => import("./_nuxt/error-404-Z9ryhyAr.js"));
+    const _Error404 = defineAsyncComponent(() => import("./_nuxt/error-404-AqYCZ73p.js"));
     const _Error = defineAsyncComponent(() => import("./_nuxt/error-500-D7JhHc4v.js"));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
@@ -1020,17 +1035,18 @@ let entry;
 const entry_default = ((ssrContext) => entry(ssrContext));
 export {
   _export_sfc as _,
-  useNuxtApp as a,
-  useRuntimeConfig as b,
-  nuxtLinkDefaults as c,
-  asyncDataDefaults as d,
+  useRouter as a,
+  useNuxtApp as b,
+  useRuntimeConfig as c,
+  nuxtLinkDefaults as d,
   entry_default as default,
   encodeRoutePath as e,
-  createError as f,
-  fetchDefaults as g,
+  asyncDataDefaults as f,
+  createError as g,
+  fetchDefaults as h,
   navigateTo as n,
   resolveRouteObject as r,
   tryUseNuxtApp as t,
-  useRouter as u
+  useRoute as u
 };
 //# sourceMappingURL=server.mjs.map

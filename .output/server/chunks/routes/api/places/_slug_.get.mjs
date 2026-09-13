@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/routes/api/places/_slug_.get');import { d as defineEventHandler, g as getRouterParam, c as createError, u as useRuntimeConfig } from '../../../nitro/nitro.mjs';
+import { d as defineEventHandler, g as getRouterParam, c as createError, u as useRuntimeConfig } from '../../../nitro/nitro.mjs';
 import { c as catalogService } from '../../../_/catalogService.mjs';
 import 'node:http';
 import 'node:https';
@@ -40,5 +40,5 @@ const _slug__get = defineEventHandler((event) => {
   };
 });
 
-export { _slug__get as default };;globalThis.__timing__.logEnd('Load chunks/routes/api/places/_slug_.get');
+export { _slug__get as default };
 //# sourceMappingURL=_slug_.get.mjs.map

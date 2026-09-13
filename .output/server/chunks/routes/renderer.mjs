@@ -1,5 +1,5 @@
-globalThis.__timing__.logStart('Load chunks/routes//renderer');import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
-import { j as joinRelativeURL, u as useRuntimeConfig, e as encodePath, a as defineRenderHandler, b as getQuery, c as createError, f as getRouteRules, h as getResponseStatusText, i as getResponseStatus, k as useNitroApp } from '../nitro/nitro.mjs';
+import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
+import { j as joinRelativeURL, u as useRuntimeConfig, e as encodePath, b as defineRenderHandler, f as getQuery, c as createError, h as getRouteRules, i as getResponseStatusText, k as getResponseStatus, l as useNitroApp } from '../nitro/nitro.mjs';
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
@@ -76,7 +76,7 @@ function createHead(options = {}) {
 
 const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"A Nuxt, Vue, TypeScript and Photo Sphere Viewer 360 travel experience."}],"link":[],"style":[],"script":[],"noscript":[],"title":"View360 Heritage Walk"};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Khám phá toàn cảnh 360° khu vực Trảng Bay và vùng lân cận với Photo Sphere Viewer."}],"link":[],"style":[],"script":[],"noscript":[],"title":"View360 – Tour 360° Trảng Bay"};
 
 const appRootTag = "div";
 
@@ -457,5 +457,5 @@ const renderer = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: handler
 }, Symbol.toStringTag, { value: 'Module' }));
 
-export { baseURL as b, headSymbol as h, renderer as r, useHead as u };;globalThis.__timing__.logEnd('Load chunks/routes//renderer');
+export { baseURL as b, headSymbol as h, renderer as r, useHead as u };
 //# sourceMappingURL=renderer.mjs.map

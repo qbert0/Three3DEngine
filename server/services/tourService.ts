@@ -3,13 +3,13 @@ import type { TourConfig, TourEntry } from '../../types/tour';
 
 export const tourService = {
   /** Get a single tour by slug. Returns null if not found. */
-  getTour(slug: string): TourConfig | null {
-    return loadTour(slug);
+  async getTour(slug: string): Promise<TourConfig | null> {
+    return await loadTour(slug);
   },
 
   /** List all tours (lightweight, no scenes included). */
-  listTours(): TourEntry[] {
-    return listTours();
+  async listTours(): Promise<TourEntry[]> {
+    return await listTours();
   },
 
   /**

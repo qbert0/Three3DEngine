@@ -36,6 +36,15 @@ export default defineNuxtConfig({
     { path: '~/themes', pathPrefix: true },   // ThemesNature* / ThemesMinimal*
   ],
 
+  nitro: {
+    serverAssets: [
+      {
+        baseName: 'tours',
+        dir: 'tours',
+      },
+    ],
+  },
+
   runtimeConfig: {
     minioEndpoint: process.env.MINIO_ENDPOINT || 'http://minio:9000',
     mariadbHost:   process.env.MARIADB_HOST   || 'mariadb',

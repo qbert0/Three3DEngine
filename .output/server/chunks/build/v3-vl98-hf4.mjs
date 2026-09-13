@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/build/v3-vl98-hf4');import { hasInjectionContext, inject } from 'vue';
+import { hasInjectionContext, inject } from 'vue';
 import { t as tryUseNuxtApp } from './server.mjs';
 import { u as useHead$1, h as headSymbol } from '../routes/renderer.mjs';
 
@@ -18,5 +18,5 @@ function useHead(input, options = {}) {
   }
 }
 
-export { useHead as u };;globalThis.__timing__.logEnd('Load chunks/build/v3-vl98-hf4');
+export { useHead as u };
 //# sourceMappingURL=v3-vl98-hf4.mjs.map

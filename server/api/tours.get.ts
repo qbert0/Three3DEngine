@@ -1,8 +1,8 @@
 import { tourService } from '../services/tourService';
 
-export default defineEventHandler(() => {
+export default defineEventHandler(async () => {
   return {
     service: 'tour-catalog',
-    items: tourService.listTours(),
+    items: await tourService.listTours(),
   };
 });
