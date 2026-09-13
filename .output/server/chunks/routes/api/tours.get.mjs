@@ -11,10 +11,10 @@ import 'node:url';
 import '../../_/yamlLoader.mjs';
 import 'js-yaml';
 
-const tours_get = defineEventHandler(async () => {
+const tours_get = defineEventHandler(() => {
   return {
     service: "tour-catalog",
-    items: await tourService.listTours()
+    items: tourService.listTours()
   };
 });
 

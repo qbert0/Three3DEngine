@@ -11,9 +11,9 @@ import 'node:url';
 import '../../../_/yamlLoader.mjs';
 import 'js-yaml';
 
-const _slug__get = defineEventHandler(async (event) => {
+const _slug__get = defineEventHandler((event) => {
   const slug = getRouterParam(event, "slug") || "";
-  const tour = await tourService.getTour(slug);
+  const tour = tourService.getTour(slug);
   if (!tour) {
     throw createError({ statusCode: 404, statusMessage: `Tour '${slug}' not found` });
   }

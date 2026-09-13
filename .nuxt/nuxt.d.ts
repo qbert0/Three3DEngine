@@ -1,6 +1,6 @@
 /// <reference types="@nuxtjs/tailwindcss" />
-/// <reference types="@nuxt/telemetry" />
 /// <reference types="@nuxt/devtools" />
+/// <reference types="@nuxt/telemetry" />
 /// <reference types="@vercel/speed-insights" />
 /// <reference path="types/nitro-layouts.d.ts" />
 /// <reference path="types/builder-env.d.ts" />

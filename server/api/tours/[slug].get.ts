@@ -1,8 +1,8 @@
 import { tourService } from '../../services/tourService';
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler((event) => {
   const slug = getRouterParam(event, 'slug') || '';
-  const tour = await tourService.getTour(slug);
+  const tour = tourService.getTour(slug);
 
   if (!tour) {
     throw createError({ statusCode: 404, statusMessage: `Tour '${slug}' not found` });

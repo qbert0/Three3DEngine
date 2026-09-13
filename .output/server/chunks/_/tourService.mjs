@@ -2,12 +2,12 @@ import { l as listTours, b as loadTour } from './yamlLoader.mjs';
 
 const tourService = {
   /** Get a single tour by slug. Returns null if not found. */
-  async getTour(slug) {
-    return await loadTour(slug);
+  getTour(slug) {
+    return loadTour(slug);
   },
   /** List all tours (lightweight, no scenes included). */
-  async listTours() {
-    return await listTours();
+  listTours() {
+    return listTours();
   },
   /**
    * Resolve media URLs.

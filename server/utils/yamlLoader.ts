@@ -2,61 +2,40 @@ import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import * as yaml from 'js-yaml';
 import type { TourConfig, TourEntry } from '../../types/tour';
+import { trangBayTour } from '../data/tours/trang-bay';
 
-// Eagerly import all YAML files from /tours at build time via Vite
-const tourModules = import.meta.glob('../../tours/*.yaml', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-}) as Record<string, string>;
+// In-memory backend data source — compiled natively into Nitro server on Vercel
+const staticTours: Record<string, TourConfig> = {
+  'trang-bay': trangBayTour,
+};
 
 const TOURS_DIR = resolve(process.cwd(), 'tours');
 
-/** Get raw YAML content for a tour slug */
-function getRawYaml(slug: string): string | null {
-  // 1. Check bundled Vite import (100% works on Vercel & serverless)
-  for (const [path, content] of Object.entries(tourModules)) {
-    if (path.endsWith(`/${slug}.yaml`)) {
-      return content;
-    }
+/** Parse and return a single tour config by slug */
+export function loadTour(slug: string): TourConfig | null {
+  // 1. Check native backend TypeScript data (100% reliable on Vercel & serverless)
+  if (staticTours[slug]) {
+    return JSON.parse(JSON.stringify(staticTours[slug]));
   }
 
-  // 2. Fallback to reading disk (for local dev if new files added dynamically)
+  // 2. Fallback to reading disk (for local dev custom YAML files)
   try {
     const filePath = join(TOURS_DIR, `${slug}.yaml`);
     if (existsSync(filePath)) {
-      return readFileSync(filePath, 'utf-8');
+      const raw = readFileSync(filePath, 'utf-8');
+      const data = yaml.load(raw) as TourConfig;
+      return data ?? null;
     }
   } catch {}
 
   return null;
 }
 
-/** Parse and return a single tour YAML file by slug */
-export async function loadTour(slug: string): Promise<TourConfig | null> {
-  const raw = getRawYaml(slug);
-  if (!raw) return null;
-  try {
-    const data = yaml.load(raw) as TourConfig;
-    return data ?? null;
-  } catch {
-    return null;
-  }
-}
-
 /** List all available tours (lightweight — no scenes) */
-export async function listTours(): Promise<TourEntry[]> {
-  const tourSlugs = new Set<string>();
+export function listTours(): TourEntry[] {
+  const tourSlugs = new Set<string>(Object.keys(staticTours));
 
-  // 1. Add slugs from bundled Vite modules
-  for (const path of Object.keys(tourModules)) {
-    const fileName = path.split('/').pop() || '';
-    if (fileName.endsWith('.yaml')) {
-      tourSlugs.add(fileName.replace(/\.yaml$/, ''));
-    }
-  }
-
-  // 2. Add slugs from local disk if available
+  // Merge local disk YAML files if available
   try {
     if (existsSync(TOURS_DIR)) {
       const files = readdirSync(TOURS_DIR).filter((f) => f.endsWith('.yaml'));
@@ -68,7 +47,7 @@ export async function listTours(): Promise<TourEntry[]> {
 
   const entries: TourEntry[] = [];
   for (const slug of tourSlugs) {
-    const tour = await loadTour(slug);
+    const tour = loadTour(slug);
     if (tour) {
       entries.push({
         slug: tour.slug,
@@ -85,24 +64,30 @@ export async function listTours(): Promise<TourEntry[]> {
   return entries;
 }
 
-/** Write a tour config back to disk (used by admin, local dev) */
+/** Write a tour config back to disk (used by admin in local dev) */
 export function saveTour(slug: string, config: TourConfig): void {
+  // Update in-memory static tour if present
+  if (staticTours[slug]) {
+    staticTours[slug] = JSON.parse(JSON.stringify(config));
+  }
+
+  // Write to YAML file on disk (if disk is writable)
   try {
     const filePath = join(TOURS_DIR, `${slug}.yaml`);
     const content = yaml.dump(config, { indent: 2, lineWidth: 120 });
     writeFileSync(filePath, content, 'utf-8');
   } catch (err) {
-    console.warn(`[saveTour] File write skipped on read-only filesystem (normal on Vercel): ${err}`);
+    console.warn(`[saveTour] Disk write skipped (normal on Vercel): ${err}`);
   }
 }
 
-/** Atomically update markers for a specific scene in the YAML file on disk */
-export async function saveSceneMarkers(
+/** Atomically update markers for a specific scene in the tour config */
+export function saveSceneMarkers(
   slug: string,
   sceneId: string,
   markers: TourConfig['scenes'][number]['markers'],
-): Promise<TourConfig | null> {
-  const tour = await loadTour(slug);
+): TourConfig | null {
+  const tour = loadTour(slug);
   if (!tour) return null;
 
   const sceneIndex = tour.scenes.findIndex((s) => s.id === sceneId);
