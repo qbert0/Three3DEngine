@@ -3,49 +3,60 @@ import { resolve, join } from 'node:path';
 import * as yaml from 'js-yaml';
 import type { TourConfig, TourEntry } from '../../types/tour';
 
+// Eagerly import all YAML files from /tours at build time via Vite
+const tourModules = import.meta.glob('../../tours/*.yaml', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>;
+
 const TOURS_DIR = resolve(process.cwd(), 'tours');
 
-/** Parse and return a single tour YAML file by slug */
-export async function loadTour(slug: string): Promise<TourConfig | null> {
-  // 1. Try Nitro serverAssets storage (for Vercel serverless deployment)
-  try {
-    const storage = useStorage('assets:tours');
-    const rawAsset = await storage.getItem<string>(`${slug}.yaml`);
-    if (rawAsset) {
-      const data = yaml.load(typeof rawAsset === 'string' ? rawAsset : JSON.stringify(rawAsset)) as TourConfig;
-      if (data) return data;
+/** Get raw YAML content for a tour slug */
+function getRawYaml(slug: string): string | null {
+  // 1. Check bundled Vite import (100% works on Vercel & serverless)
+  for (const [path, content] of Object.entries(tourModules)) {
+    if (path.endsWith(`/${slug}.yaml`)) {
+      return content;
     }
-  } catch {}
+  }
 
-  // 2. Fallback to local filesystem (for local dev & disk persistence)
+  // 2. Fallback to reading disk (for local dev if new files added dynamically)
   try {
     const filePath = join(TOURS_DIR, `${slug}.yaml`);
     if (existsSync(filePath)) {
-      const raw = readFileSync(filePath, 'utf-8');
-      const data = yaml.load(raw) as TourConfig;
-      return data ?? null;
+      return readFileSync(filePath, 'utf-8');
     }
   } catch {}
 
   return null;
 }
 
+/** Parse and return a single tour YAML file by slug */
+export async function loadTour(slug: string): Promise<TourConfig | null> {
+  const raw = getRawYaml(slug);
+  if (!raw) return null;
+  try {
+    const data = yaml.load(raw) as TourConfig;
+    return data ?? null;
+  } catch {
+    return null;
+  }
+}
+
 /** List all available tours (lightweight — no scenes) */
 export async function listTours(): Promise<TourEntry[]> {
   const tourSlugs = new Set<string>();
 
-  // 1. Try Nitro serverAssets
-  try {
-    const storage = useStorage('assets:tours');
-    const keys = await storage.getKeys();
-    for (const key of keys) {
-      if (key.endsWith('.yaml')) {
-        tourSlugs.add(key.replace(/\.yaml$/, ''));
-      }
+  // 1. Add slugs from bundled Vite modules
+  for (const path of Object.keys(tourModules)) {
+    const fileName = path.split('/').pop() || '';
+    if (fileName.endsWith('.yaml')) {
+      tourSlugs.add(fileName.replace(/\.yaml$/, ''));
     }
-  } catch {}
+  }
 
-  // 2. Fallback / merge local filesystem
+  // 2. Add slugs from local disk if available
   try {
     if (existsSync(TOURS_DIR)) {
       const files = readdirSync(TOURS_DIR).filter((f) => f.endsWith('.yaml'));

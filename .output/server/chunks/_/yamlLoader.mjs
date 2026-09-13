@@ -1,42 +1,46 @@
-import { a as useStorage } from '../nitro/nitro.mjs';
-import { writeFileSync, existsSync, readFileSync, readdirSync } from 'node:fs';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};import { writeFileSync, existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import * as yaml from 'js-yaml';
 
+const tourModules = globalThis._importMeta_.glob("../../tours/*.yaml", {
+  query: "?raw",
+  import: "default",
+  eager: true
+});
 const TOURS_DIR = resolve(process.cwd(), "tours");
-async function loadTour(slug) {
-  try {
-    const storage = useStorage("assets:tours");
-    const rawAsset = await storage.getItem(`${slug}.yaml`);
-    if (rawAsset) {
-      const data = yaml.load(typeof rawAsset === "string" ? rawAsset : JSON.stringify(rawAsset));
-      if (data) return data;
+function getRawYaml(slug) {
+  for (const [path, content] of Object.entries(tourModules)) {
+    if (path.endsWith(`/${slug}.yaml`)) {
+      return content;
     }
-  } catch {
   }
   try {
     const filePath = join(TOURS_DIR, `${slug}.yaml`);
     if (existsSync(filePath)) {
-      const raw = readFileSync(filePath, "utf-8");
-      const data = yaml.load(raw);
-      return data != null ? data : null;
+      return readFileSync(filePath, "utf-8");
     }
   } catch {
   }
   return null;
 }
+async function loadTour(slug) {
+  const raw = getRawYaml(slug);
+  if (!raw) return null;
+  try {
+    const data = yaml.load(raw);
+    return data != null ? data : null;
+  } catch {
+    return null;
+  }
+}
 async function listTours() {
   var _a, _b, _c, _d;
   const tourSlugs = /* @__PURE__ */ new Set();
-  try {
-    const storage = useStorage("assets:tours");
-    const keys = await storage.getKeys();
-    for (const key of keys) {
-      if (key.endsWith(".yaml")) {
-        tourSlugs.add(key.replace(/\.yaml$/, ""));
-      }
+  for (const path of Object.keys(tourModules)) {
+    const fileName = path.split("/").pop() || "";
+    if (fileName.endsWith(".yaml")) {
+      tourSlugs.add(fileName.replace(/\.yaml$/, ""));
     }
-  } catch {
   }
   try {
     if (existsSync(TOURS_DIR)) {
