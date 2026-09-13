@@ -3,11 +3,23 @@ import type { Serialize, Simplify } from "nitropack/types";
 declare module "nitropack/types" {
   type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T
   interface InternalApi {
+    '/api/admin/tours/:slug': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug].post').default>>>>
+    }
+    '/api/admin/tours/:slug/scenes/:sceneId/markers': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug]/scenes/[sceneId]/markers.post').default>>>>
+    }
     '/api/places': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/places.get').default>>>>
     }
     '/api/places/:slug': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/places/[slug].get').default>>>>
+    }
+    '/api/tours': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/tours.get').default>>>>
+    }
+    '/api/tours/:slug': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/tours/[slug].get').default>>>>
     }
     '/__nuxt_error': {
       'default': Simplify<Serialize<Awaited<ReturnType<typeof import('../../node_modules/@nuxt/nitro-server/dist/runtime/handlers/renderer').default>>>>

@@ -81,6 +81,8 @@ declare global {
   const isStream: typeof import('../../node_modules/h3').isStream
   const isWebResponse: typeof import('../../node_modules/h3').isWebResponse
   const lazyEventHandler: typeof import('../../node_modules/h3').lazyEventHandler
+  const listTours: typeof import('../../server/utils/yamlLoader').listTours
+  const loadTour: typeof import('../../server/utils/yamlLoader').loadTour
   const nitroPlugin: typeof import('../../node_modules/nitropack/dist/runtime/internal/plugin').nitroPlugin
   const parseCookies: typeof import('../../node_modules/h3').parseCookies
   const promisifyNodeListener: typeof import('../../node_modules/h3').promisifyNodeListener
@@ -94,6 +96,8 @@ declare global {
   const runTask: typeof import('../../node_modules/nitropack/dist/runtime/internal/task').runTask
   const sanitizeStatusCode: typeof import('../../node_modules/h3').sanitizeStatusCode
   const sanitizeStatusMessage: typeof import('../../node_modules/h3').sanitizeStatusMessage
+  const saveSceneMarkers: typeof import('../../server/utils/yamlLoader').saveSceneMarkers
+  const saveTour: typeof import('../../server/utils/yamlLoader').saveTour
   const sealSession: typeof import('../../node_modules/h3').sealSession
   const send: typeof import('../../node_modules/h3').send
   const sendError: typeof import('../../node_modules/h3').sendError
@@ -147,3 +151,4 @@ export { defineTask, runTask } from 'nitropack/runtime/internal/task';
 export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils';
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from '/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from '/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
+export { loadTour, listTours, saveTour, saveSceneMarkers } from '/run/media/qbert/1C8099B8809998BA/codedao/view360/server/utils/yamlLoader';

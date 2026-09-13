@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Binoculars, Clock3, Database, MapPin, Server, Warehouse } from '@lucide/vue';
+import { Binoculars, MapPin } from '@lucide/vue';
 import type { PlaceExperience, PlaceHotspot, PlaceScene } from '~/types/place';
 
 defineProps<{
@@ -17,38 +17,63 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <aside class="order-2 w-full border-t border-ink/10 bg-paper/95 p-4 lg:order-1 lg:h-screen lg:w-[380px] lg:overflow-y-auto lg:border-r lg:border-t-0 lg:p-6">
-    <div class="flex items-center gap-3">
-      <div class="grid h-11 w-11 place-items-center rounded bg-ink text-paper">
-        <Binoculars class="h-5 w-5" />
+  <aside class="order-2 flex w-full flex-col border-t border-white/10 bg-ink lg:order-1 lg:h-screen lg:w-[340px] lg:border-r lg:border-t-0">
+
+    <!-- Header -->
+    <div class="relative overflow-hidden px-6 pb-6 pt-7">
+      <!-- Decorative gradient blob -->
+      <div class="pointer-events-none absolute -right-8 -top-8 h-40 w-40 rounded-full bg-river/20 blur-3xl" />
+      <div class="pointer-events-none absolute -bottom-4 left-4 h-24 w-24 rounded-full bg-clay/15 blur-2xl" />
+
+      <div class="relative flex items-start gap-3">
+        <div class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-river/20 ring-1 ring-river/40">
+          <Binoculars class="h-5 w-5 text-river" />
+        </div>
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-river">View360</p>
+          <h1 class="mt-0.5 text-xl font-bold leading-tight text-white">{{ place.title }}</h1>
+        </div>
       </div>
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-river">View360</p>
-        <h1 class="text-2xl font-semibold leading-tight text-ink">{{ place.title }}</h1>
+
+      <p class="relative mt-4 text-sm leading-6 text-white/55">{{ place.summary }}</p>
+
+      <div class="relative mt-4 flex items-center gap-2 text-xs text-white/40">
+        <MapPin class="h-3.5 w-3.5 shrink-0 text-clay" />
+        <span>{{ place.location }}</span>
       </div>
     </div>
 
-    <p class="mt-5 text-sm leading-6 text-ink/70">{{ place.summary }}</p>
+    <!-- Divider -->
+    <div class="mx-6 h-px bg-white/8" />
 
-    <div class="mt-5 grid grid-cols-2 gap-3 text-sm">
-      <div class="border border-ink/10 bg-white p-3">
-        <MapPin class="mb-2 h-4 w-4 text-clay" />
-        <p class="font-medium text-ink">{{ place.location }}</p>
-      </div>
-      <div class="border border-ink/10 bg-white p-3">
-        <Clock3 class="mb-2 h-4 w-4 text-moss" />
-        <p class="font-medium text-ink">{{ place.duration }}</p>
-      </div>
+    <!-- Active scene info -->
+    <div class="px-6 py-5">
+      <p class="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Đang xem</p>
+      <p class="text-base font-semibold text-white">{{ activeScene.title }}</p>
+      <p class="mt-0.5 text-xs leading-5 text-white/50">{{ activeScene.subtitle }}</p>
     </div>
 
-    <SceneGraph :scenes="scenes" :active-scene-id="activeScene.id" @select="emit('selectScene', $event)" />
-    <SceneList :scenes="scenes" :active-scene-id="activeScene.id" @select="emit('selectScene', $event)" />
-    <HotspotPanel :scene="activeScene" :active-hotspot="activeHotspot" :selected-hotspot-id="selectedHotspotId" @select="emit('selectHotspot', $event)" />
+    <!-- Divider -->
+    <div class="mx-6 h-px bg-white/8" />
 
-    <section class="mt-7 grid gap-2 text-xs text-ink/60">
-      <div class="flex items-center gap-2"><Server class="h-4 w-4 text-river" /> Nuxt server API split into catalog and experience services</div>
-      <div class="flex items-center gap-2"><Warehouse class="h-4 w-4 text-moss" /> MinIO ready for future panorama object storage</div>
-      <div class="flex items-center gap-2"><Database class="h-4 w-4 text-clay" /> MariaDB reserved for persistent tour metadata</div>
-    </section>
+    <!-- Usage guide -->
+    <div class="mt-auto px-6 py-5">
+      <p class="mb-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35">Hướng dẫn</p>
+      <ul class="grid gap-2">
+        <li class="flex items-center gap-2.5 text-xs text-white/50">
+          <span class="text-base leading-none">🖱️</span> Kéo để xoay ảnh 360°
+        </li>
+        <li class="flex items-center gap-2.5 text-xs text-white/50">
+          <span class="text-base leading-none">🔵</span> Nút xanh – di chuyển đến cảnh kế
+        </li>
+        <li class="flex items-center gap-2.5 text-xs text-white/50">
+          <span class="text-base leading-none">🟠</span> Nút cam – xem thông tin điểm đến
+        </li>
+        <li class="flex items-center gap-2.5 text-xs text-white/50">
+          <span class="text-base leading-none">🔍</span> Cuộn chuột để zoom
+        </li>
+      </ul>
+    </div>
+
   </aside>
 </template>

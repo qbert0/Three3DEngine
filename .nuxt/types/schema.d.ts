@@ -21,6 +21,8 @@ import { NuxtModule, ModuleDependencyMeta } from '@nuxt/schema'
   }
   interface SharedPublicRuntimeConfig {
    mediaBaseUrl: string,
+
+   enableAdmin: boolean,
   }
 declare module '@nuxt/schema' {
   interface ModuleDependencies {

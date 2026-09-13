@@ -7,6 +7,8 @@ import { parentPort, threadId } from 'node:worker_threads';
 import { escapeHtml } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@vue/shared/dist/shared.cjs.js';
 import viteNodeEntry_mjs from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
 import { viteNodeFetch } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
+import { promises, writeFileSync, readFileSync, readdirSync } from 'node:fs';
+import * as yaml from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/js-yaml/dist/js-yaml.mjs';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, encodePath, joinRelativeURL } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/vue/server-renderer/index.mjs';
@@ -34,7 +36,6 @@ import { stringify, uneval } from 'file:///run/media/qbert/1C8099B8809998BA/code
 import { captureRawStackTrace, parseRawStackTrace } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/errx/dist/index.js';
 import { isVNode, isRef, toValue } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/vue/index.mjs';
 import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
-import { promises } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/pathe/dist/index.mjs';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/unhead/dist/server.mjs';
@@ -693,7 +694,8 @@ const _inlineRuntimeConfig = {
     }
   },
   "public": {
-    "mediaBaseUrl": ""
+    "mediaBaseUrl": "",
+    "enableAdmin": false
   },
   "minioEndpoint": "http://minio:9000",
   "mariadbHost": "mariadb"
@@ -2104,7 +2106,7 @@ const _q1ZScfGbj9qCMgFQOe8zWkedPEk9DBJBLIHVGM7K5V8 = (function(nitro) {
 
 const rootDir = "/run/media/qbert/1C8099B8809998BA/codedao/view360";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"A Nuxt, Vue, TypeScript and Photo Sphere Viewer 360 travel experience."}],"link":[],"style":[],"script":[],"noscript":[],"title":"View360 Heritage Walk"};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Khám phá toàn cảnh 360° khu vực Trảng Bay và vùng lân cận với Photo Sphere Viewer."}],"link":[],"style":[],"script":[],"noscript":[],"title":"View360 – Tour 360° Trảng Bay"};
 
 const appRootTag = "div";
 
@@ -2210,19 +2212,19 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
 const assets = {
-  "/index.mjs.map": {
-    "type": "application/json",
-    "etag": "\"6f1ca-T9D/+y0aUup1x6fUqm9HkOwmGM0\"",
-    "mtime": "2026-06-22T18:08:39.279Z",
-    "size": 455114,
-    "path": "index.mjs.map"
-  },
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1bef4-HGrynV2OVZVdCT6AX5Z5N9p6G2g\"",
-    "mtime": "2026-06-22T18:08:39.279Z",
-    "size": 114420,
+    "etag": "\"204df-nUmkuMlQ7Cc+cjf/4XCrNuMgITw\"",
+    "mtime": "2026-09-13T04:17:49.844Z",
+    "size": 132319,
     "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"81483-fGwzwIrABeVHGl2C1H4ch/c2nsE\"",
+    "mtime": "2026-09-13T04:17:49.844Z",
+    "size": 529539,
+    "path": "index.mjs.map"
   }
 };
 
@@ -2755,14 +2757,22 @@ async function getIslandContext(event) {
 	};
 }
 
+const _lazy_PGQEaE = () => Promise.resolve().then(function () { return _slug__post$1; });
+const _lazy_VypIyW = () => Promise.resolve().then(function () { return markers_post$1; });
 const _lazy_Cu4gt4 = () => Promise.resolve().then(function () { return places_get$1; });
-const _lazy_5853ui = () => Promise.resolve().then(function () { return _slug__get$1; });
+const _lazy_5853ui = () => Promise.resolve().then(function () { return _slug__get$3; });
+const _lazy_exYNoq = () => Promise.resolve().then(function () { return tours_get$1; });
+const _lazy_K0uFYU = () => Promise.resolve().then(function () { return _slug__get$1; });
 const _lazy_nNil0X = () => Promise.resolve().then(function () { return renderer; });
 
 const handlers = [
   { route: '', handler: _qee9ua, lazy: false, middleware: true, method: undefined },
+  { route: '/api/admin/tours/:slug', handler: _lazy_PGQEaE, lazy: true, middleware: false, method: "post" },
+  { route: '/api/admin/tours/:slug/scenes/:sceneId/markers', handler: _lazy_VypIyW, lazy: true, middleware: false, method: "post" },
   { route: '/api/places', handler: _lazy_Cu4gt4, lazy: true, middleware: false, method: "get" },
   { route: '/api/places/:slug', handler: _lazy_5853ui, lazy: true, middleware: false, method: "get" },
+  { route: '/api/tours', handler: _lazy_exYNoq, lazy: true, middleware: false, method: "get" },
+  { route: '/api/tours/:slug', handler: _lazy_K0uFYU, lazy: true, middleware: false, method: "get" },
   { route: '/__nuxt_error', handler: _lazy_nNil0X, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: handler$1, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_nNil0X, lazy: true, middleware: false, method: undefined }
@@ -3117,90 +3127,533 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const TOURS_DIR = resolve(process.cwd(), "tours");
+function loadTour(slug) {
+  try {
+    const filePath = join(TOURS_DIR, `${slug}.yaml`);
+    const raw = readFileSync(filePath, "utf-8");
+    const data = yaml.load(raw);
+    return data != null ? data : null;
+  } catch {
+    return null;
+  }
+}
+function listTours() {
+  try {
+    const files = readdirSync(TOURS_DIR).filter((f) => f.endsWith(".yaml"));
+    return files.map((file) => {
+      var _a, _b, _c, _d;
+      const slug = file.replace(".yaml", "");
+      const tour = loadTour(slug);
+      if (!tour) return null;
+      return {
+        slug: tour.slug,
+        title: tour.title,
+        location: tour.location,
+        summary: tour.summary,
+        theme: tour.theme,
+        sceneCount: (_b = (_a = tour.scenes) == null ? void 0 : _a.length) != null ? _b : 0,
+        cover: (_d = (_c = tour.scenes) == null ? void 0 : _c[0]) == null ? void 0 : _d.thumbnail
+      };
+    }).filter((t) => t !== null);
+  } catch {
+    return [];
+  }
+}
+function saveTour(slug, config) {
+  const filePath = join(TOURS_DIR, `${slug}.yaml`);
+  const content = yaml.dump(config, { indent: 2, lineWidth: 120 });
+  writeFileSync(filePath, content, "utf-8");
+}
+function saveSceneMarkers(slug, sceneId, markers) {
+  const tour = loadTour(slug);
+  if (!tour) return null;
+  const sceneIndex = tour.scenes.findIndex((s) => s.id === sceneId);
+  if (sceneIndex === -1) return null;
+  tour.scenes[sceneIndex].markers = markers;
+  saveTour(slug, tour);
+  return tour;
+}
+
+const _slug__post = defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug") || "";
+  const body = await readBody(event);
+  if (!body || !body.slug || !Array.isArray(body.scenes)) {
+    throw createError({ statusCode: 400, statusMessage: "Invalid tour config body" });
+  }
+  try {
+    saveTour(slug, body);
+    return { ok: true, slug };
+  } catch (err) {
+    throw createError({ statusCode: 500, statusMessage: `Could not save tour: ${err}` });
+  }
+});
+
+const _slug__post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _slug__post
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const markers_post = defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug") || "";
+  const sceneId = getRouterParam(event, "sceneId") || "";
+  const body = await readBody(event);
+  if (!body || !Array.isArray(body.markers)) {
+    throw createError({ statusCode: 400, statusMessage: "Invalid markers body" });
+  }
+  const updatedTour = saveSceneMarkers(slug, sceneId, body.markers);
+  if (!updatedTour) {
+    throw createError({ statusCode: 404, statusMessage: `Scene '${sceneId}' or Tour '${slug}' not found` });
+  }
+  return { ok: true, slug, sceneId, tour: updatedTour };
+});
+
+const markers_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: markers_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const places = [
   {
     slug: "heritage-ridge",
-    title: "Heritage Ridge Walk",
-    location: "Highland cultural trail",
-    summary: "A calm 360 route through a ridge lookout, a timber gallery, and a lantern courtyard.",
-    duration: "18 min",
+    title: "Tour 360\xB0 Th\u1EF1c \u0110\u1ECBa",
+    location: "Tr\u1EA3ng Bay \u2013 Khu V\u1EF1c R\u1EEBng N\xFAi",
+    summary: "Kh\xE1m ph\xE1 to\xE0n c\u1EA3nh 360\xB0 t\u1EA1i khu v\u1EF1c Tr\u1EA3ng Bay v\xE0 v\xF9ng l\xE2n c\u1EADn. Xoay \u1EA3nh \u0111\u1EC3 quan s\xE1t chi ti\u1EBFt \u0111\u1ECBa h\xECnh, th\u1EA3m th\u1EF1c v\u1EADt v\xE0 c\u1EA3nh quan thi\xEAn nhi\xEAn.",
+    duration: "T\u1EF1 do",
     curator: "View360 Studio",
     scenes: [
+      // ── Khu vực trung tâm – 7 ảnh ──────────────────────────────────
       {
-        id: "ridge-lookout",
-        title: "Ridge Lookout",
-        subtitle: "Start above the valley and scan the trail markers.",
-        panorama: "/panoramas/scene-entrance.jpg",
-        thumbnail: "/thumbnails/scene-entrance.jpg",
+        id: "scene-c1",
+        title: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
+        subtitle: "To\xE0n c\u1EA3nh khu v\u1EF1c trung t\xE2m, \u0111i\u1EC3m kh\u1EDFi \u0111\u1EA7u c\u1EE7a h\xE0nh tr\xECnh.",
+        panorama: "/images/1788771876123.jpg",
+        thumbnail: "/thumbnails/new/1788771876123.jpg",
         initialYaw: 0,
-        initialPitch: -0.08,
+        initialPitch: -0.05,
         hotspots: [
           {
-            id: "old-map",
-            label: "Trail map",
-            yaw: 0.42,
-            pitch: -0.08,
-            note: "A carved map marks the old walking route between market houses."
+            id: "c1-next",
+            label: "R\xECa R\u1EEBng Th\u01B0a",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn R\xECa R\u1EEBng Th\u01B0a.",
+            targetSceneId: "scene-c2"
           },
           {
-            id: "watch-point",
-            label: "Watch point",
-            yaw: -1.1,
-            pitch: 0.02,
-            note: "The guide recommends stopping here at sunrise for clear valley light.",
-            targetSceneId: "timber-gallery"
+            id: "c1-trbay1",
+            label: "Tr\u1EA3ng Bay 1",
+            yaw: -1.57,
+            pitch: -0.3,
+            note: "Kh\xE1m ph\xE1 khu v\u1EF1c Tr\u1EA3ng Bay 1.",
+            targetSceneId: "scene-tb1-1"
           }
         ]
       },
       {
-        id: "timber-gallery",
-        title: "Timber Gallery",
-        subtitle: "A quiet room for local craft and archive photos.",
-        panorama: "/panoramas/scene-gallery.jpg",
-        thumbnail: "/thumbnails/scene-gallery.jpg",
-        initialYaw: 1.35,
-        initialPitch: -0.12,
+        id: "scene-c2",
+        title: "R\xECa R\u1EEBng Th\u01B0a",
+        subtitle: "Ranh gi\u1EDBi gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng c\u1ECF, \xE1nh s\xE1ng l\u1ECDc qua t\xE1n l\xE1.",
+        panorama: "/images/1788771876132.jpg",
+        thumbnail: "/thumbnails/new/1788771876132.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
         hotspots: [
           {
-            id: "archive-wall",
-            label: "Archive wall",
-            yaw: 1.8,
-            pitch: 0.04,
-            note: "Photos on this wall document how the ridge settlement changed over time."
+            id: "c2-prev",
+            label: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i \u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng.",
+            targetSceneId: "scene-c1"
           },
           {
-            id: "craft-table",
-            label: "Craft table",
-            yaw: 2.75,
-            pitch: -0.22,
-            note: "The table is used for weaving demonstrations during weekend tours.",
-            targetSceneId: "lantern-court"
+            id: "c2-next",
+            label: "L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng.",
+            targetSceneId: "scene-c3"
           }
         ]
       },
       {
-        id: "lantern-court",
-        title: "Lantern Courtyard",
-        subtitle: "End at the courtyard where evening tours gather.",
-        panorama: "/panoramas/scene-courtyard.jpg",
-        thumbnail: "/thumbnails/scene-courtyard.jpg",
-        initialYaw: -0.75,
-        initialPitch: -0.1,
+        id: "scene-c3",
+        title: "L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng",
+        subtitle: "Con \u0111\u01B0\u1EDDng nh\u1ECF xuy\xEAn qua th\u1EA3m th\u1EF1c v\u1EADt, d\u1EA5u ch\xE2n ng\u01B0\u1EDDi \u0111i tr\u01B0\u1EDBc.",
+        panorama: "/images/1788771876143.jpg",
+        thumbnail: "/thumbnails/new/1788771876143.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
         hotspots: [
           {
-            id: "tea-corner",
-            label: "Tea corner",
-            yaw: -0.35,
-            pitch: -0.18,
-            note: "Guests pause here before the final walk down from the ridge."
+            id: "c3-prev",
+            label: "R\xECa R\u1EEBng Th\u01B0a",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i R\xECa R\u1EEBng Th\u01B0a.",
+            targetSceneId: "scene-c2"
           },
           {
-            id: "lantern-line",
-            label: "Lantern line",
-            yaw: -1.95,
-            pitch: 0.18,
-            note: "The lanterns are lit each evening to guide visitors through the courtyard.",
-            targetSceneId: "ridge-lookout"
+            id: "c3-next",
+            label: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng.",
+            targetSceneId: "scene-c4"
+          }
+        ]
+      },
+      {
+        id: "scene-c4",
+        title: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
+        subtitle: "Kh\xF4ng gian m\u1EDF r\u1ED9ng, t\u1EA7m nh\xECn 360\xB0 kh\xF4ng b\u1ECB che khu\u1EA5t.",
+        panorama: "/images/1788771876162.jpg",
+        thumbnail: "/thumbnails/new/1788771876162.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "c4-prev",
+            label: "L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng.",
+            targetSceneId: "scene-c3"
+          },
+          {
+            id: "c4-next",
+            label: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn G\xF3c Nh\xECn Ph\xEDa N\xFAi.",
+            targetSceneId: "scene-c5"
+          }
+        ]
+      },
+      {
+        id: "scene-c5",
+        title: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
+        subtitle: "D\xE3y n\xFAi xa ph\xEDa ch\xE2n tr\u1EDDi, m\xE2y tr\xF4i nh\u1EB9 tr\xEAn \u0111\u1EC9nh.",
+        panorama: "/images/1788771876173.jpg",
+        thumbnail: "/thumbnails/new/1788771876173.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "c5-prev",
+            label: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng.",
+            targetSceneId: "scene-c4"
+          },
+          {
+            id: "c5-next",
+            label: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p.",
+            targetSceneId: "scene-c6"
+          }
+        ]
+      },
+      {
+        id: "scene-c6",
+        title: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
+        subtitle: "Th\u1EA3m c\xE2y b\u1EE5i d\xE0y \u0111\u1EB7c, n\u01A1i chuy\u1EC3n ti\u1EBFp gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng.",
+        panorama: "/images/1788771876183.jpg",
+        thumbnail: "/thumbnails/new/1788771876183.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "c6-prev",
+            label: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i G\xF3c Nh\xECn Ph\xEDa N\xFAi.",
+            targetSceneId: "scene-c5"
+          },
+          {
+            id: "c6-next",
+            label: "\u0110i\u1EC3m H\u1EE3p L\u01B0u",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn \u0110i\u1EC3m H\u1EE3p L\u01B0u.",
+            targetSceneId: "scene-c7"
+          }
+        ]
+      },
+      {
+        id: "scene-c7",
+        title: "\u0110i\u1EC3m H\u1EE3p L\u01B0u",
+        subtitle: "N\u01A1i ba h\u01B0\u1EDBng \u0111i g\u1EB7p nhau \u2013 c\u1EEDa ng\xF5 v\xE0o khu Tr\u1EA3ng Bay.",
+        panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+        thumbnail: "/thumbnails/new/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "c7-prev",
+            label: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p.",
+            targetSceneId: "scene-c6"
+          },
+          {
+            id: "c7-trbay2",
+            label: "Tr\u1EA3ng Bay 2",
+            yaw: 1.57,
+            pitch: -0.3,
+            note: "Kh\xE1m ph\xE1 khu v\u1EF1c Tr\u1EA3ng Bay 2.",
+            targetSceneId: "scene-tb2-1"
+          }
+        ]
+      },
+      // ── Trảng Bay 1 – 5 ảnh ────────────────────────────────────────
+      {
+        id: "scene-tb1-1",
+        title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 1",
+        subtitle: "B\u1EAFt \u0111\u1EA7u h\xE0nh tr\xECnh t\u1EA1i c\u1EEDa ng\xF5 c\u1EE7a Tr\u1EA3ng Bay 1.",
+        panorama: "/images/trbay1/1788771876074.jpg",
+        thumbnail: "/thumbnails/new/1788771876074.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb1-1-back",
+            label: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
+            yaw: 3.14,
+            pitch: -0.3,
+            note: "Quay l\u1EA1i \u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng.",
+            targetSceneId: "scene-c1"
+          },
+          {
+            id: "tb1-1-next",
+            label: "\u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn \u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng.",
+            targetSceneId: "scene-tb1-2"
+          }
+        ]
+      },
+      {
+        id: "scene-tb1-2",
+        title: "\u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng",
+        subtitle: "M\u1EB7t tr\u1EA3ng ph\u1EB3ng r\u1ED9ng, c\u1ECF xanh m\u01B0\u1EDBt tr\u1EA3i d\xE0i t\u1EDBi t\u1EADn ch\xE2n tr\u1EDDi.",
+        panorama: "/images/trbay1/1788771876090.jpg",
+        thumbnail: "/thumbnails/new/1788771876090.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb1-2-prev",
+            label: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 1",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 1.",
+            targetSceneId: "scene-tb1-1"
+          },
+          {
+            id: "tb1-2-next",
+            label: "G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng.",
+            targetSceneId: "scene-tb1-3"
+          }
+        ]
+      },
+      {
+        id: "scene-tb1-3",
+        title: "G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng",
+        subtitle: "H\u01B0\u1EDBng nh\xECn ph\xEDa \u0110\xF4ng, n\u01A1i n\u1EAFng s\xE1ng chi\u1EBFu r\xF5 t\u1EEBng c\u1ECDng c\u1ECF.",
+        panorama: "/images/trbay1/1788771876098.jpg",
+        thumbnail: "/thumbnails/new/1788771876098.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb1-3-prev",
+            label: "\u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i \u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng.",
+            targetSceneId: "scene-tb1-2"
+          },
+          {
+            id: "tb1-3-next",
+            label: "Trung T\xE2m Tr\u1EA3ng Bay 1",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn Trung T\xE2m Tr\u1EA3ng Bay 1.",
+            targetSceneId: "scene-tb1-4"
+          }
+        ]
+      },
+      {
+        id: "scene-tb1-4",
+        title: "Trung T\xE2m Tr\u1EA3ng Bay 1",
+        subtitle: "\u0110i\u1EC3m gi\u1EEFa c\u1EE7a Tr\u1EA3ng Bay 1, to\xE0n c\u1EA3nh t\u1EE9 ph\xEDa kh\xF4ng b\u1ECB che.",
+        panorama: "/images/trbay1/1788771876106.jpg",
+        thumbnail: "/thumbnails/new/1788771876106.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb1-4-prev",
+            label: "G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng.",
+            targetSceneId: "scene-tb1-3"
+          },
+          {
+            id: "tb1-4-next",
+            label: "Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng.",
+            targetSceneId: "scene-tb1-5"
+          }
+        ]
+      },
+      {
+        id: "scene-tb1-5",
+        title: "Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng",
+        subtitle: "Ranh gi\u1EDBi t\u1EF1 nhi\xEAn gi\u1EEFa Tr\u1EA3ng Bay 1 v\xE0 Tr\u1EA3ng Bay 2.",
+        panorama: "/images/trbay1/1788771876114.jpg",
+        thumbnail: "/thumbnails/new/1788771876114.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb1-5-prev",
+            label: "Trung T\xE2m Tr\u1EA3ng Bay 1",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i Trung T\xE2m Tr\u1EA3ng Bay 1.",
+            targetSceneId: "scene-tb1-4"
+          },
+          {
+            id: "tb1-5-trbay2",
+            label: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
+            yaw: 1.57,
+            pitch: -0.3,
+            note: "Ti\u1EBFp t\u1EE5c sang C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2.",
+            targetSceneId: "scene-tb2-1"
+          }
+        ]
+      },
+      // ── Trảng Bay 2 – 4 ảnh ────────────────────────────────────────
+      {
+        id: "scene-tb2-1",
+        title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
+        subtitle: "B\u1EAFt \u0111\u1EA7u kh\xE1m ph\xE1 khu v\u1EF1c Tr\u1EA3ng Bay 2, \u0111\u1ECBa h\xECnh l\u1EA1 h\u01A1n.",
+        panorama: "/images/trbay2/1788771876042.jpg",
+        thumbnail: "/thumbnails/new/1788771876042.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb2-1-back",
+            label: "Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng",
+            yaw: 3.14,
+            pitch: -0.3,
+            note: "Quay l\u1EA1i Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng.",
+            targetSceneId: "scene-tb1-5"
+          },
+          {
+            id: "tb2-1-next",
+            label: "V\xF9ng C\u1ECF Lau Cao",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn V\xF9ng C\u1ECF Lau Cao.",
+            targetSceneId: "scene-tb2-2"
+          }
+        ]
+      },
+      {
+        id: "scene-tb2-2",
+        title: "V\xF9ng C\u1ECF Lau Cao",
+        subtitle: "C\u1ECF lau cao v\xFAt che ph\u1EE7, t\u1EA1o h\xE0nh lang xanh t\u1EF1 nhi\xEAn.",
+        panorama: "/images/trbay2/1788771876050.jpg",
+        thumbnail: "/thumbnails/new/1788771876050.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb2-2-prev",
+            label: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2.",
+            targetSceneId: "scene-tb2-1"
+          },
+          {
+            id: "tb2-2-next",
+            label: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn B\u1EDD R\u1EEBng Ph\xEDa T\xE2y.",
+            targetSceneId: "scene-tb2-3"
+          }
+        ]
+      },
+      {
+        id: "scene-tb2-3",
+        title: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
+        subtitle: "C\xE2y r\u1EEBng cao v\xFAt ph\xEDa T\xE2y, b\xF3ng m\xE1t che ph\u1EE7 m\u1EB7t tr\u1EA3ng.",
+        panorama: "/images/trbay2/1788771876058.jpg",
+        thumbnail: "/thumbnails/new/1788771876058.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb2-3-prev",
+            label: "V\xF9ng C\u1ECF Lau Cao",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i V\xF9ng C\u1ECF Lau Cao.",
+            targetSceneId: "scene-tb2-2"
+          },
+          {
+            id: "tb2-3-next",
+            label: "Cu\u1ED1i Tr\u1EA3ng Bay 2",
+            yaw: 0,
+            pitch: -0.35,
+            note: "Di chuy\u1EC3n \u0111\u1EBFn Cu\u1ED1i Tr\u1EA3ng Bay 2.",
+            targetSceneId: "scene-tb2-4"
+          }
+        ]
+      },
+      {
+        id: "scene-tb2-4",
+        title: "Cu\u1ED1i Tr\u1EA3ng Bay 2",
+        subtitle: "\u0110i\u1EC3m k\u1EBFt th\xFAc h\xE0nh tr\xECnh \u2013 nh\xECn l\u1EA1i to\xE0n b\u1ED9 con \u0111\u01B0\u1EDDng \u0111\xE3 \u0111i.",
+        panorama: "/images/trbay2/1788771876067.jpg",
+        thumbnail: "/thumbnails/new/1788771876067.jpg",
+        initialYaw: 0,
+        initialPitch: -0.05,
+        hotspots: [
+          {
+            id: "tb2-4-prev",
+            label: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
+            yaw: 3.14,
+            pitch: -0.35,
+            note: "Quay l\u1EA1i B\u1EDD R\u1EEBng Ph\xEDa T\xE2y.",
+            targetSceneId: "scene-tb2-3"
+          },
+          {
+            id: "tb2-4-start",
+            label: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
+            yaw: 1.57,
+            pitch: -0.3,
+            note: "Quay l\u1EA1i \u0111i\u1EC3m b\u1EAFt \u0111\u1EA7u c\u1EE7a tour.",
+            targetSceneId: "scene-c1"
           }
         ]
       }
@@ -3251,7 +3704,7 @@ const mediaService = {
   }
 };
 
-const _slug__get = defineEventHandler((event) => {
+const _slug__get$2 = defineEventHandler((event) => {
   const slug = getRouterParam(event, "slug") || "";
   const place = catalogService.getPlace(slug);
   if (!place) {
@@ -3264,6 +3717,64 @@ const _slug__get = defineEventHandler((event) => {
   return {
     service: "experience-service",
     item: mediaService.withPublicMedia(place, config.public.mediaBaseUrl)
+  };
+});
+
+const _slug__get$3 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: _slug__get$2
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const tourService = {
+  /** Get a single tour by slug. Returns null if not found. */
+  getTour(slug) {
+    return loadTour(slug);
+  },
+  /** List all tours (lightweight, no scenes included). */
+  listTours() {
+    return listTours();
+  },
+  /**
+   * Resolve media URLs.
+   * If a mediaBaseUrl is set (e.g. MinIO), prefix all /images and /thumbnails paths.
+   */
+  withMedia(tour, baseUrl = "") {
+    if (!baseUrl) return tour;
+    const prefix = baseUrl.replace(/\/$/, "");
+    const prefixUrl = (url) => url.startsWith("http") ? url : `${prefix}/${url.replace(/^\//, "")}`;
+    return {
+      ...tour,
+      scenes: tour.scenes.map((scene) => ({
+        ...scene,
+        panorama: prefixUrl(scene.panorama),
+        thumbnail: prefixUrl(scene.thumbnail)
+      }))
+    };
+  }
+};
+
+const tours_get = defineEventHandler(() => {
+  return {
+    service: "tour-catalog",
+    items: tourService.listTours()
+  };
+});
+
+const tours_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: tours_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const _slug__get = defineEventHandler((event) => {
+  const slug = getRouterParam(event, "slug") || "";
+  const tour = tourService.getTour(slug);
+  if (!tour) {
+    throw createError({ statusCode: 404, statusMessage: `Tour '${slug}' not found` });
+  }
+  const config = useRuntimeConfig(event);
+  return {
+    service: "tour-experience",
+    item: tourService.withMedia(tour, config.public.mediaBaseUrl)
   };
 });
 

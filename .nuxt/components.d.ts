@@ -20,6 +20,9 @@ export const SceneGraphNode: typeof import("../components/SceneGraphNode.vue")['
 export const SceneList: typeof import("../components/SceneList.vue")['default']
 export const SceneViewer: typeof import("../components/SceneViewer.vue")['default']
 export const TourSidebar: typeof import("../components/TourSidebar.vue")['default']
+export const Viewer360: typeof import("../components/Viewer360.vue")['default']
+export const MinimalTourSidebar: typeof import("../themes/minimal/TourSidebar.vue")['default']
+export const NatureTourSidebar: typeof import("../themes/nature/TourSidebar.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -49,6 +52,9 @@ export const LazySceneGraphNode: LazyComponent<typeof import("../components/Scen
 export const LazySceneList: LazyComponent<typeof import("../components/SceneList.vue")['default']>
 export const LazySceneViewer: LazyComponent<typeof import("../components/SceneViewer.vue")['default']>
 export const LazyTourSidebar: LazyComponent<typeof import("../components/TourSidebar.vue")['default']>
+export const LazyViewer360: LazyComponent<typeof import("../components/Viewer360.vue")['default']>
+export const LazyMinimalTourSidebar: LazyComponent<typeof import("../themes/minimal/TourSidebar.vue")['default']>
+export const LazyNatureTourSidebar: LazyComponent<typeof import("../themes/nature/TourSidebar.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

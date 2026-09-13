@@ -13,8 +13,8 @@ body,
 
 body {
   margin: 0;
-  background: #f7f3ec;
-  color: #141414;
+  background: #141414;
+  color: #f7f3ec;
 }
 
 button,
@@ -25,3 +25,35 @@ a {
 .psv-container {
   font-family: inherit;
 }
+
+/* ── Nav hotspot hover effects ──────────────────────────────── */
+
+/* Scale up the circle on hover */
+.nav-hotspot-btn > div {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.nav-hotspot-btn:hover > div {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 6px 32px rgba(31,111,139,0.75), 0 0 0 8px rgba(31,111,139,0.22) !important;
+}
+.nav-hotspot-btn:active > div {
+  transform: scale(0.95);
+}
+
+/* Show destination tooltip on hover */
+.nav-hotspot-btn .nav-hotspot-tooltip {
+  opacity: 0;
+  transform: translateX(-50%) translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+}
+.nav-hotspot-btn:hover .nav-hotspot-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Suppress PSV default marker tooltip */
+.psv-marker--has-tooltip .psv-marker__tooltip {
+  display: none !important;
+}
+
