@@ -1,6 +1,8 @@
-import { writeFileSync, existsSync, readFileSync, readdirSync } from 'node:fs';
+globalThis.__timing__.logStart('Load chunks/_/yamlLoader');import { writeFileSync, existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import * as yaml from 'js-yaml';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 
 const trangBayTour = {
   slug: "trang-bay",
@@ -396,22 +398,163 @@ const trangBayTour = {
   ]
 };
 
+function parseYaml(raw) {
+  var _a;
+  try {
+    const data = yaml.load(raw);
+    if (data === null || data === void 0) {
+      return { ok: false, error: "YAML file r\u1ED7ng ho\u1EB7c ch\u1EC9 ch\u1EE9a null." };
+    }
+    if (typeof data !== "object" || Array.isArray(data)) {
+      return { ok: false, error: "YAML root ph\u1EA3i l\xE0 object, kh\xF4ng ph\u1EA3i array hay scalar." };
+    }
+    return { ok: true, data };
+  } catch (e) {
+    return { ok: false, error: `YAML parse error: ${(_a = e == null ? void 0 : e.message) != null ? _a : String(e)}` };
+  }
+}
+function dumpYaml(data) {
+  return yaml.dump(data, { indent: 2, lineWidth: 120, quotingType: '"' });
+}
+
+let _ajv = null;
+let _validate = null;
+function getValidator() {
+  if (_validate) return _validate;
+  _ajv = new Ajv({ allErrors: true, useDefaults: true });
+  addFormats(_ajv);
+  const schema = {
+    $schema: "http://json-schema.org/draft-07/schema#",
+    type: "object",
+    required: ["slug", "title", "location", "summary", "scenes"],
+    properties: {
+      slug: { type: "string" },
+      title: { type: "string", minLength: 1 },
+      location: { type: "string", minLength: 1 },
+      summary: { type: "string", minLength: 1 },
+      duration: { type: "string" },
+      theme: { type: "string", enum: ["nature", "minimal", "tourism", "urban"], default: "nature" },
+      initialSceneId: { type: "string" },
+      plugins: { type: "array", items: { type: "string" } },
+      scenes: {
+        type: "array",
+        minItems: 1,
+        items: {
+          type: "object",
+          required: ["id", "title", "panorama", "thumbnail"],
+          properties: {
+            id: { type: "string" },
+            title: { type: "string", minLength: 1 },
+            subtitle: { type: "string", default: "" },
+            panorama: { type: "string", minLength: 1 },
+            thumbnail: { type: "string", minLength: 1 },
+            initialYaw: { type: "number", default: 0 },
+            initialPitch: { type: "number", default: 0 },
+            coordinates: {
+              type: "array",
+              minItems: 2,
+              maxItems: 2,
+              items: { type: "number" }
+            },
+            markers: { type: "array", default: [] }
+          }
+        }
+      }
+    }
+  };
+  _validate = _ajv.compile(schema);
+  return _validate;
+}
+function compileTour(raw) {
+  var _a, _b, _c;
+  const validate = getValidator();
+  const valid = validate(raw);
+  if (!valid) {
+    const errors = ((_a = validate.errors) != null ? _a : []).map(
+      (e) => `[${e.instancePath || "(root)"}] ${e.message}`
+    );
+    return { ok: false, errors };
+  }
+  const data = raw;
+  const warnings = [];
+  const scenes = data.scenes.map((s, i) => {
+    var _a2, _b2, _c2, _d;
+    const markers = ((_a2 = s.markers) != null ? _a2 : []).map((m) => {
+      if (!m.id || !m.plugin || !m.label) {
+        warnings.push(`Scene[${i}].markers: marker thi\u1EBFu id/plugin/label \u2014 b\u1ECB b\u1ECF qua.`);
+        return null;
+      }
+      return m;
+    }).filter(Boolean);
+    return {
+      id: s.id,
+      title: s.title,
+      subtitle: (_b2 = s.subtitle) != null ? _b2 : "",
+      panorama: s.panorama,
+      thumbnail: s.thumbnail,
+      initialYaw: (_c2 = s.initialYaw) != null ? _c2 : 0,
+      initialPitch: (_d = s.initialPitch) != null ? _d : 0,
+      coordinates: s.coordinates,
+      markers
+    };
+  });
+  if (data.initialSceneId) {
+    const exists = scenes.some((s) => s.id === data.initialSceneId);
+    if (!exists) {
+      warnings.push(`initialSceneId '${data.initialSceneId}' kh\xF4ng t\u1ED3n t\u1EA1i trong scenes \u2014 s\u1EBD d\xF9ng scene \u0111\u1EA7u ti\xEAn.`);
+    }
+  }
+  const tour = {
+    slug: data.slug,
+    title: data.title,
+    location: data.location,
+    summary: data.summary,
+    duration: data.duration,
+    theme: (_b = data.theme) != null ? _b : "nature",
+    initialSceneId: data.initialSceneId,
+    plugins: (_c = data.plugins) != null ? _c : [],
+    mode: data.mode,
+    guidedDuration: data.guidedDuration,
+    autoRotate: data.autoRotate,
+    showMinimap: data.showMinimap,
+    transition: data.transition,
+    transitionDuration: data.transitionDuration,
+    transitionColor: data.transitionColor,
+    thumbnailFallbackAfterMs: data.thumbnailFallbackAfterMs,
+    preloadEnabled: data.preloadEnabled,
+    preloadRadius: data.preloadRadius,
+    minOverlayMs: data.minOverlayMs,
+    scenes
+  };
+  return { ok: true, tour, warnings };
+}
+
 const staticTours = {
   "trang-bay": trangBayTour
 };
 const TOURS_DIR = resolve(process.cwd(), "tours");
 function loadTour(slug) {
-  if (staticTours[slug]) {
-    return JSON.parse(JSON.stringify(staticTours[slug]));
-  }
   try {
     const filePath = join(TOURS_DIR, `${slug}.yaml`);
     if (existsSync(filePath)) {
       const raw = readFileSync(filePath, "utf-8");
-      const data = yaml.load(raw);
-      return data != null ? data : null;
+      const parsed = parseYaml(raw);
+      if (parsed.ok) {
+        const compiled = compileTour(parsed.data);
+        if (compiled.ok) {
+          return compiled.tour;
+        } else {
+          console.error(`[yamlLoader] Schema validation failed (${slug}):`, compiled.errors);
+        }
+      } else {
+        console.error(`[yamlLoader] YAML parse error (${slug}):`, parsed.error);
+      }
     }
-  } catch {
+  } catch (e) {
+    console.error(`[yamlLoader] Failed to read ${slug}.yaml from disk:`, e);
+  }
+  if (staticTours[slug]) {
+    return JSON.parse(JSON.stringify(staticTours[slug]));
   }
   return null;
 }
@@ -450,8 +593,7 @@ function saveTour(slug, config) {
   }
   try {
     const filePath = join(TOURS_DIR, `${slug}.yaml`);
-    const content = yaml.dump(config, { indent: 2, lineWidth: 120 });
-    writeFileSync(filePath, content, "utf-8");
+    writeFileSync(filePath, dumpYaml(config), "utf-8");
   } catch (err) {
     console.warn(`[saveTour] Disk write skipped (normal on Vercel): ${err}`);
   }
@@ -466,5 +608,5 @@ function saveSceneMarkers(slug, sceneId, markers) {
   return tour;
 }
 
-export { saveSceneMarkers as a, loadTour as b, listTours as l, saveTour as s };
+export { saveSceneMarkers as a, loadTour as b, listTours as l, saveTour as s };;globalThis.__timing__.logEnd('Load chunks/_/yamlLoader');
 //# sourceMappingURL=yamlLoader.mjs.map

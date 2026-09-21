@@ -30,5 +30,17 @@ export { requestIdleCallback, cancelIdleCallback } from '#app/compat/idle-callba
 export { setInterval } from '#app/compat/interval';
 export { definePageMeta } from '../node_modules/nuxt/dist/pages/runtime/composables';
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
+export { useImageLoader, ImageLoadResult } from '../composables/useImageLoader';
 export { usePreloader } from '../composables/usePreloader';
+export { useSceneTransition, SceneTransitionHandle } from '../composables/useSceneTransition';
+export { useSnapshot } from '../composables/useSnapshot';
+export { TOGGLE_VARIANTS, useTheme, ToggleVariant } from '../composables/useTheme';
+export { useThree360Engine, UseThree360Options } from '../composables/useThree360Engine';
+export { useToast, ToastVariant, ToastItem } from '../composables/useToast';
+export { useTransition, TransitionStyle, TransitionHandle, TransitionOptions } from '../composables/useTransition';
 export { useViewer360, UseViewer360Options } from '../composables/useViewer360';
+export { useWarpTransition } from '../composables/useWarpTransition';
+export { useEditorStore, EditorAddMode } from '../stores/editor';
+export { useRuntimeStore } from '../stores/runtime';
+export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';
+export { useNuxtDevTools } from '../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';

@@ -1,4 +1,4 @@
-import { d as defineEventHandler } from '../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/places.get');import { d as defineEventHandler } from '../../nitro/nitro.mjs';
 import { c as catalogService } from '../../_/catalogService.mjs';
 import 'node:http';
 import 'node:https';
@@ -16,5 +16,5 @@ const places_get = defineEventHandler(() => {
   };
 });
 
-export { places_get as default };
+export { places_get as default };;globalThis.__timing__.logEnd('Load chunks/routes/api/places.get');
 //# sourceMappingURL=places.get.mjs.map

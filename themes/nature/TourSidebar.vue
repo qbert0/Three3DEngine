@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { Binoculars, MapPin } from '@lucide/vue';
+import { Binoculars, MapPin, Eye } from 'lucide';
 import type { TourConfig, TourScene } from '~/types/tour';
 
-defineProps<{
+const props = defineProps<{
   tour: TourConfig;
   activeScene: TourScene;
 }>();
+
+// Morph from Binoculars → Eye when hovering the icon area
+import { ref } from 'vue';
+const iconHovered = ref(false);
 </script>
 
 <template>
@@ -17,19 +21,31 @@ defineProps<{
       <div class="pointer-events-none absolute -bottom-4 left-4 h-24 w-24 rounded-full bg-clay/15 blur-2xl" />
 
       <div class="relative flex items-start gap-3">
-        <div class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-river/20 ring-1 ring-river/40">
-          <Binoculars class="h-5 w-5 text-river" />
+        <!-- Binoculars → Eye morph on hover -->
+        <div
+          class="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-river/20 ring-1 ring-river/40 cursor-default"
+          @mouseenter="iconHovered = true"
+          @mouseleave="iconHovered = false"
+        >
+          <MorphIcon
+            :icon="iconHovered ? Eye : Binoculars"
+            :size="20"
+            spring="bouncy"
+            color="rgb(31 111 139)"
+          />
         </div>
-        <div>
+        <div class="flex-1 min-w-0">
           <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-river">View360</p>
           <h1 class="mt-0.5 text-xl font-bold leading-tight text-white">{{ tour.title }}</h1>
         </div>
+        <!-- Theme toggle in sidebar header -->
+        <ThemeToggle size="text-xl" class="mt-0.5 shrink-0" />
       </div>
 
       <p class="relative mt-4 text-sm leading-6 text-white/55">{{ tour.summary }}</p>
 
       <div class="relative mt-4 flex items-center gap-2 text-xs text-white/40">
-        <MapPin class="h-3.5 w-3.5 shrink-0 text-clay" />
+        <MorphIcon :icon="MapPin" :size="14" color="rgb(168 88 63)" />
         <span>{{ tour.location }}</span>
       </div>
     </div>

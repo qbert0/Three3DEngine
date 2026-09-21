@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     saveTour(slug, body);
-    return { ok: true, slug };
+    return { ok: true, slug, tour: body };
   } catch (err) {
     throw createError({ statusCode: 500, statusMessage: `Could not save tour: ${err}` });
   }

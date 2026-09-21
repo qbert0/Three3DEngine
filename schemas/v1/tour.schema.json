@@ -1,0 +1,93 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://view360.local/schemas/v1/tour.schema.json",
+  "title": "TourConfig",
+  "description": "Full configuration for a View360 panorama tour, loaded from YAML.",
+  "type": "object",
+  "required": ["slug", "title", "location", "summary", "scenes"],
+  "additionalProperties": false,
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "URL-safe identifier, e.g. 'trang-bay'"
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "location": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 1000 },
+    "duration": {
+      "type": "string",
+      "description": "Human-readable duration, e.g. '~10 phút'"
+    },
+    "theme": {
+      "type": "string",
+      "enum": ["nature", "minimal", "tourism", "urban"],
+      "default": "nature"
+    },
+    "initialSceneId": {
+      "type": "string",
+      "description": "ID of the first scene to display. Defaults to scenes[0]."
+    },
+    "plugins": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of enabled plugin names."
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/TourScene" }
+    }
+  },
+  "definitions": {
+    "TourScene": {
+      "type": "object",
+      "required": ["id", "title", "panorama", "thumbnail"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:[-_][a-z0-9]+)*$"
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "subtitle": { "type": "string", "default": "" },
+        "panorama": { "type": "string", "minLength": 1 },
+        "thumbnail": { "type": "string", "minLength": 1 },
+        "initialYaw": { "type": "number", "default": 0 },
+        "initialPitch": { "type": "number", "default": 0 },
+        "markers": {
+          "type": "array",
+          "default": [],
+          "items": { "$ref": "#/definitions/TourMarker" }
+        }
+      }
+    },
+    "TourMarker": {
+      "type": "object",
+      "required": ["id", "plugin", "label", "yaw", "pitch"],
+      "properties": {
+        "id": { "type": "string" },
+        "plugin": { "type": "string", "enum": ["navigation", "info", "audio", "ai-chat"] },
+        "label": { "type": "string" },
+        "yaw": { "type": "number" },
+        "pitch": { "type": "number" },
+        "targetScene": {
+          "type": "string",
+          "description": "navigation markers only — target scene ID"
+        },
+        "content": {
+          "type": "string",
+          "description": "info markers only — popup content text"
+        },
+        "src": {
+          "type": "string",
+          "description": "audio markers only — audio file URL"
+        },
+        "context": {
+          "type": "string",
+          "description": "ai-chat markers only — extra context for AI"
+        }
+      }
+    }
+  }
+}

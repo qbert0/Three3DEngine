@@ -1,587 +1,2159 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, computed, watch } from 'vue';
-import { Viewer, events } from '@photo-sphere-viewer/core';
+import { EquirectangularAdapter, Viewer, events } from '@photo-sphere-viewer/core';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
-import * as yaml from 'js-yaml';
 import type { TourConfig, TourScene, TourMarker, NavigationMarker, InfoMarker } from '~/types/tour';
 
-definePageMeta({ ssr: false });
+definePageMeta({ layout: false, ssr: false });
 
 const route = useRoute();
+const router = useRouter();
 const slug = route.params.slug as string;
-const sceneId = route.params.sceneId as string;
+const initialSceneIdParam = route.params.sceneId as string;
+
+const { show: showToast } = useToast();
 
 // ── Fetch tour data ───────────────────────────────────────────────────────────
-const { data, refresh } = await useFetch<{ item: TourConfig }>(`/api/tours/${slug}`);
-const tour = computed(() => data.value?.item);
-const scene = computed<TourScene | undefined>(
-  () => tour.value?.scenes.find((s) => s.id === sceneId),
+const { data } = await useFetch<{ item: TourConfig }>(`/api/tours/${slug}`);
+
+// Deep copy tour into reactive local state
+const tour = ref<TourConfig | null>(null);
+
+// Undo/Redo history stack
+const historyStack = ref<TourConfig[]>([]);
+const historyIndex = ref<number>(-1);
+let isHistoryAction = false;
+
+function pushHistorySnapshot() {
+  if (isHistoryAction || !tour.value) return;
+  const currentSnap = JSON.stringify(tour.value);
+  const lastSnap = historyIndex.value >= 0 ? JSON.stringify(historyStack.value[historyIndex.value]) : '';
+  if (currentSnap === lastSnap) return;
+
+  historyStack.value = historyStack.value.slice(0, historyIndex.value + 1);
+  historyStack.value.push(JSON.parse(currentSnap));
+  historyIndex.value = historyStack.value.length - 1;
+}
+
+function initTourState() {
+  if (data.value?.item) {
+    tour.value = JSON.parse(JSON.stringify(data.value.item));
+    historyStack.value = [JSON.parse(JSON.stringify(data.value.item))];
+    historyIndex.value = 0;
+  }
+}
+initTourState();
+watch(() => data.value?.item, () => initTourState(), { deep: true });
+
+function undo() {
+  if (historyIndex.value > 0) {
+    isHistoryAction = true;
+    historyIndex.value--;
+    tour.value = JSON.parse(JSON.stringify(historyStack.value[historyIndex.value]));
+    isDirty.value = true;
+    goToScene(Math.min(currentSceneIdx.value, (tour.value?.scenes.length ?? 1) - 1));
+    isHistoryAction = false;
+    showToast({ message: 'Đã hoàn tác (Undo)', variant: 'default' });
+  }
+}
+
+function redo() {
+  if (historyIndex.value < historyStack.value.length - 1) {
+    isHistoryAction = true;
+    historyIndex.value++;
+    tour.value = JSON.parse(JSON.stringify(historyStack.value[historyIndex.value]));
+    isDirty.value = true;
+    goToScene(Math.min(currentSceneIdx.value, (tour.value?.scenes.length ?? 1) - 1));
+    isHistoryAction = false;
+    showToast({ message: 'Đã làm lại (Redo)', variant: 'default' });
+  }
+}
+
+const canUndo = computed(() => historyIndex.value > 0);
+const canRedo = computed(() => historyIndex.value < historyStack.value.length - 1);
+
+// Active scene index
+const currentSceneIdx = ref<number>(0);
+
+// Synchronize initial scene index based on route param or initialSceneId
+watch(
+  () => tour.value,
+  (t) => {
+    if (!t || !t.scenes?.length) return;
+    const foundIdx = t.scenes.findIndex((s) => s.id === initialSceneIdParam);
+    if (foundIdx !== -1) {
+      currentSceneIdx.value = foundIdx;
+    } else if (t.initialSceneId) {
+      const startIdx = t.scenes.findIndex((s) => s.id === t.initialSceneId);
+      if (startIdx !== -1) currentSceneIdx.value = startIdx;
+    }
+  },
+  { immediate: true },
 );
-const otherScenes = computed(() =>
-  tour.value?.scenes.filter((s) => s.id !== sceneId) ?? [],
-);
 
-// ── Local editable markers (deep copy from scene) ─────────────────────────────
-const localMarkers = ref<TourMarker[]>([]);
-watch(scene, (s) => {
-  if (s) localMarkers.value = JSON.parse(JSON.stringify(s.markers));
-}, { immediate: true });
+const currentScene = computed<TourScene | null>(() => {
+  if (!tour.value || !tour.value.scenes.length) return null;
+  return tour.value.scenes[currentSceneIdx.value] ?? tour.value.scenes[0];
+});
 
-// ── Toolbar mode: what happens when user clicks the panorama ─────────────────
-type AddMode = 'view' | 'add-navigation' | 'add-info';
-const addMode = ref<AddMode>('view');
+// Inspector tabs & state
+type InspectorTab = 'scene' | 'hotspots' | 'settings';
+const currentTab = ref<InspectorTab>('scene');
 
-// ── PSV refs ─────────────────────────────────────────────────────────────────
+const selectedHotspotId = ref<string | null>(null);
+const selectedHotspot = computed<TourMarker | null>(() => {
+  if (!currentScene.value) return null;
+  return currentScene.value.markers.find((m) => m.id === selectedHotspotId.value) ?? null;
+});
+
+// Real Upload State
+const fileInput = ref<HTMLInputElement | null>(null);
+const uploadingImage = ref(false);
+
+function triggerImageUpload() {
+  fileInput.value?.click();
+}
+
+async function handleFileChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const files = target.files;
+  if (!files || !files.length || !currentScene.value) return;
+
+  const file = files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+
+  uploadingImage.value = true;
+  try {
+    const res = await $fetch<{ ok: boolean; files: Array<{ original: string; thumbnail: string }> }>(
+      '/api/admin/media',
+      {
+        method: 'POST',
+        body: formData,
+      },
+    );
+
+    if (res.ok && res.files?.length) {
+      const uploaded = res.files[0];
+      currentScene.value.panorama = uploaded.original;
+      if (uploaded.thumbnail) {
+        currentScene.value.thumbnail = uploaded.thumbnail;
+      }
+
+      // Update PSV viewer panorama
+      if (viewer) {
+        viewer.setPanorama(uploaded.original).then(() => {
+          syncMarkersToViewer();
+        });
+      }
+      markDirty();
+      showToast({ message: 'Tải ảnh panorama mới thành công!', variant: 'success' });
+    }
+  } catch (err: any) {
+    showToast({ message: err?.statusMessage ?? 'Lỗi khi upload ảnh', variant: 'error' });
+  } finally {
+    uploadingImage.value = false;
+    if (target) target.value = '';
+  }
+}
+
+// Editor toolbar state
+const isPlacingHotspot = ref(false);
+const showHotspotModal = ref(false);
+const pendingHotspotCoords = ref<{ yaw: number; pitch: number } | null>(null);
+
+const previewMode = ref(false);
+const zoom = ref(100);
+const modeTab = ref<'edit' | 'drag'>('edit');
+
+// Dirty & saving state
+const isDirty = ref(false);
+const saving = ref(false);
+
+function markDirty() {
+  isDirty.value = true;
+  pushHistorySnapshot();
+}
+
+function markSaved() {
+  isDirty.value = false;
+}
+
+// PSV Viewer refs
 const container = ref<HTMLElement | null>(null);
 let viewer: Viewer | null = null;
 let markersPlugin: MarkersPlugin | null = null;
 
-// ── Selected marker for editing ───────────────────────────────────────────────
-const selectedId = ref<string | null>(null);
-const selectedMarker = computed(() =>
-  localMarkers.value.find((m) => m.id === selectedId.value) ?? null,
-);
+// Guided mode timer
+let guidedTimer: ReturnType<typeof setInterval> | null = null;
 
-// Edit form state (mirrors selectedMarker, editable)
-const editLabel = ref('');
-const editTargetScene = ref('');
-const editContent = ref('');
-const editYaw = ref(0);
-const editPitch = ref(0);
+// Drag & drop state for scene list reordering
+const draggingSceneIdx = ref<number | null>(null);
+const dragOverSceneIdx = ref<number | null>(null);
 
-watch(selectedMarker, (m) => {
-  if (!m) return;
-  editLabel.value = m.label;
-  editYaw.value = m.yaw;
-  editPitch.value = m.pitch;
-  editTargetScene.value = m.plugin === 'navigation' ? (m as NavigationMarker).targetScene : '';
-  editContent.value = m.plugin === 'info' ? (m as InfoMarker).content : '';
-});
-
-// ── PSV marker HTML — distinct icons per plugin ───────────────────────────────
-const navHtml = (label: string) => `
-  <div class="admin-marker admin-marker--nav" title="${label}">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-      <path d="M12 4 L12 18" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-      <path d="M6 11 L12 5 L18 11" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="9" cy="20.5" r="1.6" fill="rgba(255,255,255,0.7)"/>
-      <circle cx="15" cy="20.5" r="1.6" fill="rgba(255,255,255,0.7)"/>
-    </svg>
-    <span class="admin-marker__label">${label}</span>
+// ── PSV marker HTML helpers ───────────────────────────────────────────────────
+const navHtml = (label: string, isSelected: boolean) => `
+  <div class="edit-hotspot nav ${isSelected ? 'selected' : ''}">
+    <div class="hs-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 4 L12 18"/><path d="M6 11 L12 5 L18 11"/>
+      </svg>
+    </div>
+    <span class="hs-label">${label}</span>
   </div>`;
 
-const infoHtml = (label: string) => `
-  <div class="admin-marker admin-marker--info" title="${label}">
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <circle cx="9" cy="4.5" r="1.5" fill="white"/>
-      <path d="M9 7.5 L9 13.5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-    </svg>
-    <span class="admin-marker__label">${label}</span>
+const infoHtml = (label: string, isSelected: boolean) => `
+  <div class="edit-hotspot info ${isSelected ? 'selected' : ''}">
+    <div class="hs-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round">
+        <circle cx="12" cy="7" r="1.8" fill="white" stroke="none"/>
+        <path d="M12 11 L12 18"/>
+      </svg>
+    </div>
+    <span class="hs-label">${label}</span>
   </div>`;
 
-function markerHtml(m: TourMarker) {
-  return m.plugin === 'navigation' ? navHtml(m.label) : infoHtml(m.label);
+function getMarkerHtml(m: TourMarker) {
+  const isSelected = m.id === selectedHotspotId.value;
+  return m.plugin === 'navigation' ? navHtml(m.label, isSelected) : infoHtml(m.label, isSelected);
 }
 
-// ── Sync local markers → PSV viewer ──────────────────────────────────────────
+// ── Sync markers to PSV ───────────────────────────────────────────────────────
 function syncMarkersToViewer() {
-  if (!markersPlugin) return;
+  if (!markersPlugin || !currentScene.value) return;
   markersPlugin.clearMarkers();
   markersPlugin.setMarkers(
-    localMarkers.value.map((m) => ({
+    currentScene.value.markers.map((m) => ({
       id: m.id,
       position: { yaw: m.yaw, pitch: m.pitch },
-      html: markerHtml(m),
-      anchor: 'bottom center',
-      draggable: true,          // ← enable drag to move
+      html: getMarkerHtml(m),
+      anchor: 'center center',
+      draggable: true,
       data: { plugin: m.plugin },
     })),
   );
 }
 
-watch(localMarkers, syncMarkersToViewer, { deep: true });
+watch(
+  () => currentScene.value?.markers,
+  () => {
+    syncMarkersToViewer();
+  },
+  { deep: true },
+);
 
-// ── Init PSV ──────────────────────────────────────────────────────────────────
+watch(selectedHotspotId, () => {
+  syncMarkersToViewer();
+});
+
+// Update panorama if URL changed via text input
+function onPanoramaUrlChange() {
+  if (!currentScene.value || !viewer) return;
+  viewer.setPanorama(currentScene.value.panorama).then(() => {
+    syncMarkersToViewer();
+  });
+  markDirty();
+}
+
+// ── Init PSV Viewer ───────────────────────────────────────────────────────────
 onMounted(async () => {
   await nextTick();
-  if (!container.value || !scene.value) return;
+  if (!container.value || !currentScene.value) return;
 
   viewer = new Viewer({
     container: container.value,
-    panorama: scene.value.panorama,
-    loadingImg: scene.value.thumbnail,
-    defaultYaw: scene.value.initialYaw,
-    defaultPitch: scene.value.initialPitch,
+    panorama: currentScene.value.panorama,
+    // Use the same raw image seam as the public viewer when placing markers.
+    adapter: [EquirectangularAdapter, { useXmpData: false }],
+    loadingImg: currentScene.value.thumbnail,
+    defaultYaw: currentScene.value.initialYaw || 0,
+    defaultPitch: currentScene.value.initialPitch || 0,
     touchmoveTwoFingers: false,
     mousewheelCtrlKey: false,
-    navbar: ['zoom', 'move', 'fullscreen'],
+    navbar: false, // minimalist studio canvas
     plugins: [[MarkersPlugin, { markers: [] }]],
   });
 
   markersPlugin = viewer.getPlugin<MarkersPlugin>(MarkersPlugin);
 
-  // Render initial markers once PSV is ready
   viewer.addEventListener(events.ReadyEvent.type, () => {
     syncMarkersToViewer();
   });
 
-  // ── Click on panorama ─────────────────────────────────────────────────────
+  // Click canvas
   viewer.addEventListener('click', (e: any) => {
     const { yaw, pitch } = e.data as { yaw: number; pitch: number };
 
-    if (addMode.value === 'add-navigation') {
-      addMarker('navigation', yaw, pitch);
-      addMode.value = 'view'; // reset mode after placing
-    } else if (addMode.value === 'add-info') {
-      addMarker('info', yaw, pitch);
-      addMode.value = 'view';
-    }
-    // view mode: deselect
-    else {
-      selectedId.value = null;
+    if (isPlacingHotspot.value) {
+      pendingHotspotCoords.value = { yaw, pitch };
+      isPlacingHotspot.value = false;
+      showHotspotModal.value = true;
+    } else {
+      selectedHotspotId.value = null;
     }
   });
 
-  // ── Select marker → open edit panel ────────────────────────────────────────
+  // Select marker
   markersPlugin.addEventListener('select-marker', ({ marker }) => {
-    selectedId.value = marker.id;
-    addMode.value = 'view';
+    if (isPlacingHotspot.value) return;
+    selectedHotspotId.value = marker.id;
+    currentTab.value = 'hotspots';
   });
 
-  // ── Drag marker → update yaw/pitch in real-time ─────────────────────────────
+  // Drag marker
   markersPlugin.addEventListener('marker-moved' as any, (e: any) => {
     const id: string = e.marker?.id ?? e.markerId;
     const pos = e.position ?? e.markerData?.position;
-    if (!id || !pos) return;
-    const idx = localMarkers.value.findIndex((m) => m.id === id);
+    if (!id || !pos || !currentScene.value) return;
+
+    const idx = currentScene.value.markers.findIndex((m) => m.id === id);
     if (idx === -1) return;
-    const updated = {
-      ...localMarkers.value[idx],
-      yaw: parseFloat((pos.yaw as number).toFixed(3)),
-      pitch: parseFloat((pos.pitch as number).toFixed(3)),
-    };
-    localMarkers.value[idx] = updated;
-    // If this marker is selected, update edit fields too
-    if (selectedId.value === id) {
-      editYaw.value = updated.yaw;
-      editPitch.value = updated.pitch;
-    }
+
+    currentScene.value.markers[idx].yaw = parseFloat((pos.yaw as number).toFixed(3));
+    currentScene.value.markers[idx].pitch = parseFloat((pos.pitch as number).toFixed(3));
+    markDirty();
   });
 });
 
 onBeforeUnmount(() => {
-  if (saveTimer) {
-    clearTimeout(saveTimer);
-    saveToServer();
-  }
+  stopGuidedMode();
   viewer?.destroy();
   viewer = null;
 });
 
-// ── Add a new marker ──────────────────────────────────────────────────────────
-function addMarker(plugin: 'navigation' | 'info', yaw: number, pitch: number) {
-  const id = `marker-${plugin}-${Date.now()}`;
+// ── Scene Navigation ──────────────────────────────────────────────────────────
+function goToScene(idx: number) {
+  if (!tour.value || idx < 0 || idx >= tour.value.scenes.length) return;
+  currentSceneIdx.value = idx;
+  selectedHotspotId.value = null;
+
+  const targetScene = tour.value.scenes[idx];
+  if (viewer && targetScene) {
+    viewer.setPanorama(targetScene.panorama).then(() => {
+      viewer?.rotate({ yaw: targetScene.initialYaw || 0, pitch: targetScene.initialPitch || 0 });
+      syncMarkersToViewer();
+    });
+  }
+}
+
+// ── Add & Delete Scenes ───────────────────────────────────────────────────────
+function addScene() {
+  if (!tour.value) return;
+  const id = `s${Date.now()}`;
+  const newScene: TourScene = {
+    id,
+    title: 'Cảnh mới',
+    subtitle: 'Mô tả cảnh mới',
+    panorama: 'https://picsum.photos/id/1036/2400/1200',
+    thumbnail: 'https://picsum.photos/id/1036/200/120',
+    initialYaw: 0,
+    initialPitch: 0,
+    markers: [],
+  };
+  tour.value.scenes.push(newScene);
+  currentSceneIdx.value = tour.value.scenes.length - 1;
+  markDirty();
+  goToScene(currentSceneIdx.value);
+  showToast({ message: 'Đã thêm cảnh mới', variant: 'success' });
+}
+
+function deleteCurrentScene() {
+  if (!tour.value || !currentScene.value) return;
+  if (tour.value.scenes.length <= 1) {
+    showToast({ message: 'Không thể xóa cảnh cuối cùng', variant: 'error' });
+    return;
+  }
+  if (!confirm(`Xóa cảnh "${currentScene.value.title}"?`)) return;
+
+  tour.value.scenes.splice(currentSceneIdx.value, 1);
+  currentSceneIdx.value = Math.max(0, currentSceneIdx.value - 1);
+  markDirty();
+  goToScene(currentSceneIdx.value);
+  showToast({ message: 'Đã xóa cảnh', variant: 'success' });
+}
+
+// ── Reorder Scenes (Drag & Drop) ──────────────────────────────────────────────
+function handleSceneDragStart(idx: number, e: DragEvent) {
+  draggingSceneIdx.value = idx;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(idx));
+  }
+}
+
+function handleSceneDragOver(idx: number, e: DragEvent) {
+  e.preventDefault();
+  dragOverSceneIdx.value = idx;
+}
+
+function handleSceneDrop(idx: number, e: DragEvent) {
+  e.preventDefault();
+  dragOverSceneIdx.value = null;
+  const from = draggingSceneIdx.value;
+  draggingSceneIdx.value = null;
+  if (from === null || from === idx || !tour.value) return;
+
+  const [moved] = tour.value.scenes.splice(from, 1);
+  tour.value.scenes.splice(idx, 0, moved);
+
+  if (from === currentSceneIdx.value) currentSceneIdx.value = idx;
+  else if (from < currentSceneIdx.value && idx >= currentSceneIdx.value) currentSceneIdx.value--;
+  else if (from > currentSceneIdx.value && idx <= currentSceneIdx.value) currentSceneIdx.value++;
+
+  markDirty();
+  showToast({ message: 'Đã sắp xếp lại danh sách cảnh', variant: 'default' });
+}
+
+// ── Hotspot Placement Flow ────────────────────────────────────────────────────
+function startPlacingHotspot() {
+  isPlacingHotspot.value = !isPlacingHotspot.value;
+  if (isPlacingHotspot.value) {
+    showToast({ message: 'Click lên ảnh panorama để đặt hotspot', variant: 'default' });
+  }
+}
+
+function cancelPlacing() {
+  isPlacingHotspot.value = false;
+  showHotspotModal.value = false;
+  pendingHotspotCoords.value = null;
+}
+
+function createHotspot(type: 'navigation' | 'info') {
+  if (!pendingHotspotCoords.value || !currentScene.value) return;
+  const id = `h${Date.now()}`;
   const base = {
     id,
-    label: plugin === 'navigation' ? 'Điểm đến mới' : 'Thông tin',
-    yaw: parseFloat(yaw.toFixed(3)),
-    pitch: parseFloat(pitch.toFixed(3)),
+    label: type === 'navigation' ? 'Cảnh mới' : 'Thông tin',
+    yaw: parseFloat(pendingHotspotCoords.value.yaw.toFixed(3)),
+    pitch: parseFloat(pendingHotspotCoords.value.pitch.toFixed(3)),
   };
-  if (plugin === 'navigation') {
-    localMarkers.value.push({ ...base, plugin: 'navigation', targetScene: '' } as NavigationMarker);
+
+  if (type === 'navigation') {
+    const firstOther = tour.value?.scenes.find((s) => s.id !== currentScene.value?.id);
+    currentScene.value.markers.push({
+      ...base,
+      plugin: 'navigation',
+      targetScene: firstOther ? firstOther.id : '',
+    } as NavigationMarker);
   } else {
-    localMarkers.value.push({ ...base, plugin: 'info', content: '' } as InfoMarker);
+    currentScene.value.markers.push({
+      ...base,
+      plugin: 'info',
+      content: '',
+    } as InfoMarker);
   }
-  // Auto-select to edit immediately
-  selectedId.value = id;
+
+  selectedHotspotId.value = id;
+  currentTab.value = 'hotspots';
+  markDirty();
+  showHotspotModal.value = false;
+  pendingHotspotCoords.value = null;
+  showToast({ message: 'Đã thêm hotspot mới', variant: 'success' });
 }
 
-// ── Save edit form back to marker list ────────────────────────────────────────
-function saveEdit() {
-  const idx = localMarkers.value.findIndex((m) => m.id === selectedId.value);
-  if (idx === -1) return;
-  const base = {
-    id: localMarkers.value[idx].id,
-    plugin: localMarkers.value[idx].plugin,
-    label: editLabel.value.trim() || 'Marker',
-    yaw: editYaw.value,
-    pitch: editPitch.value,
-  };
-  if (base.plugin === 'navigation') {
-    localMarkers.value[idx] = { ...base, plugin: 'navigation', targetScene: editTargetScene.value };
+function deleteHotspot(id: string) {
+  if (!currentScene.value) return;
+  currentScene.value.markers = currentScene.value.markers.filter((m) => m.id !== id);
+  if (selectedHotspotId.value === id) selectedHotspotId.value = null;
+  markDirty();
+  showToast({ message: 'Đã xóa hotspot', variant: 'default' });
+}
+
+// ── Guided & Preview Mode ─────────────────────────────────────────────────────
+function togglePreviewMode() {
+  previewMode.value = !previewMode.value;
+  if (previewMode.value) {
+    showToast({ message: 'Đang ở chế độ xem trước — như người dùng thấy', variant: 'success' });
+    if (tour.value?.mode === 'guided') startGuidedMode();
   } else {
-    localMarkers.value[idx] = { ...base, plugin: 'info', content: editContent.value };
+    stopGuidedMode();
   }
-  selectedId.value = null;
 }
 
-function deleteMarker(id: string) {
-  localMarkers.value = localMarkers.value.filter((m) => m.id !== id);
-  if (selectedId.value === id) selectedId.value = null;
+function startGuidedMode() {
+  stopGuidedMode();
+  const dur = (tour.value?.guidedDuration || 8) * 1000;
+  guidedTimer = setInterval(() => {
+    if (!tour.value) return;
+    const next = (currentSceneIdx.value + 1) % tour.value.scenes.length;
+    goToScene(next);
+  }, dur);
 }
 
-// ── Focus marker in viewer ────────────────────────────────────────────────────
-function focusMarker(m: TourMarker) {
-  selectedId.value = m.id;
-  viewer?.rotate({ yaw: m.yaw, pitch: m.pitch });
+function stopGuidedMode() {
+  if (guidedTimer) clearInterval(guidedTimer);
+  guidedTimer = null;
 }
 
-// ── Auto-save (debounced) ─────────────────────────────────────────────────────
-const saving = ref(false);
-const saveMsg = ref('');
-let saveTimer: ReturnType<typeof setTimeout> | null = null;
+// ── Zoom controls ─────────────────────────────────────────────────────────────
+function changeZoom(delta: number) {
+  zoom.value = Math.max(50, Math.min(200, zoom.value + delta));
+  if (viewer) {
+    viewer.zoom(zoom.value);
+  }
+}
 
-/** Auto-save markers whenever they change (1.5s debounce) */
-watch(
-  localMarkers,
-  () => {
-    if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveToServer, 1500);
-  },
-  { deep: true },
-);
-
+// ── Save to server ────────────────────────────────────────────────────────────
 async function saveToServer() {
   if (!tour.value) return;
   saving.value = true;
-  saveMsg.value = '';
   try {
-    const res = await $fetch<{ ok: boolean; tour: TourConfig }>(
-      `/api/admin/tours/${slug}/scenes/${sceneId}/markers`,
-      {
-        method: 'POST',
-        body: { markers: localMarkers.value },
-      },
-    );
+    const res = await $fetch<{ ok: boolean; tour: TourConfig }>(`/api/admin/tours/${slug}`, {
+      method: 'POST',
+      body: tour.value,
+    });
     if (res.tour) {
       data.value = { item: res.tour };
+      tour.value = JSON.parse(JSON.stringify(res.tour));
     }
-    saveMsg.value = '✓ Đã lưu';
+    markSaved();
+    showToast({ message: 'Đã lưu thay đổi thành công', variant: 'success' });
   } catch (err: any) {
-    saveMsg.value = `✗ ${err?.statusMessage ?? 'Lỗi lưu file'}`;
+    showToast({ message: err?.statusMessage ?? 'Lỗi khi lưu tour', variant: 'error' });
   } finally {
     saving.value = false;
-    setTimeout(() => { saveMsg.value = ''; }, 2500);
   }
 }
 
-function exportYaml() {
-  if (!tour.value) return;
-  const updated = {
-    ...tour.value,
-    scenes: tour.value.scenes.map((s) =>
-      s.id === sceneId ? { ...s, markers: localMarkers.value } : s,
-    ),
+// ── Keyboard Shortcuts ────────────────────────────────────────────────────────
+onMounted(() => {
+  const handleKeydown = (e: KeyboardEvent) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) {
+      return;
+    }
+
+    if (e.key === 'Escape') {
+      if (showHotspotModal.value) cancelPlacing();
+      else if (isPlacingHotspot.value) cancelPlacing();
+      else if (selectedHotspotId.value) selectedHotspotId.value = null;
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveToServer();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) redo();
+      else undo();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+      e.preventDefault();
+      redo();
+    }
+    if (e.key === 'ArrowDown' && e.altKey) {
+      e.preventDefault();
+      if (tour.value) goToScene(Math.min(tour.value.scenes.length - 1, currentSceneIdx.value + 1));
+    }
+    if (e.key === 'ArrowUp' && e.altKey) {
+      e.preventDefault();
+      goToScene(Math.max(0, currentSceneIdx.value - 1));
+    }
   };
-  const blob = new Blob([yaml.dump(updated, { indent: 2, lineWidth: 120 })], { type: 'text/yaml' });
-  const a = Object.assign(document.createElement('a'), {
-    href: URL.createObjectURL(blob),
-    download: `${slug}.yaml`,
-  });
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
+
+  window.addEventListener('keydown', handleKeydown);
+  onBeforeUnmount(() => window.removeEventListener('keydown', handleKeydown));
+});
 </script>
 
 <template>
-  <main class="flex h-screen overflow-hidden bg-[#0d0d0d] text-white">
+  <div :class="['admin-studio', { 'preview-mode': previewMode }]">
 
-    <!-- ── Left panel ──────────────────────────────────────────────────────── -->
-    <aside class="flex h-full w-[290px] shrink-0 flex-col border-r border-white/8 bg-ink">
+    <!-- Hidden native file input for real image upload -->
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      class="hidden"
+      @change="handleFileChange"
+    >
 
-      <!-- Scene header -->
-      <div class="border-b border-white/8 px-5 py-4">
-        <NuxtLink :to="`/admin/${slug}`" class="text-xs text-white/40 hover:text-white/70">
-          ← {{ tour?.title }}
-        </NuxtLink>
-        <h1 class="mt-1.5 text-sm font-bold leading-snug text-white">{{ scene?.title }}</h1>
-        <p class="mt-0.5 text-xs text-white/40">{{ localMarkers.length }} marker</p>
+    <!-- ═══ TOPBAR ═══ -->
+    <header class="topbar">
+      <div class="tb-logo">
+        <div class="tb-logo-mark">V</div>
+        <div class="tb-logo-text">
+          <strong>Admin Studio</strong>
+          <span>{{ tour?.title ?? 'View360' }}</span>
+        </div>
       </div>
 
-      <!-- ── Toolbar: Add mode ─────────────────────────────────────────────── -->
-      <div class="border-b border-white/8 px-4 py-3">
-        <p class="mb-2 text-[10px] font-bold uppercase tracking-widest text-white/30">Thêm marker</p>
-        <div class="flex gap-2">
-          <!-- Add Navigation -->
+      <div class="tb-breadcrumb">
+        <NuxtLink to="/admin" class="hover:text-white transition-colors">Tour 360°</NuxtLink>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+        <strong id="breadcrumbTour">{{ tour?.title }}</strong>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+        <span id="breadcrumbScene">{{ currentScene?.title }}</span>
+      </div>
+
+      <div class="tb-spacer"></div>
+
+      <!-- Save Indicator -->
+      <div class="save-indicator" :class="{ saving, dirty: isDirty }">
+        <span class="dot"></span>
+        <span id="saveText">{{ saving ? 'Đang lưu...' : isDirty ? 'Có thay đổi chưa lưu' : 'Đã lưu' }}</span>
+      </div>
+
+      <div class="tb-actions">
+        <UiTooltip content="Hoàn tác (Ctrl+Z)" placement="bottom">
           <button
-            class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-semibold transition-all"
-            :class="addMode === 'add-navigation'
-              ? 'border-river bg-river/20 text-river'
-              : 'border-white/15 text-white/50 hover:border-river/50 hover:text-white/80'"
-            @click="addMode = addMode === 'add-navigation' ? 'view' : 'add-navigation'"
+            class="tb-btn"
+            id="undoBtn"
+            :disabled="!canUndo"
+            :style="{ opacity: canUndo ? 1 : 0.4 }"
+            @click="undo"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-              <path d="M12 3 L12 17" :stroke="addMode === 'add-navigation' ? 'currentColor' : '#6b7280'" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M6 10 L12 4 L18 10" :stroke="addMode === 'add-navigation' ? 'currentColor' : '#6b7280'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7v6h6" />
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
             </svg>
-            Navigation
           </button>
-          <!-- Add Info -->
+        </UiTooltip>
+
+        <UiTooltip content="Làm lại (Ctrl+Y)" placement="bottom">
           <button
-            class="flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-xs font-semibold transition-all"
-            :class="addMode === 'add-info'
-              ? 'border-clay bg-clay/20 text-clay'
-              : 'border-white/15 text-white/50 hover:border-clay/50 hover:text-white/80'"
-            @click="addMode = addMode === 'add-info' ? 'view' : 'add-info'"
+            class="tb-btn"
+            id="redoBtn"
+            :disabled="!canRedo"
+            :style="{ opacity: canRedo ? 1 : 0.4 }"
+            @click="redo"
           >
-            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
-              <circle cx="9" cy="4.5" r="1.5" :fill="addMode === 'add-info' ? 'currentColor' : '#6b7280'"/>
-              <path d="M9 7.5 L9 13.5" :stroke="addMode === 'add-info' ? 'currentColor' : '#6b7280'" stroke-width="2.2" stroke-linecap="round"/>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 7v6h-6" />
+              <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
             </svg>
-            Info
           </button>
+        </UiTooltip>
+
+        <button class="tb-btn" id="previewBtn" @click="togglePreviewMode">
+          <svg v-if="!previewMode" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+          </svg>
+          <span>{{ previewMode ? 'Chỉnh sửa' : 'Xem trước' }}</span>
+        </button>
+
+        <button class="tb-btn primary" id="saveBtn" :disabled="saving" @click="saveToServer">
+          <UiSpinner v-if="saving" size="sm" color="white" />
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <path d="M17 21v-8H7v8" />
+            <path d="M7 3v5h8" />
+          </svg>
+          <span>Lưu</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ═══ SIDEBAR TRÁI — SCENE LIST ═══ -->
+    <aside class="sidebar-left">
+      <div class="side-head">
+        <div class="side-head-row">
+          <h3>Danh sách cảnh</h3>
+          <UiTooltip content="Thêm cảnh mới" placement="right">
+            <button class="side-add" id="addSceneBtn" @click="addScene">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </button>
+          </UiTooltip>
         </div>
-        <!-- Mode hint -->
-        <p
-          v-if="addMode !== 'view'"
-          class="mt-2 rounded-lg px-2 py-1.5 text-[11px] text-center font-medium"
-          :class="addMode === 'add-navigation' ? 'bg-river/10 text-river' : 'bg-clay/10 text-clay'"
+        <p id="sceneCount">{{ tour?.scenes.length ?? 0 }} cảnh · Kéo để sắp xếp</p>
+      </div>
+
+      <div class="scene-list" id="sceneList">
+        <div
+          v-for="(s, idx) in tour?.scenes ?? []"
+          :key="s.id"
+          :class="[
+            'scene-item',
+            { active: idx === currentSceneIdx },
+            { 'drag-over': dragOverSceneIdx === idx }
+          ]"
+          draggable="true"
+          @dragstart="handleSceneDragStart(idx, $event)"
+          @dragover="handleSceneDragOver(idx, $event)"
+          @drop="handleSceneDrop(idx, $event)"
+          @click="goToScene(idx)"
         >
-          {{ addMode === 'add-navigation' ? '↑ Nhấn vào ảnh để đặt marker điều hướng' : 'ⓘ Nhấn vào ảnh để đặt marker thông tin' }}
-        </p>
-      </div>
-
-      <!-- ── Marker list ────────────────────────────────────────────────────── -->
-      <div class="flex-1 overflow-y-auto px-3 py-3">
-        <p v-if="!localMarkers.length" class="px-1 py-4 text-center text-xs italic text-white/30">
-          Chưa có marker nào.<br/>Dùng nút ở trên rồi nhấn vào ảnh để thêm.
-        </p>
-
-        <div class="space-y-1.5">
-          <div
-            v-for="m in localMarkers"
-            :key="m.id"
-            class="group flex items-center gap-2 rounded-lg border px-3 py-2.5 cursor-pointer transition-all"
-            :class="selectedId === m.id
-              ? (m.plugin === 'navigation' ? 'border-river/60 bg-river/10' : 'border-clay/60 bg-clay/10')
-              : 'border-white/8 bg-white/3 hover:border-white/20'"
-            @click="focusMarker(m)"
-          >
-            <!-- Icon -->
-            <div
-              class="grid h-7 w-7 shrink-0 place-items-center rounded-full"
-              :class="m.plugin === 'navigation' ? 'bg-river/25' : 'bg-clay/25'"
-            >
-              <svg v-if="m.plugin === 'navigation'" width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <path d="M12 4 L12 17" stroke="#1f6f8b" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M7 10 L12 5 L17 10" stroke="#1f6f8b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <svg v-else width="10" height="12" viewBox="0 0 14 16" fill="none">
-                <circle cx="7" cy="3" r="1.4" fill="#a8583f"/>
-                <path d="M7 6 L7 13" stroke="#a8583f" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-            </div>
-
-            <!-- Info -->
-            <div class="min-w-0 flex-1">
-              <p class="truncate text-xs font-semibold text-white">{{ m.label }}</p>
-              <p class="text-[10px] text-white/35">
-                yaw {{ m.yaw.toFixed(2) }} · pitch {{ m.pitch.toFixed(2) }}
-              </p>
-            </div>
-
-            <!-- Delete button (visible on hover/select) -->
-            <button
-              class="shrink-0 rounded p-1 text-white/30 opacity-0 hover:text-clay group-hover:opacity-100 transition-all"
-              :class="selectedId === m.id ? 'opacity-100' : ''"
-              title="Xoá marker"
-              @click.stop="deleteMarker(m.id)"
-            >✕</button>
+          <span class="scene-drag">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+              <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+              <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+            </svg>
+          </span>
+          <img class="scene-thumb-sm" :src="s.thumbnail" :alt="s.title">
+          <div class="scene-info">
+            <strong>{{ s.title }}</strong>
+            <span>{{ s.markers?.length ?? 0 }} hotspot{{ tour?.initialSceneId === s.id ? ' · ★ Bắt đầu' : '' }}</span>
           </div>
+          <span v-if="tour?.initialSceneId === s.id" class="scene-badge">Start</span>
         </div>
       </div>
-
-      <!-- ── Auto-save status + Export ─────────────────────────────────────── -->
-      <div class="border-t border-white/8 px-4 py-4 space-y-2">
-        <!-- Auto-save status -->
-        <div class="flex items-center gap-2 rounded-lg bg-white/4 px-3 py-2">
-          <span v-if="saving" class="h-2 w-2 rounded-full bg-river animate-pulse shrink-0" />
-          <span v-else-if="saveMsg.startsWith('✓')" class="h-2 w-2 rounded-full bg-[#4caf50] shrink-0" />
-          <span v-else-if="saveMsg.startsWith('✗')" class="h-2 w-2 rounded-full bg-clay shrink-0" />
-          <span v-else class="h-2 w-2 rounded-full bg-white/20 shrink-0" />
-          <p class="text-xs"
-            :class="{
-              'text-river': saving,
-              'text-[#4caf50]': !saving && saveMsg.startsWith('✓'),
-              'text-clay': !saving && saveMsg.startsWith('✗'),
-              'text-white/35': !saving && !saveMsg,
-            }"
-          >
-            {{ saving ? 'Đang lưu…' : saveMsg || 'Tự động lưu khi thay đổi' }}
-          </p>
-        </div>
-        <button
-          class="w-full rounded-lg border border-white/15 px-4 py-2 text-xs text-white/55 hover:text-white hover:border-white/30 transition"
-          @click="exportYaml"
-        >📥 Xuất YAML</button>
-      </div>
-
     </aside>
 
-    <!-- ── Right: Panorama viewer ──────────────────────────────────────────── -->
-    <div class="relative flex-1">
-      <div ref="container" class="h-full w-full" />
+    <!-- ═══ CENTER — PREVIEW ═══ -->
+    <main class="preview">
+      <div class="preview-toolbar">
+        <div class="pt-tabs">
+          <button
+            :class="['pt-tab', { active: modeTab === 'edit' }]"
+            @click="modeTab = 'edit'"
+          >
+            Chỉnh sửa
+          </button>
+          <button
+            :class="['pt-tab', { active: modeTab === 'drag' }]"
+            @click="modeTab = 'drag'"
+          >
+            Xoay ảnh
+          </button>
+        </div>
 
-      <!-- Cursor hint overlay (changes based on mode) -->
-      <div
-        class="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full px-4 py-2 text-xs backdrop-blur-sm ring-1 transition-all"
-        :class="addMode === 'view'
-          ? 'bg-ink/70 text-white/40 ring-white/10'
-          : addMode === 'add-navigation'
-            ? 'bg-river/20 text-river ring-river/40'
-            : 'bg-clay/20 text-clay ring-clay/40'"
-      >
-        <span v-if="addMode === 'view'">🖱️ Kéo marker để di chuyển · Nhấn marker để chỉnh · Nhấn ảnh để bỏ chọn</span>
-        <span v-else-if="addMode === 'add-navigation'">↑ Nhấn vào điểm trong ảnh để đặt marker Navigation</span>
-        <span v-else>ⓘ Nhấn vào điểm trong ảnh để đặt marker Info</span>
+        <div class="pt-spacer"></div>
+
+        <div class="pt-zoom">
+          <button id="zoomOut" title="Thu nhỏ" @click="changeZoom(-10)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14" />
+            </svg>
+          </button>
+          <span class="pt-zoom-label" id="zoomLabel">{{ zoom }}%</span>
+          <button id="zoomIn" title="Phóng to" @click="changeZoom(10)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </div>
+
+        <button
+          :class="['tb-btn', { primary: isPlacingHotspot }]"
+          id="placeHotspotBtn"
+          @click="startPlacingHotspot"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span>{{ isPlacingHotspot ? 'Đang đặt...' : 'Đặt hotspot' }}</span>
+        </button>
       </div>
 
-      <!-- ── Edit panel (slide up when marker selected) ───────────────────── -->
-      <Transition name="slide-up">
-        <div
-          v-if="selectedMarker"
-          class="absolute bottom-0 left-0 right-0 rounded-t-2xl border-t border-white/10 bg-ink/97 px-5 pb-6 pt-4 backdrop-blur-md shadow-2xl"
-        >
-          <div class="mb-4 flex items-center gap-3">
-            <!-- Plugin type badge -->
-            <span
-              class="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
-              :class="selectedMarker.plugin === 'navigation' ? 'bg-river/20 text-river' : 'bg-clay/20 text-clay'"
-            >
-              {{ selectedMarker.plugin === 'navigation' ? '↑ Navigation' : 'ⓘ Info' }}
-            </span>
-            <h2 class="flex-1 text-sm font-semibold text-white">Chỉnh sửa Marker</h2>
-            <button class="text-white/40 hover:text-white text-sm" @click="selectedId = null">✕</button>
-          </div>
+      <div class="preview-canvas" id="previewCanvas">
+        <div ref="container" class="h-full w-full" />
 
-          <div class="grid gap-3">
-            <!-- Label -->
-            <div>
-              <label class="mb-1 block text-[11px] text-white/50">Tên hiển thị</label>
+        <div class="place-hint" :class="{ active: isPlacingHotspot }" id="placeHint">
+          Click lên ảnh để đặt hotspot · ESC để hủy
+        </div>
+
+        <div class="preview-info">
+          <span class="preview-info-badge">CẢNH {{ currentSceneIdx + 1 }}/{{ tour?.scenes.length ?? 1 }}</span>
+          <span class="preview-info-title" id="infoTitle">{{ currentScene?.title }}</span>
+          <span class="preview-info-coord" id="infoCoord">
+            {{ isPlacingHotspot ? 'Nhấn vị trí bất kỳ để đặt' : 'Vị trí xem panorama' }}
+          </span>
+        </div>
+      </div>
+    </main>
+
+    <!-- ═══ SIDEBAR PHẢI — INSPECTOR ═══ -->
+    <aside class="inspector">
+      <div class="insp-tabs">
+        <button
+          :class="['insp-tab', { active: currentTab === 'scene' }]"
+          @click="currentTab = 'scene'"
+        >
+          Cảnh
+        </button>
+        <button
+          :class="['insp-tab', { active: currentTab === 'hotspots' }]"
+          @click="currentTab = 'hotspots'"
+        >
+          Hotspots
+        </button>
+        <button
+          :class="['insp-tab', { active: currentTab === 'settings' }]"
+          @click="currentTab = 'settings'"
+        >
+          Cài đặt
+        </button>
+      </div>
+
+      <div class="insp-body" id="inspBody">
+
+        <!-- ── TAB 1: CẢNH ── -->
+        <template v-if="currentTab === 'scene' && currentScene">
+          <div class="insp-section">
+            <div class="insp-section-title">Thông tin cảnh</div>
+            <div class="field">
+              <label>Tên cảnh</label>
               <input
-                v-model="editLabel"
-                placeholder="Tên marker"
-                class="w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/25 focus:border-river focus:outline-none"
+                v-model="currentScene.title"
+                type="text"
+                id="fieldName"
+                @input="markDirty"
+              >
+            </div>
+            <div class="field">
+              <label>Mô tả ngắn</label>
+              <textarea
+                v-model="currentScene.subtitle"
+                id="fieldDesc"
+                @input="markDirty"
               />
             </div>
+          </div>
 
-            <!-- Coordinates (read-only — drag to change) -->
-            <div class="flex gap-2">
-              <div class="flex-1">
-                <label class="mb-1 block text-[11px] text-white/50">Yaw (kéo để thay đổi)</label>
-                <div class="rounded-lg border border-white/8 bg-white/3 px-3 py-2 text-sm text-white/50 font-mono">
-                  {{ editYaw.toFixed(3) }}
-                </div>
-              </div>
-              <div class="flex-1">
-                <label class="mb-1 block text-[11px] text-white/50">Pitch (kéo để thay đổi)</label>
-                <div class="rounded-lg border border-white/8 bg-white/3 px-3 py-2 text-sm text-white/50 font-mono">
-                  {{ editPitch.toFixed(3) }}
-                </div>
+          <!-- Real Image Picker with Upload & Direct URL -->
+          <div class="insp-section">
+            <div class="insp-section-title">Ảnh panorama</div>
+            <div
+              class="img-picker"
+              id="imgPicker"
+              title="Nhấn để tải ảnh panorama từ máy tính"
+              @click="triggerImageUpload"
+            >
+              <img :src="currentScene.panorama" :alt="currentScene.title">
+              <div class="img-picker-overlay">
+                <UiSpinner v-if="uploadingImage" size="md" color="white" />
+                <template v-else>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span>{{ uploadingImage ? 'Đang tải lên...' : 'Đổi ảnh (Tải lên)' }}</span>
+                </template>
               </div>
             </div>
 
-            <!-- Navigation: target scene -->
-            <div v-if="selectedMarker.plugin === 'navigation'">
-              <label class="mb-1 block text-[11px] text-white/50">Cảnh đích</label>
-              <select
-                v-model="editTargetScene"
-                class="w-full rounded-lg border border-white/15 bg-ink px-3 py-2 text-sm text-white focus:border-river focus:outline-none"
+            <!-- Direct Panorama & Thumbnail URL Fields -->
+            <div class="field mt-2">
+              <label>URL ảnh panorama (2:1)</label>
+              <input
+                v-model="currentScene.panorama"
+                type="text"
+                placeholder="https://... hoặc /uploads/..."
+                @change="onPanoramaUrlChange"
               >
-                <option value="" disabled>Chọn cảnh đích...</option>
-                <option v-for="s in otherScenes" :key="s.id" :value="s.id">{{ s.title }}</option>
+            </div>
+            <div class="field">
+              <label>URL ảnh thumbnail</label>
+              <input
+                v-model="currentScene.thumbnail"
+                type="text"
+                placeholder="https://... hoặc /thumbnails/..."
+                @input="markDirty"
+              >
+            </div>
+
+            <div class="hint-text">💡 Nhấn vào ô xem trước để chọn file từ máy tính hoặc dán đường dẫn URL trực tiếp.</div>
+          </div>
+
+          <div class="insp-section">
+            <div class="insp-section-title">Vị trí trong tour</div>
+            <div class="field-row">
+              <div class="field">
+                <label>Thứ tự</label>
+                <input
+                  :value="currentSceneIdx + 1"
+                  type="number"
+                  min="1"
+                  :max="tour?.scenes.length"
+                  @change="(e: any) => {
+                    const newOrder = Math.max(0, Math.min((tour?.scenes.length ?? 1) - 1, parseInt(e.target.value) - 1));
+                    if (newOrder !== currentSceneIdx && tour) {
+                      const [moved] = tour.scenes.splice(currentSceneIdx, 1);
+                      tour.scenes.splice(newOrder, 0, moved);
+                      currentSceneIdx = newOrder;
+                      markDirty();
+                    }
+                  }"
+                >
+              </div>
+              <div class="field">
+                <label>ID</label>
+                <input type="text" :value="currentScene.id" readonly style="opacity:0.5">
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <label for="isStartToggle">Đặt làm cảnh bắt đầu</label>
+              <UiSwitch
+                :model-value="tour?.initialSceneId === currentScene.id"
+                @update:model-value="(val) => {
+                  if (tour) {
+                    tour.initialSceneId = val ? currentScene.id : undefined;
+                    markDirty();
+                  }
+                }"
+              />
+            </div>
+          </div>
+
+          <div class="insp-section">
+            <button class="btn-block danger" id="deleteSceneBtn" @click="deleteCurrentScene">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Xóa cảnh này
+            </button>
+          </div>
+        </template>
+
+        <!-- ── TAB 2: HOTSPOTS ── -->
+        <template v-else-if="currentTab === 'hotspots' && currentScene">
+          <div class="insp-section">
+            <div class="insp-section-title">
+              <span>Hotspots trong cảnh ({{ currentScene.markers.length }})</span>
+            </div>
+
+            <div v-if="!currentScene.markers.length" class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>
+              </svg>
+              Chưa có hotspot nào.<br>Nhấn "Đặt hotspot" để bắt đầu.
+            </div>
+
+            <div v-else class="hotspot-list">
+              <div
+                v-for="hs in currentScene.markers"
+                :key="hs.id"
+                :class="['hotspot-row', { selected: hs.id === selectedHotspotId }]"
+                @click="selectedHotspotId = hs.id"
+              >
+                <div :class="['hotspot-row-icon', hs.plugin === 'navigation' ? 'nav' : 'info']">
+                  <svg v-if="hs.plugin === 'navigation'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 4 L12 18"/><path d="M6 11 L12 5 L18 11"/>
+                  </svg>
+                  <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                    <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none"/>
+                    <path d="M12 11 L12 18"/>
+                  </svg>
+                </div>
+                <span class="hotspot-row-name">{{ hs.label }}</span>
+                <button class="hotspot-row-delete" @click.stop="deleteHotspot(hs.id)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <button class="btn-block primary" id="quickAddHotspot" @click="startPlacingHotspot">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+              Thêm hotspot
+            </button>
+          </div>
+
+          <!-- Edit Selected Hotspot Form -->
+          <div v-if="selectedHotspot" class="insp-section border-t border-white/8 pt-4">
+            <div class="insp-section-title">Chỉnh sửa hotspot</div>
+
+            <div class="field">
+              <label>Nhãn hiển thị</label>
+              <input
+                v-model="selectedHotspot.label"
+                type="text"
+                @input="markDirty"
+              >
+            </div>
+
+            <!-- Navigation target scene dropdown -->
+            <div v-if="selectedHotspot.plugin === 'navigation'" class="field">
+              <label>Cảnh đích</label>
+              <select
+                :value="(selectedHotspot as NavigationMarker).targetScene"
+                @change="(e: any) => {
+                  (selectedHotspot as NavigationMarker).targetScene = e.target.value;
+                  markDirty();
+                }"
+              >
+                <option value="" disabled>— Chọn cảnh —</option>
+                <option
+                  v-for="s in tour?.scenes ?? []"
+                  :key="s.id"
+                  :value="s.id"
+                >
+                  {{ s.title }}
+                </option>
               </select>
             </div>
 
-            <!-- Info: content -->
-            <div v-if="selectedMarker.plugin === 'info'">
-              <label class="mb-1 block text-[11px] text-white/50">Nội dung thông tin</label>
+            <!-- Info content textarea -->
+            <div v-if="selectedHotspot.plugin === 'info'" class="field">
+              <label>Nội dung thông tin</label>
               <textarea
-                v-model="editContent"
-                rows="2"
-                placeholder="Mô tả về địa điểm..."
-                class="w-full resize-none rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/25 focus:border-clay focus:outline-none"
+                :value="(selectedHotspot as InfoMarker).content"
+                placeholder="Mô tả chi tiết địa điểm..."
+                @input="(e: any) => {
+                  (selectedHotspot as InfoMarker).content = e.target.value;
+                  markDirty();
+                }"
               />
             </div>
 
-            <!-- Actions -->
-            <div class="flex gap-2 pt-1">
-              <button
-                class="flex-1 rounded-lg py-2.5 text-sm font-bold transition"
-                :class="selectedMarker.plugin === 'navigation' ? 'bg-river hover:bg-river/80 text-white' : 'bg-clay hover:bg-clay/80 text-white'"
-                @click="saveEdit"
-              >Lưu thay đổi</button>
-              <button
-                class="rounded-lg border border-white/15 px-4 py-2.5 text-sm text-white/50 hover:border-clay/40 hover:text-clay transition"
-                @click="deleteMarker(selectedMarker.id)"
-              >Xoá</button>
+            <!-- Position Yaw & Pitch -->
+            <div class="field-row">
+              <div class="field">
+                <label>Yaw (rad)</label>
+                <input
+                  :value="selectedHotspot.yaw.toFixed(2)"
+                  type="number"
+                  step="0.05"
+                  @change="(e: any) => {
+                    selectedHotspot!.yaw = parseFloat(e.target.value);
+                    syncMarkersToViewer();
+                    markDirty();
+                  }"
+                >
+              </div>
+              <div class="field">
+                <label>Pitch (rad)</label>
+                <input
+                  :value="selectedHotspot.pitch.toFixed(2)"
+                  type="number"
+                  step="0.05"
+                  @change="(e: any) => {
+                    selectedHotspot!.pitch = parseFloat(e.target.value);
+                    syncMarkersToViewer();
+                    markDirty();
+                  }"
+                >
+              </div>
+            </div>
+            <div class="hint-text">💡 Kéo trực tiếp hotspot trên ảnh panorama để di chuyển nhanh.</div>
+          </div>
+        </template>
+
+        <!-- ── TAB 3: CÀI ĐẶT (TÙY CHỈNH PROJECT) ── -->
+        <template v-else-if="currentTab === 'settings' && tour">
+          <div class="insp-section">
+            <div class="insp-section-title">Chế độ tour</div>
+            <div class="field">
+              <label>Kiểu trải nghiệm</label>
+              <select
+                :value="tour.mode ?? 'free'"
+                @change="(e: any) => {
+                  tour!.mode = e.target.value;
+                  markDirty();
+                }"
+              >
+                <option value="free">Tự do khám phá</option>
+                <option value="guided">Có hướng dẫn (tự chuyển cảnh)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Thời gian mỗi cảnh (giây)</label>
+              <input
+                :value="tour.guidedDuration ?? 8"
+                type="number"
+                min="3"
+                max="60"
+                @input="(e: any) => {
+                  tour!.guidedDuration = parseInt(e.target.value) || 8;
+                  markDirty();
+                }"
+              >
+            </div>
+            <div class="hint-text">Ở chế độ có hướng dẫn, tour tự động chuyển sang cảnh tiếp theo sau thời gian này.</div>
+          </div>
+
+          <div class="insp-section">
+            <div class="insp-section-title">Cảnh bắt đầu</div>
+            <div class="field">
+              <select
+                :value="tour.initialSceneId ?? tour.scenes[0]?.id"
+                @change="(e: any) => {
+                  tour!.initialSceneId = e.target.value;
+                  markDirty();
+                }"
+              >
+                <option
+                  v-for="s in tour.scenes"
+                  :key="s.id"
+                  :value="s.id"
+                >
+                  {{ s.title }}
+                </option>
+              </select>
             </div>
           </div>
-        </div>
-      </Transition>
-    </div>
 
-  </main>
+          <div class="insp-section">
+            <div class="insp-section-title">Tùy chọn hiển thị</div>
+            <div class="toggle-row">
+              <label>Tự động xoay ảnh</label>
+              <UiSwitch
+                :model-value="!!tour.autoRotate"
+                @update:model-value="(val) => {
+                  tour!.autoRotate = val;
+                  markDirty();
+                }"
+              />
+            </div>
+            <div class="toggle-row">
+              <label>Hiện bản đồ nhỏ</label>
+              <UiSwitch
+                :model-value="tour.showMinimap !== false"
+                @update:model-value="(val) => {
+                  tour!.showMinimap = val;
+                  markDirty();
+                }"
+              />
+            </div>
+          </div>
+        </template>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ═══ MODAL: Chọn loại hotspot ═══ -->
+  <div class="modal-backdrop" :class="{ open: showHotspotModal }" @click.self="cancelPlacing">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>Chọn loại hotspot</h3>
+        <button class="modal-close" @click="cancelPlacing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="type-grid">
+          <div class="type-card" @click="createHotspot('navigation')">
+            <div class="type-card-icon nav">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 4 L12 18" />
+                <path d="M6 11 L12 5 L18 11" />
+              </svg>
+            </div>
+            <strong>Di chuyển</strong>
+            <span>Dẫn đến cảnh khác</span>
+          </div>
+          <div class="type-card" @click="createHotspot('info')">
+            <div class="type-card-icon info">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none" />
+                <path d="M12 11 L12 18" />
+              </svg>
+            </div>
+            <strong>Thông tin</strong>
+            <span>Hiện panel thông tin</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="tb-btn" @click="cancelPlacing">Hủy</button>
+      </div>
+    </div>
+  </div>
 </template>
 
-<style>
-/* ── Admin marker icon styles ──────────────────────────────────────────────── */
-.admin-marker {
+<style scoped>
+/* ═══ ROOT LAYOUT ═══ */
+.admin-studio {
+  display: grid;
+  grid-template-columns: 300px 1fr 340px;
+  grid-template-rows: 56px 1fr;
+  height: 100vh;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.admin-studio > * {
+  background: #141414;
+}
+
+/* ═══ TOPBAR ═══ */
+.topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  background: #141414 !important;
+}
+
+.tb-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-right: 16px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  height: 32px;
+}
+
+.tb-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1f6f8b, #155d75);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.15);
+}
+
+.tb-logo-text {
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.tb-logo-text strong {
+  display: block;
+  font-weight: 600;
+}
+
+.tb-logo-text span {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tb-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.tb-breadcrumb strong {
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.tb-breadcrumb svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0.4;
+}
+
+.tb-spacer {
+  flex: 1;
+}
+
+.tb-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.tb-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.tb-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.tb-btn.primary {
+  background: #1f6f8b;
+  border-color: #1f6f8b;
+  color: #fff;
+}
+
+.tb-btn.primary:hover {
+  background: #2d8fb0;
+  border-color: #2d8fb0;
+}
+
+.save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.42);
+  padding: 0 12px;
+}
+
+.save-indicator .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+.save-indicator.saving .dot {
+  background: #c9a227;
+  animation: pulse 1s infinite;
+}
+
+.save-indicator.dirty .dot {
+  background: #a8583f;
+}
+
+@keyframes pulse {
+  50% { opacity: 0.4; }
+}
+
+/* ═══ SIDEBAR TRÁI — SCENE LIST ═══ */
+.sidebar-left {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.side-head {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.side-head-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.side-head h3 {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.side-head p {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.side-add {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(31, 111, 139, 0.2);
+  border: 1px solid rgba(31, 111, 139, 0.35);
+  color: #7ec8e3;
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+
+.side-add:hover {
+  background: rgba(31, 111, 139, 0.35);
+  color: #fff;
+}
+
+.side-add svg {
+  width: 14px;
+  height: 14px;
+}
+
+.scene-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scene-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+  position: relative;
+}
+
+.scene-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.scene-item.active {
+  background: rgba(31, 111, 139, 0.14);
+  border-color: rgba(31, 111, 139, 0.4);
+}
+
+.scene-item.active::before {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #1f6f8b;
+}
+
+.scene-item.drag-over {
+  border-top: 2px solid #1f6f8b;
+}
+
+.scene-drag {
+  cursor: grab;
+  color: rgba(255, 255, 255, 0.25);
+  padding: 0 2px;
+  flex-shrink: 0;
+}
+
+.scene-drag svg {
+  width: 12px;
+  height: 12px;
+}
+
+.scene-thumb-sm {
+  width: 44px;
+  height: 30px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scene-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.scene-info strong {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scene-info span {
+  display: block;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.42);
+  font-family: monospace;
+  margin-top: 2px;
+}
+
+.scene-badge {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(201, 162, 39, 0.2);
+  color: #c9a227;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ═══ CENTER — PREVIEW ═══ */
+.preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #141414;
+  flex-shrink: 0;
+}
+
+.pt-tabs {
+  display: flex;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.pt-tab {
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.42);
+  transition: all 0.15s;
+}
+
+.pt-tab.active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.pt-spacer {
+  flex: 1;
+}
+
+.pt-zoom {
+  display: flex;
   align-items: center;
   gap: 4px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+}
+
+.pt-zoom button {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0.42);
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+
+.pt-zoom button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.pt-zoom svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pt-zoom-label {
+  font-size: 11px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.42);
+  padding: 0 6px;
+  min-width: 42px;
+  text-align: center;
+}
+
+/* Preview canvas */
+.preview-canvas {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Hotspots in PSV */
+:deep(.edit-hotspot) {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: grab;
   user-select: none;
 }
-.admin-marker:active { cursor: grabbing; }
 
-.admin-marker--nav > div {
-  width: 46px; height: 46px;
+:deep(.edit-hotspot.info) {
+  width: 40px;
+  height: 40px;
+}
+
+:deep(.edit-hotspot .hs-circle) {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   background: rgba(31, 111, 139, 0.9);
-  border: 2.5px solid rgba(255,255,255,0.85);
-  box-shadow: 0 4px 20px rgba(31,111,139,0.55), 0 0 0 5px rgba(31,111,139,0.2);
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.admin-marker--nav:hover > div {
-  transform: scale(1.12);
-  box-shadow: 0 6px 28px rgba(31,111,139,0.75), 0 0 0 7px rgba(31,111,139,0.28);
+  border: 2.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 24px rgba(31, 111, 139, 0.6), 0 0 0 6px rgba(31, 111, 139, 0.2);
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
 }
 
-.admin-marker--info > div {
-  width: 42px; height: 42px;
-  border-radius: 50%;
+:deep(.edit-hotspot.info .hs-circle) {
   background: rgba(168, 88, 63, 0.9);
-  border: 2.5px solid rgba(255,255,255,0.85);
-  box-shadow: 0 4px 20px rgba(168,88,63,0.5), 0 0 0 5px rgba(168,88,63,0.18);
-  display: flex; align-items: center; justify-content: center;
-  transition: transform 0.12s ease, box-shadow 0.12s ease;
-}
-.admin-marker--info:hover > div {
-  transform: scale(1.12);
-  box-shadow: 0 6px 28px rgba(168,88,63,0.7), 0 0 0 7px rgba(168,88,63,0.26);
+  box-shadow: 0 4px 20px rgba(168, 88, 63, 0.55), 0 0 0 6px rgba(168, 88, 63, 0.18);
 }
 
-.admin-marker__label {
-  font-size: 10px; font-weight: 700;
+:deep(.edit-hotspot.selected .hs-circle) {
+  box-shadow: 0 0 0 3px #c9a227, 0 6px 32px rgba(201, 162, 39, 0.6);
+}
+
+:deep(.edit-hotspot .hs-circle svg) {
+  width: 18px;
+  height: 18px;
+}
+
+:deep(.edit-hotspot .hs-label) {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
   color: #fff;
-  background: rgba(12,12,12,0.75);
-  padding: 2px 8px;
-  border-radius: 20px;
+  background: rgba(10, 10, 10, 0.78);
+  padding: 3px 8px;
+  border-radius: 999px;
   white-space: nowrap;
-  max-width: 120px;
-  overflow: hidden; text-overflow: ellipsis;
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
 }
 
-/* ── Slide-up transition ────────────────────────────────────────────────────── */
-.slide-up-enter-active, .slide-up-leave-active {
-  transition: transform 0.28s ease, opacity 0.28s ease;
+/* Preview bottom info */
+.preview-info {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(10, 10, 10, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  backdrop-filter: blur(14px);
+  z-index: 6;
+  pointer-events: none;
 }
-.slide-up-enter-from, .slide-up-leave-to {
-  transform: translateY(100%); opacity: 0;
+
+.preview-info-badge {
+  font-size: 10px;
+  font-family: monospace;
+  padding: 3px 8px;
+  background: rgba(31, 111, 139, 0.3);
+  color: #7ec8e3;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.preview-info-title {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.preview-info-coord {
+  font-size: 11px;
+  font-family: monospace;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+/* Hint overlay */
+.place-hint {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  background: rgba(201, 162, 39, 0.95);
+  color: #1a1613;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  z-index: 10;
+  display: none;
+  box-shadow: 0 8px 24px rgba(201, 162, 39, 0.4);
+}
+
+.place-hint.active {
+  display: block;
+  animation: hint-pulse 1.5s infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.03); }
+}
+
+/* ═══ SIDEBAR PHẢI — INSPECTOR ═══ */
+.inspector {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #141414 !important;
+}
+
+.insp-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  background: #141414;
+}
+
+.insp-tab {
+  flex: 1;
+  padding: 14px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.42);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.insp-tab:hover {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.insp-tab.active {
+  color: #ffffff;
+  border-bottom-color: #1f6f8b;
+}
+
+.insp-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.insp-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.insp-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.68);
+  font-weight: 500;
+}
+
+.field input[type="text"],
+.field input[type="number"],
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.15s;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: #1f6f8b;
+  background: rgba(31, 111, 139, 0.08);
+  box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.15);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.field select option {
+  background: #1c1c1c;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.hint-text {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 1.5;
+}
+
+/* Image picker */
+.img-picker {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.img-picker:hover {
+  border-color: #1f6f8b;
+  background: rgba(31, 111, 139, 0.06);
+}
+
+.img-picker img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.img-picker-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.15s;
+  font-size: 12px;
+}
+
+.img-picker:hover .img-picker-overlay {
+  opacity: 1;
+}
+
+.img-picker-overlay svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hotspot list */
+.hotspot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hotspot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 12px;
+}
+
+.hotspot-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.hotspot-row.selected {
+  background: rgba(31, 111, 139, 0.14);
+  border-color: rgba(31, 111, 139, 0.4);
+}
+
+.hotspot-row-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.hotspot-row-icon.nav {
+  background: rgba(31, 111, 139, 0.25);
+  color: #7ec8e3;
+}
+
+.hotspot-row-icon.info {
+  background: rgba(168, 88, 63, 0.25);
+  color: #e0a58b;
+}
+
+.hotspot-row-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+.hotspot-row-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.hotspot-row-delete {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.25);
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+
+.hotspot-row-delete:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+}
+
+.hotspot-row-delete svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.empty-state svg {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 8px;
+  opacity: 0.3;
+}
+
+/* Buttons */
+.btn-block {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.btn-block:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.btn-block svg {
+  width: 14px;
+  height: 14px;
+}
+
+.btn-block.primary {
+  background: rgba(31, 111, 139, 0.2);
+  border-color: rgba(31, 111, 139, 0.4);
+  color: #7ec8e3;
+}
+
+.btn-block.primary:hover {
+  background: rgba(31, 111, 139, 0.35);
+  color: #fff;
+}
+
+.btn-block.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.btn-block.danger:hover {
+  background: rgba(239, 68, 68, 0.22);
+  color: #fff;
+}
+
+/* Toggle row */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.toggle-row label {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+/* ═══ PREVIEW MODE — Hide sidebars & toolbar ═══ */
+.admin-studio.preview-mode {
+  grid-template-columns: 1fr;
+  grid-template-rows: 56px 1fr;
+}
+
+.admin-studio.preview-mode .sidebar-left,
+.admin-studio.preview-mode .inspector,
+.admin-studio.preview-mode .preview-toolbar {
+  display: none !important;
+}
+
+/* ═══ MODAL ═══ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal {
+  background: #1c1c1c;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+  overflow: hidden;
+  color: #fff;
+}
+
+.modal-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-head h3 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-foot {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.42);
+  display: grid;
+  place-items: center;
+  transition: all 0.15s;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.modal-close svg {
+  width: 14px;
+  height: 14px;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.type-card {
+  padding: 16px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+
+.type-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.type-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin: 0 auto 10px;
+  display: grid;
+  place-items: center;
+}
+
+.type-card-icon.nav {
+  background: rgba(31, 111, 139, 0.3);
+  color: #7ec8e3;
+}
+
+.type-card-icon.info {
+  background: rgba(168, 88, 63, 0.3);
+  color: #e0a58b;
+}
+
+.type-card-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.type-card strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.type-card span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.4;
 }
 </style>

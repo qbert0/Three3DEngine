@@ -14,13 +14,34 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 interface _GlobalComponents {
-  HotspotPanel: typeof import("../../components/HotspotPanel.vue")['default']
-  SceneGraph: typeof import("../../components/SceneGraph.vue")['default']
-  SceneGraphNode: typeof import("../../components/SceneGraphNode.vue")['default']
-  SceneList: typeof import("../../components/SceneList.vue")['default']
+  UiAvatar: typeof import("../../components/ui/Avatar.vue")['default']
+  UiBadge: typeof import("../../components/ui/Badge.vue")['default']
+  UiBanner: typeof import("../../components/ui/Banner.vue")['default']
+  UiButton: typeof import("../../components/ui/Button.vue")['default']
+  UiCard: typeof import("../../components/ui/Card.vue")['default']
+  UiDivider: typeof import("../../components/ui/Divider.vue")['default']
+  UiEmptyState: typeof import("../../components/ui/EmptyState.vue")['default']
+  UiKbd: typeof import("../../components/ui/Kbd.vue")['default']
+  UiSkeleton: typeof import("../../components/ui/Skeleton.vue")['default']
+  UiSpinner: typeof import("../../components/ui/Spinner.vue")['default']
+  UiStatusDot: typeof import("../../components/ui/StatusDot.vue")['default']
+  UiSwitch: typeof import("../../components/ui/Switch.vue")['default']
+  UiTextInput: typeof import("../../components/ui/TextInput.vue")['default']
+  UiToast: typeof import("../../components/ui/Toast.vue")['default']
+  UiToastProvider: typeof import("../../components/ui/ToastProvider.vue")['default']
+  UiTooltip: typeof import("../../components/ui/Tooltip.vue")['default']
+  HotspotPanel: typeof import("../../components/experience/HotspotPanel.vue")['default']
+  SceneList: typeof import("../../components/experience/SceneList.vue")['default']
+  ThreeViewer360: typeof import("../../components/experience/ThreeViewer360.vue")['default']
+  TourSidebar: typeof import("../../components/experience/TourSidebar.vue")['default']
+  Viewer360: typeof import("../../components/experience/Viewer360.vue")['default']
+  SceneGraph: typeof import("../../components/editor/SceneGraph.vue")['default']
+  SceneGraphNode: typeof import("../../components/editor/SceneGraphNode.vue")['default']
+  TourCard: typeof import("../../components/catalog/TourCard.vue")['default']
+  MorphIcon: typeof import("../../components/MorphIcon.vue")['default']
   SceneViewer: typeof import("../../components/SceneViewer.vue")['default']
-  TourSidebar: typeof import("../../components/TourSidebar.vue")['default']
-  Viewer360: typeof import("../../components/Viewer360.vue")['default']
+  ThemeToggle: typeof import("../../components/ThemeToggle.vue")['default']
+  ThemeToggleSelector: typeof import("../../components/ThemeToggleSelector.vue")['default']
   MinimalTourSidebar: typeof import("../../themes/minimal/TourSidebar.vue")['default']
   NatureTourSidebar: typeof import("../../themes/nature/TourSidebar.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
@@ -46,13 +67,34 @@ interface _GlobalComponents {
   Html: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Html']
   Body: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Body']
   NuxtIsland: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island")['default']
-  LazyHotspotPanel: LazyComponent<typeof import("../../components/HotspotPanel.vue")['default']>
-  LazySceneGraph: LazyComponent<typeof import("../../components/SceneGraph.vue")['default']>
-  LazySceneGraphNode: LazyComponent<typeof import("../../components/SceneGraphNode.vue")['default']>
-  LazySceneList: LazyComponent<typeof import("../../components/SceneList.vue")['default']>
+  LazyUiAvatar: LazyComponent<typeof import("../../components/ui/Avatar.vue")['default']>
+  LazyUiBadge: LazyComponent<typeof import("../../components/ui/Badge.vue")['default']>
+  LazyUiBanner: LazyComponent<typeof import("../../components/ui/Banner.vue")['default']>
+  LazyUiButton: LazyComponent<typeof import("../../components/ui/Button.vue")['default']>
+  LazyUiCard: LazyComponent<typeof import("../../components/ui/Card.vue")['default']>
+  LazyUiDivider: LazyComponent<typeof import("../../components/ui/Divider.vue")['default']>
+  LazyUiEmptyState: LazyComponent<typeof import("../../components/ui/EmptyState.vue")['default']>
+  LazyUiKbd: LazyComponent<typeof import("../../components/ui/Kbd.vue")['default']>
+  LazyUiSkeleton: LazyComponent<typeof import("../../components/ui/Skeleton.vue")['default']>
+  LazyUiSpinner: LazyComponent<typeof import("../../components/ui/Spinner.vue")['default']>
+  LazyUiStatusDot: LazyComponent<typeof import("../../components/ui/StatusDot.vue")['default']>
+  LazyUiSwitch: LazyComponent<typeof import("../../components/ui/Switch.vue")['default']>
+  LazyUiTextInput: LazyComponent<typeof import("../../components/ui/TextInput.vue")['default']>
+  LazyUiToast: LazyComponent<typeof import("../../components/ui/Toast.vue")['default']>
+  LazyUiToastProvider: LazyComponent<typeof import("../../components/ui/ToastProvider.vue")['default']>
+  LazyUiTooltip: LazyComponent<typeof import("../../components/ui/Tooltip.vue")['default']>
+  LazyHotspotPanel: LazyComponent<typeof import("../../components/experience/HotspotPanel.vue")['default']>
+  LazySceneList: LazyComponent<typeof import("../../components/experience/SceneList.vue")['default']>
+  LazyThreeViewer360: LazyComponent<typeof import("../../components/experience/ThreeViewer360.vue")['default']>
+  LazyTourSidebar: LazyComponent<typeof import("../../components/experience/TourSidebar.vue")['default']>
+  LazyViewer360: LazyComponent<typeof import("../../components/experience/Viewer360.vue")['default']>
+  LazySceneGraph: LazyComponent<typeof import("../../components/editor/SceneGraph.vue")['default']>
+  LazySceneGraphNode: LazyComponent<typeof import("../../components/editor/SceneGraphNode.vue")['default']>
+  LazyTourCard: LazyComponent<typeof import("../../components/catalog/TourCard.vue")['default']>
+  LazyMorphIcon: LazyComponent<typeof import("../../components/MorphIcon.vue")['default']>
   LazySceneViewer: LazyComponent<typeof import("../../components/SceneViewer.vue")['default']>
-  LazyTourSidebar: LazyComponent<typeof import("../../components/TourSidebar.vue")['default']>
-  LazyViewer360: LazyComponent<typeof import("../../components/Viewer360.vue")['default']>
+  LazyThemeToggle: LazyComponent<typeof import("../../components/ThemeToggle.vue")['default']>
+  LazyThemeToggleSelector: LazyComponent<typeof import("../../components/ThemeToggleSelector.vue")['default']>
   LazyMinimalTourSidebar: LazyComponent<typeof import("../../themes/minimal/TourSidebar.vue")['default']>
   LazyNatureTourSidebar: LazyComponent<typeof import("../../themes/nature/TourSidebar.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>

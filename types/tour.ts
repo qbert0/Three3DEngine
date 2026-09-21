@@ -54,6 +54,7 @@ export interface TourScene {
   thumbnail: string;
   initialYaw: number;
   initialPitch: number;
+  coordinates?: [number, number];
   markers: TourMarker[];
 }
 
@@ -67,6 +68,17 @@ export interface TourConfig {
   theme?: string;            // 'nature' | 'tourism' | 'minimal'
   initialSceneId?: string;   // optional: ID of initial scene to load
   plugins?: string[];        // enabled plugins list
+  mode?: 'free' | 'guided';  // 'free' | 'guided'
+  guidedDuration?: number;   // seconds per scene in guided mode
+  autoRotate?: boolean;      // auto rotate panorama
+  showMinimap?: boolean;     // show mini map
+  transition?: 'crossfade-pan' | 'radial-blur' | 'mask-wipe' | 'vignette' | 'split-slide';
+  transitionDuration?: number;
+  transitionColor?: string;
+  thumbnailFallbackAfterMs?: number;
+  preloadEnabled?: boolean;
+  preloadRadius?: number;
+  minOverlayMs?: number;
   scenes: TourScene[];
 }
 

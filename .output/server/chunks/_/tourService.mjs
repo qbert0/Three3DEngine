@@ -1,4 +1,4 @@
-import { l as listTours, b as loadTour } from './yamlLoader.mjs';
+globalThis.__timing__.logStart('Load chunks/_/tourService');import { l as listTours, b as loadTour } from './yamlLoader.mjs';
 
 const tourService = {
   /** Get a single tour by slug. Returns null if not found. */
@@ -28,5 +28,5 @@ const tourService = {
   }
 };
 
-export { tourService as t };
+export { tourService as t };;globalThis.__timing__.logEnd('Load chunks/_/tourService');
 //# sourceMappingURL=tourService.mjs.map

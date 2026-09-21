@@ -1,4 +1,4 @@
-import { d as defineEventHandler, g as getRouterParam, r as readBody, c as createError } from '../../../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/admin/tours/_slug_.post');import { d as defineEventHandler, g as getRouterParam, a as readBody, c as createError } from '../../../../nitro/nitro.mjs';
 import { s as saveTour } from '../../../../_/yamlLoader.mjs';
 import 'node:http';
 import 'node:https';
@@ -9,6 +9,8 @@ import 'node:path';
 import 'node:crypto';
 import 'node:url';
 import 'js-yaml';
+import 'ajv';
+import 'ajv-formats';
 
 const _slug__post = defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug") || "";
@@ -18,11 +20,11 @@ const _slug__post = defineEventHandler(async (event) => {
   }
   try {
     saveTour(slug, body);
-    return { ok: true, slug };
+    return { ok: true, slug, tour: body };
   } catch (err) {
     throw createError({ statusCode: 500, statusMessage: `Could not save tour: ${err}` });
   }
 });
 
-export { _slug__post as default };
+export { _slug__post as default };;globalThis.__timing__.logEnd('Load chunks/routes/api/admin/tours/_slug_.post');
 //# sourceMappingURL=_slug_.post.mjs.map

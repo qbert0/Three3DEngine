@@ -1,3 +1,7 @@
 <template>
-  <NuxtPage />
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
+  <UiToastProvider />
 </template>
+

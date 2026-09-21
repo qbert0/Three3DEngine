@@ -1,4 +1,4 @@
-import { d as defineEventHandler, g as getRouterParam, r as readBody, c as createError } from '../../../../../../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/admin/tours/_slug/scenes/_sceneId/markers.post');import { d as defineEventHandler, g as getRouterParam, a as readBody, c as createError } from '../../../../../../../nitro/nitro.mjs';
 import { a as saveSceneMarkers } from '../../../../../../../_/yamlLoader.mjs';
 import 'node:http';
 import 'node:https';
@@ -9,6 +9,8 @@ import 'node:path';
 import 'node:crypto';
 import 'node:url';
 import 'js-yaml';
+import 'ajv';
+import 'ajv-formats';
 
 const markers_post = defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug") || "";
@@ -24,5 +26,5 @@ const markers_post = defineEventHandler(async (event) => {
   return { ok: true, slug, sceneId, tour: updatedTour };
 });
 
-export { markers_post as default };
+export { markers_post as default };;globalThis.__timing__.logEnd('Load chunks/routes/api/admin/tours/_slug/scenes/_sceneId/markers.post');
 //# sourceMappingURL=markers.post.mjs.map

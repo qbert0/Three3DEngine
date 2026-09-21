@@ -74,9 +74,6 @@
       "nitropack": [
         "../node_modules/nitropack"
       ],
-      "vite/client": [
-        "../node_modules/vite/client"
-      ],
       "nitropack/types": [
         "../node_modules/nitropack/types"
       ],
@@ -141,6 +138,7 @@
     "../node_modules",
     "../node_modules/nuxt/node_modules",
     "../node_modules/@nuxtjs/tailwindcss/node_modules",
+    "../node_modules/@pinia/nuxt/node_modules",
     "../node_modules/@vercel/speed-insights/node_modules",
     "../node_modules/@nuxt/devtools/node_modules",
     "../node_modules/@nuxt/telemetry/node_modules",

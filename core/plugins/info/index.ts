@@ -3,7 +3,7 @@ import type { View360Plugin, PluginContext, PluginMarker } from '../types';
 
 const infoHtml = (label: string): string => `
 <button aria-label="${label}"
-  style="display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;">
+  style="position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:0;">
   <div style="width:44px;height:44px;border-radius:50%;background:rgba(168,88,63,0.88);
     border:2.5px solid rgba(255,255,255,0.8);
     box-shadow:0 4px 20px rgba(168,88,63,0.55),0 0 0 6px rgba(168,88,63,0.18);
@@ -13,9 +13,10 @@ const infoHtml = (label: string): string => `
       <path d="M9 8 L9 13.5" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
     </svg>
   </div>
-  <span style="font-size:10px;font-weight:700;color:#fff;background:rgba(15,15,15,0.7);
+  <span style="position:absolute;top:calc(100% + 5px);left:50%;transform:translateX(-50%);
+    font-size:10px;font-weight:700;color:#fff;background:rgba(15,15,15,0.7);
     padding:3px 9px;border-radius:20px;white-space:nowrap;backdrop-filter:blur(6px);
-    letter-spacing:0.04em;border:1px solid rgba(255,255,255,0.1);">${label}</span>
+    letter-spacing:0.04em;border:1px solid rgba(255,255,255,0.1);pointer-events:none;">${label}</span>
 </button>`;
 
 export const InfoPlugin: View360Plugin = {
@@ -28,7 +29,7 @@ export const InfoPlugin: View360Plugin = {
         id: m.id,
         position: { yaw: m.yaw, pitch: m.pitch },
         html: infoHtml(m.label),
-        anchor: 'bottom center',
+        anchor: 'center center',
         data: { plugin: 'info', content: m.content, label: m.label },
       }));
   },

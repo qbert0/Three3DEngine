@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Di Tích Cổ Thành — Khu Di Tích Lịch Sử Quốc Gia</title>
+    <meta name="description"
+        content="Khu di tích lịch sử quốc gia — Khám phá giá trị văn hóa, đặt vé tham quan, sự kiện lễ hội và trải nghiệm tour 360°.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+   HERITAGE DESIGN SYSTEM
+   Doanh nghiệp có thể đổi toàn bộ palette qua các biến này
+   ═══════════════════════════════════════════════════════════ */
+        :root {
+            --heritage-ink: #1a1613;
+            --heritage-son: #8b2e2e;
+            --heritage-son-dark: #6e2323;
+            --heritage-bronze: #b8860b;
+            --heritage-paper: #f5efe6;
+            --heritage-stone: #6b6258;
+            --heritage-jade: #2f5d50;
+            --heritage-line: #d9cfbe;
+            --heritage-muted: #8a7d6d;
+
+            --ink-100: var(--heritage-ink);
+            --ink-70: rgba(26, 22, 19, .7);
+            --ink-50: rgba(26, 22, 19, .5);
+            --ink-30: rgba(26, 22, 19, .3);
+            --ink-10: rgba(26, 22, 19, .08);
+
+            --shadow-sm: 0 1px 2px rgba(26, 22, 19, .06);
+            --shadow-md: 0 4px 16px rgba(26, 22, 19, .08);
+            --shadow-lg: 0 12px 40px rgba(26, 22, 19, .12);
+
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 16px;
+            --radius-full: 999px;
+
+            --container: 1200px;
+            --font-sans: 'Be Vietnam Pro', system-ui, sans-serif;
+            --font-serif: 'Lora', Georgia, serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--heritage-ink);
+            background: var(--heritage-paper);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        img {
+            max-width: 100%;
+            display: block;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .container {
+            max-width: var(--container);
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .serif {
+            font-family: var(--font-serif);
+        }
+
+        /* ═══ Buttons ═══ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 14px;
+            transition: all .2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--heritage-son);
+            color: #fff;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            background: var(--heritage-son-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--heritage-ink);
+            border: 1.5px solid var(--ink-30);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--heritage-son);
+            color: var(--heritage-son);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--ink-70);
+        }
+
+        .btn-ghost:hover {
+            color: var(--heritage-son);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* ═══ Section ═══ */
+        .section {
+            padding: 96px 0;
+        }
+
+        .section-sm {
+            padding: 64px 0;
+        }
+
+        .section-head {
+            margin-bottom: 48px;
+            max-width: 720px;
+        }
+
+        .section-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--heritage-son);
+            margin-bottom: 16px;
+        }
+
+        .section-eyebrow::before {
+            content: '';
+            width: 32px;
+            height: 1.5px;
+            background: var(--heritage-son);
+        }
+
+        .section-title {
+            font-family: var(--font-serif);
+            font-size: clamp(28px, 4vw, 44px);
+            font-weight: 600;
+            line-height: 1.15;
+            letter-spacing: -.02em;
+        }
+
+        .section-sub {
+            font-size: 16px;
+            color: var(--ink-70);
+            margin-top: 16px;
+        }
+
+        /* ═══ TOP BAR ═══ */
+        .topbar {
+            background: var(--heritage-ink);
+            color: rgba(245, 239, 230, .7);
+            font-size: 12px;
+            padding: 8px 0;
+        }
+
+        .topbar-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .topbar a:hover {
+            color: var(--heritage-bronze);
+        }
+
+        .topbar-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .topbar-hotline strong {
+            color: var(--heritage-bronze);
+        }
+
+        /* ═══ HEADER ═══ */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(245, 239, 230, .92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--heritage-line);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+            gap: 32px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-mark {
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--heritage-son), var(--heritage-son-dark));
+            color: #fff;
+            border-radius: 50%;
+            font-family: var(--font-serif);
+            font-weight: 600;
+            font-size: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .logo-text {
+            line-height: 1.1;
+        }
+
+        .logo-text strong {
+            display: block;
+            font-family: var(--font-serif);
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -.01em;
+        }
+
+        .logo-text span {
+            font-size: 10px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--heritage-muted);
+        }
+
+        .nav {
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav a {
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--ink-70);
+            transition: all .15s;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            color: var(--heritage-son);
+            background: var(--ink-10);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--ink-70);
+            transition: all .15s;
+        }
+
+        .icon-btn:hover {
+            background: var(--ink-10);
+            color: var(--heritage-son);
+        }
+
+        .menu-toggle {
+            display: none;
+        }
+
+        /* ═══ HERO ═══ */
+        .hero {
+            position: relative;
+            min-height: 640px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            background: var(--heritage-ink);
+            color: #fff;
+        }
+
+        .hero-slides {
+            position: absolute;
+            inset: 0;
+        }
+
+        .hero-slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+
+        .hero-slide.active {
+            opacity: 1;
+        }
+
+        .hero-slide::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(26, 22, 19, .85) 0%, rgba(26, 22, 19, .5) 50%, rgba(26, 22, 19, .2) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 640px;
+            padding: 80px 0;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 14px;
+            background: rgba(184, 134, 11, .15);
+            border: 1px solid rgba(184, 134, 11, .35);
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--heritage-bronze);
+            margin-bottom: 24px;
+        }
+
+        .hero-eyebrow .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--heritage-bronze);
+            box-shadow: 0 0 0 4px rgba(184, 134, 11, .2);
+        }
+
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(36px, 6vw, 64px);
+            font-weight: 600;
+            line-height: 1.08;
+            letter-spacing: -.025em;
+            margin-bottom: 20px;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--heritage-bronze);
+        }
+
+        .hero-desc {
+            font-size: 17px;
+            color: rgba(245, 239, 230, .8);
+            max-width: 520px;
+            margin-bottom: 32px;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero-outline {
+            border: 1.5px solid rgba(255, 255, 255, .35);
+            color: #fff;
+        }
+
+        .btn-hero-outline:hover {
+            background: rgba(255, 255, 255, .1);
+            border-color: #fff;
+        }
+
+        .hero-stats {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            background: rgba(26, 22, 19, .6);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .hero-stats-inner {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            max-width: var(--container);
+            margin: 0 auto;
+        }
+
+        .stat {
+            padding: 20px 24px;
+            border-right: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .stat:last-child {
+            border-right: none;
+        }
+
+        .stat-value {
+            font-family: var(--font-serif);
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--heritage-bronze);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: rgba(245, 239, 230, .65);
+            letter-spacing: .05em;
+            margin-top: 4px;
+        }
+
+        .hero-dots {
+            position: absolute;
+            bottom: 120px;
+            right: 48px;
+            z-index: 3;
+            display: flex;
+            gap: 8px;
+        }
+
+        .hero-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .35);
+            transition: all .3s;
+        }
+
+        .hero-dot.active {
+            background: var(--heritage-bronze);
+            width: 32px;
+            border-radius: 5px;
+        }
+
+        /* ═══ INTRO / ABOUT ═══ */
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+
+        .intro-images {
+            position: relative;
+        }
+
+        .intro-img-main {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .intro-img-float {
+            position: absolute;
+            bottom: -32px;
+            right: -32px;
+            width: 55%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: var(--radius-lg);
+            border: 6px solid var(--heritage-paper);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .intro-badge {
+            position: absolute;
+            top: 24px;
+            left: -20px;
+            padding: 14px 20px;
+            background: var(--heritage-son);
+            color: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            max-width: 200px;
+        }
+
+        .intro-badge strong {
+            display: block;
+            font-family: var(--font-serif);
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .intro-badge span {
+            font-size: 11px;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            opacity: .9;
+        }
+
+        .intro-features {
+            display: grid;
+            gap: 20px;
+            margin-top: 32px;
+        }
+
+        .intro-feature {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid var(--heritage-line);
+            border-radius: var(--radius-md);
+            transition: all .2s;
+        }
+
+        .intro-feature:hover {
+            border-color: var(--heritage-son);
+            transform: translateX(4px);
+        }
+
+        .feature-icon {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            background: rgba(139, 46, 46, .08);
+            color: var(--heritage-son);
+            border-radius: var(--radius-sm);
+        }
+
+        .feature-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .intro-feature h4 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .intro-feature p {
+            font-size: 13px;
+            color: var(--ink-70);
+            line-height: 1.5;
+        }
+
+        /* ═══ HIGHLIGHTS ═══ */
+        .highlights {
+            background: #fff;
+        }
+
+        .highlight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+        }
+
+        .highlight-card {
+            position: relative;
+            aspect-ratio: 3/4;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+        }
+
+        .highlight-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .6s ease;
+        }
+
+        .highlight-card:hover img {
+            transform: scale(1.06);
+        }
+
+        .highlight-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(26, 22, 19, .9) 100%);
+        }
+
+        .highlight-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 24px;
+            z-index: 2;
+            color: #fff;
+        }
+
+        .highlight-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(184, 134, 11, .9);
+            color: #fff;
+            border-radius: var(--radius-full);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .highlight-body h3 {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .highlight-body p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .75);
+        }
+
+        /* ═══ 360 TOUR MODULE ═══ */
+        .tour-module {
+            background: var(--heritage-ink);
+            color: #fff;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
+            min-height: 520px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tour-info {
+            padding: 56px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--heritage-son-dark), var(--heritage-ink));
+        }
+
+        .tour-info .section-eyebrow {
+            color: var(--heritage-bronze);
+        }
+
+        .tour-info .section-eyebrow::before {
+            background: var(--heritage-bronze);
+        }
+
+        .tour-info h2 {
+            font-family: var(--font-serif);
+            font-size: 36px;
+            font-weight: 600;
+            line-height: 1.15;
+            letter-spacing: -.02em;
+            margin-bottom: 16px;
+        }
+
+        .tour-info p {
+            color: rgba(245, 239, 230, .75);
+            margin-bottom: 28px;
+        }
+
+        .tour-scenes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+
+        .tour-scene {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all .2s;
+            color: rgba(255, 255, 255, .85);
+            font-size: 13px;
+            font-weight: 500;
+            text-align: left;
+            width: 100%;
+        }
+
+        .tour-scene:hover {
+            background: rgba(255, 255, 255, .1);
+            border-color: var(--heritage-bronze);
+        }
+
+        .tour-scene.active {
+            background: rgba(184, 134, 11, .15);
+            border-color: var(--heritage-bronze);
+            color: #fff;
+        }
+
+        .tour-scene-num {
+            width: 26px;
+            height: 26px;
+            display: grid;
+            place-items: center;
+            background: var(--heritage-bronze);
+            color: var(--heritage-ink);
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .tour-viewer {
+            position: relative;
+            background: #000;
+            min-height: 420px;
+        }
+
+        .tour-viewer-img {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: opacity .5s;
+        }
+
+        .tour-viewer-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, .7) 100%);
+        }
+
+        .tour-viewer-label {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            right: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px;
+        }
+
+        .tour-viewer-label h4 {
+            font-family: var(--font-serif);
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .tour-viewer-label p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, .7);
+        }
+
+        .tour-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            padding: 8px 14px;
+            background: rgba(0, 0, 0, .6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--heritage-bronze);
+        }
+
+        .tour-hotspot {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--heritage-bronze);
+            box-shadow: 0 0 0 6px rgba(184, 134, 11, .25), 0 0 20px rgba(184, 134, 11, .5);
+            cursor: pointer;
+            transition: transform .2s;
+        }
+
+        .tour-hotspot:hover {
+            transform: scale(1.3);
+        }
+
+        .tour-hotspot::before {
+            content: '';
+            position: absolute;
+            inset: -12px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(184, 134, 11, .5);
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(.8);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        /* ═══ EVENTS ═══ */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .event-card {
+            background: #fff;
+            border: 1px solid var(--heritage-line);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: all .25s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--heritage-son);
+        }
+
+        .event-img {
+            aspect-ratio: 16/10;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .5s;
+        }
+
+        .event-card:hover .event-img img {
+            transform: scale(1.05);
+        }
+
+        .event-date {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: var(--heritage-son);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            line-height: 1;
+        }
+
+        .event-date strong {
+            display: block;
+            font-size: 22px;
+            font-family: var(--font-serif);
+        }
+
+        .event-date span {
+            font-size: 10px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            opacity: .9;
+        }
+
+        .event-body {
+            padding: 24px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-cat {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--heritage-bronze);
+            margin-bottom: 8px;
+        }
+
+        .event-body h3 {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .event-body p {
+            font-size: 13px;
+            color: var(--ink-70);
+            margin-bottom: 16px;
+            flex: 1;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--ink-50);
+            padding-top: 16px;
+            border-top: 1px solid var(--heritage-line);
+            margin-top: auto;
+        }
+
+        .event-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ═══ TICKETS ═══ */
+        .tickets {
+            background: linear-gradient(180deg, var(--heritage-paper) 0%, #ece4d6 100%);
+            border-top: 1px solid var(--heritage-line);
+            border-bottom: 1px solid var(--heritage-line);
+        }
+
+        .tickets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .ticket {
+            background: #fff;
+            border: 1px solid var(--heritage-line);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: all .25s;
+        }
+
+        .ticket:hover {
+            border-color: var(--heritage-son);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+        }
+
+        .ticket.featured {
+            border-color: var(--heritage-son);
+            border-width: 2px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .ticket.featured::before {
+            content: 'Phổ biến nhất';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--heritage-son);
+            color: #fff;
+            padding: 5px 16px;
+            border-radius: var(--radius-full);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .ticket-name {
+            font-family: var(--font-serif);
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .ticket-desc {
+            font-size: 13px;
+            color: var(--ink-70);
+            margin-bottom: 20px;
+        }
+
+        .ticket-price {
+            font-family: var(--font-serif);
+            font-size: 40px;
+            font-weight: 600;
+            color: var(--heritage-son);
+            line-height: 1;
+            margin-bottom: 24px;
+        }
+
+        .ticket-price span {
+            font-size: 14px;
+            color: var(--ink-50);
+            font-family: var(--font-sans);
+            font-weight: 500;
+        }
+
+        .ticket-features {
+            list-style: none;
+            margin-bottom: 28px;
+            flex: 1;
+            display: grid;
+            gap: 10px;
+        }
+
+        .ticket-features li {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            font-size: 13px;
+            color: var(--ink-70);
+        }
+
+        .ticket-features svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            color: var(--heritage-jade);
+            margin-top: 1px;
+        }
+
+        .ticket .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ═══ NEWS ═══ */
+        .news-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 32px;
+        }
+
+        .news-feature {
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: #fff;
+            border: 1px solid var(--heritage-line);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .news-feature-img {
+            aspect-ratio: 16/9;
+            overflow: hidden;
+        }
+
+        .news-feature-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .5s;
+        }
+
+        .news-feature:hover .news-feature-img img {
+            transform: scale(1.04);
+        }
+
+        .news-feature-body {
+            padding: 32px;
+        }
+
+        .news-feature-body h3 {
+            font-family: var(--font-serif);
+            font-size: 26px;
+            font-weight: 600;
+            line-height: 1.25;
+            margin: 12px 0 12px;
+        }
+
+        .news-feature-body p {
+            font-size: 14px;
+            color: var(--ink-70);
+            line-height: 1.6;
+        }
+
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .news-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid var(--heritage-line);
+            border-radius: var(--radius-md);
+            transition: all .2s;
+        }
+
+        .news-item:hover {
+            border-color: var(--heritage-son);
+            transform: translateX(4px);
+        }
+
+        .news-item img {
+            width: 96px;
+            height: 96px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            flex-shrink: 0;
+        }
+
+        .news-item h4 {
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin: 6px 0 6px;
+        }
+
+        .news-item p {
+            font-size: 12px;
+            color: var(--ink-50);
+        }
+
+        .news-item .event-cat {
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        /* ═══ PARTNERS ═══ */
+        .partners {
+            background: #fff;
+            border-top: 1px solid var(--heritage-line);
+            border-bottom: 1px solid var(--heritage-line);
+            padding: 40px 0;
+        }
+
+        .partners-label {
+            text-align: center;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--ink-30);
+            margin-bottom: 24px;
+        }
+
+        .partners-logos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 48px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .partner-logo {
+            font-family: var(--font-serif);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--ink-30);
+            opacity: .6;
+            transition: all .2s;
+            white-space: nowrap;
+        }
+
+        .partner-logo:hover {
+            opacity: 1;
+            color: var(--heritage-stone);
+        }
+
+        /* ═══ FOOTER ═══ */
+        .footer {
+            background: var(--heritage-ink);
+            color: rgba(245, 239, 230, .7);
+            padding: 64px 0 24px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+            gap: 48px;
+            padding-bottom: 48px;
+            border-bottom: 1px solid rgba(255, 255, 255, .1);
+        }
+
+        .footer h5 {
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .footer-logo .logo-mark {
+            background: linear-gradient(135deg, var(--heritage-son), var(--heritage-son-dark));
+        }
+
+        .footer-logo strong {
+            color: #fff;
+            font-family: var(--font-serif);
+            font-size: 18px;
+        }
+
+        .footer-desc {
+            font-size: 13px;
+            line-height: 1.7;
+            max-width: 320px;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            transition: color .15s;
+        }
+
+        .footer-links a:hover {
+            color: var(--heritage-bronze);
+        }
+
+        .footer-contact {
+            display: grid;
+            gap: 12px;
+            font-size: 13px;
+        }
+
+        .footer-contact div {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .footer-contact svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            margin-top: 3px;
+            color: var(--heritage-bronze);
+        }
+
+        .newsletter {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .newsletter input {
+            flex: 1;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .15);
+            border-radius: var(--radius-md);
+            color: #fff;
+            font-size: 13px;
+            font-family: inherit;
+        }
+
+        .newsletter input::placeholder {
+            color: rgba(255, 255, 255, .4);
+        }
+
+        .newsletter input:focus {
+            outline: none;
+            border-color: var(--heritage-bronze);
+        }
+
+        .newsletter button {
+            padding: 10px 16px;
+            background: var(--heritage-son);
+            color: #fff;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 13px;
+            transition: background .2s;
+        }
+
+        .newsletter button:hover {
+            background: var(--heritage-son-dark);
+        }
+
+        .footer-bottom {
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 12px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 8px;
+        }
+
+        .footer-social a {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, .05);
+            border-radius: 50%;
+            transition: all .2s;
+        }
+
+        .footer-social a:hover {
+            background: var(--heritage-son);
+            color: #fff;
+        }
+
+        /* ═══ ADMIN TOGGLE (demo) ═══ */
+        .admin-panel {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 200;
+            background: #fff;
+            color: var(--heritage-ink);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--heritage-line);
+            padding: 16px;
+            min-width: 260px;
+            font-size: 12px;
+            transform: translateY(calc(100% + 32px));
+            transition: transform .3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .admin-panel.open {
+            transform: translateY(0);
+        }
+
+        .admin-panel h6 {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--heritage-muted);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-panel label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .admin-panel input[type="checkbox"] {
+            accent-color: var(--heritage-son);
+        }
+
+        .admin-trigger {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 201;
+            padding: 10px 16px;
+            background: var(--heritage-ink);
+            color: #fff;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-trigger:hover {
+            background: var(--heritage-son);
+        }
+
+        .admin-panel.open~.admin-trigger {
+            display: none;
+        }
+
+        /* ═══ RESPONSIVE ═══ */
+        @media (max-width: 1024px) {
+            .intro-grid {
+                grid-template-columns: 1fr;
+                gap: 80px;
+            }
+
+            .tour-module {
+                grid-template-columns: 1fr;
+            }
+
+            .tour-info {
+                padding: 40px 32px;
+            }
+
+            .news-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 32px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section {
+                padding: 64px 0;
+            }
+
+            .nav {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: grid;
+            }
+
+            .topbar-links {
+                display: none;
+            }
+
+            .topbar-hotline {
+                font-size: 11px;
+            }
+
+            .hero {
+                min-height: 560px;
+            }
+
+            .hero-stats-inner {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat {
+                border-bottom: 1px solid rgba(255, 255, 255, .1);
+            }
+
+            .stat:nth-child(2) {
+                border-right: none;
+            }
+
+            .hero-dots {
+                bottom: 200px;
+                right: 24px;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════
+     ADMIN PANEL (Demo tùy chỉnh module)
+     ═══════════════════════════════════════════════ -->
+    <div class="admin-panel" id="adminPanel">
+        <h6>
+            <span>⚙️ Tùy chỉnh website</span>
+            <button onclick="document.getElementById('adminPanel').classList.remove('open')"
+                style="color:var(--ink-50);font-size:16px;">×</button>
+        </h6>
+        <p style="color:var(--ink-50);margin-bottom:12px;line-height:1.5;">Bật/tắt các module hiển thị trên trang. Đây
+            là demo cho tính năng admin — trong thực tế sẽ lưu vào DB.</p>
+        <label><input type="checkbox" data-module="intro" checked> Giới thiệu di tích</label>
+        <label><input type="checkbox" data-module="highlights" checked> Điểm tham quan</label>
+        <label><input type="checkbox" data-module="tour" checked> Tour 360°</label>
+        <label><input type="checkbox" data-module="events" checked> Sự kiện & Lễ hội</label>
+        <label><input type="checkbox" data-module="tickets" checked> Bán vé</label>
+        <label><input type="checkbox" data-module="news" checked> Tin tức</label>
+        <label><input type="checkbox" data-module="partners" checked> Đối tác</label>
+    </div>
+    <button class="admin-trigger" onclick="document.getElementById('adminPanel').classList.toggle('open')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3" />
+            <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+        Admin
+    </button>
+
+    <!-- ═══ TOP BAR ═══ -->
+    <div class="topbar">
+        <div class="container topbar-inner">
+            <div class="topbar-hotline">
+                ☎ Hotline đặt vé: <strong>1900 1234</strong> · Giờ mở cửa: 07:30 – 18:00
+            </div>
+            <div class="topbar-links">
+                <a href="#">Tin tức</a>
+                <a href="#">Tuyển dụng</a>
+                <a href="#">Liên hệ</a>
+                <a href="#">🇻🇳 VI</a>
+                <a href="#">Đăng nhập</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ HEADER ═══ -->
+    <header class="header">
+        <div class="container header-inner">
+            <a href="#" class="logo">
+                <div class="logo-mark">C</div>
+                <div class="logo-text">
+                    <strong>Cổ Thành</strong>
+                    <span>Di tích lịch sử quốc gia</span>
+                </div>
+            </a>
+            <nav class="nav">
+                <a href="#" class="active">Trang chủ</a>
+                <a href="#intro">Giới thiệu</a>
+                <a href="#highlights">Điểm tham quan</a>
+                <a href="#tour">Tour 360°</a>
+                <a href="#events">Sự kiện</a>
+                <a href="#tickets">Vé</a>
+                <a href="#news">Tin tức</a>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn" aria-label="Tìm kiếm">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="m21 21-4.3-4.3" />
+                    </svg>
+                </button>
+                <button class="icon-btn" aria-label="Giỏ hàng">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1" />
+                        <circle cx="20" cy="21" r="1" />
+                        <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" />
+                    </svg>
+                </button>
+                <a href="#tickets" class="btn btn-primary btn-sm">Đặt vé ngay</a>
+                <button class="icon-btn menu-toggle" aria-label="Menu">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="4" x2="20" y1="12" y2="12" />
+                        <line x1="4" x2="20" y1="6" y2="6" />
+                        <line x1="4" x2="20" y1="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══ HERO ═══ -->
+    <section class="hero">
+        <div class="hero-slides" id="heroSlides">
+            <div class="hero-slide active" style="background-image:url('https://picsum.photos/id/1039/1920/1080')">
+            </div>
+            <div class="hero-slide" style="background-image:url('https://picsum.photos/id/1043/1920/1080')"></div>
+            <div class="hero-slide" style="background-image:url('https://picsum.photos/id/1050/1920/1080')"></div>
+        </div>
+
+        <div class="container hero-content">
+            <div class="hero-eyebrow">
+                <span class="dot"></span>
+                Di tích quốc gia đặc biệt · Từ năm 1428
+            </div>
+            <h1 class="hero-title">
+                Nơi <em>lịch sử</em> vẫn còn<br>thì thầm cùng đá cổ
+            </h1>
+            <p class="hero-desc">
+                Khám phá quần thể di tích hơn 600 năm tuổi — nơi hội tụ giá trị văn hóa, kiến trúc và tâm linh của dân
+                tộc. Trải nghiệm tour 360°, sự kiện lễ hội và đặt vé trực tuyến ngay hôm nay.
+            </p>
+            <div class="hero-ctas">
+                <a href="#tour" class="btn btn-primary">
+                    Khám phá tour 360°
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="#tickets" class="btn btn-hero-outline">Đặt vé tham quan</a>
+            </div>
+        </div>
+
+        <div class="hero-dots" id="heroDots">
+            <button class="hero-dot active" data-slide="0"></button>
+            <button class="hero-dot" data-slide="1"></button>
+            <button class="hero-dot" data-slide="2"></button>
+        </div>
+
+        <div class="hero-stats">
+            <div class="hero-stats-inner">
+                <div class="stat">
+                    <div class="stat-value">600+</div>
+                    <div class="stat-label">Năm lịch sử</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">42</div>
+                    <div class="stat-label">Di tích thành phần</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">1.2M</div>
+                    <div class="stat-label">Khách/năm</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">4.9★</div>
+                    <div class="stat-label">Đánh giá du khách</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ INTRO MODULE ═══ -->
+    <section class="section" id="intro" data-module="intro">
+        <div class="container">
+            <div class="intro-grid">
+                <div class="intro-images">
+                    <img class="intro-img-main" src="https://picsum.photos/id/1036/800/1000" alt="Di tích cổ thành">
+                    <img class="intro-img-float" src="https://picsum.photos/id/1048/600/600" alt="Chi tiết kiến trúc">
+                    <div class="intro-badge">
+                        <strong>1428</strong>
+                        <span>Khởi dựng</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="section-eyebrow">Giới thiệu</div>
+                    <h2 class="section-title">Hành trình 6 thế kỷ gìn giữ hồn dân tộc</h2>
+                    <p class="section-sub">
+                        Cổ Thành được xây dựng từ thời Lê sơ, trải qua bao thăng trầm lịch sử vẫn giữ được nét uy nghiêm
+                        cổ kính. Nơi đây không chỉ là chứng nhân lịch sử mà còn là không gian văn hóa sống động, kết nối
+                        quá khứ với hiện tại.
+                    </p>
+                    <div class="intro-features">
+                        <div class="intro-feature">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 21h18" />
+                                    <path d="M5 21V7l8-4v18" />
+                                    <path d="M19 21V11l-6-4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4>Kiến trúc độc đáo</h4>
+                                <p>Quần thể thành quách, đền đài mang đậm dấu ấn kiến trúc cung đình thế kỷ XV.</p>
+                            </div>
+                        </div>
+                        <div class="intro-feature">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v20" />
+                                    <path d="M5 12h14" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4>Không gian tâm linh</h4>
+                                <p>Nơi thờ tự linh thiêng, thu hút hàng nghìn du khách hành hương mỗi năm.</p>
+                            </div>
+                        </div>
+                        <div class="intro-feature">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <path d="m9 12 2 2 4-4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4>Di sản được UNESCO vinh danh</h4>
+                                <p>Được công nhận là Di tích quốc gia đặc biệt và đề cử Di sản văn hóa thế giới.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="btn btn-outline" style="margin-top:32px;">
+                        Tìm hiểu thêm
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M5 12h14" />
+                            <path d="m12 5 7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ HIGHLIGHTS MODULE ═══ -->
+    <section class="section highlights" id="highlights" data-module="highlights">
+        <div class="container">
+            <div class="section-head" style="text-align:center;margin-left:auto;margin-right:auto;">
+                <div class="section-eyebrow" style="justify-content:center;">Điểm tham quan</div>
+                <h2 class="section-title">Những nơi không thể bỏ lỡ</h2>
+                <p class="section-sub">Mỗi công trình là một câu chuyện lịch sử, một tác phẩm nghệ thuật kiến trúc độc
+                    đáo.</p>
+            </div>
+
+            <div class="highlight-grid">
+                <div class="highlight-card">
+                    <img src="https://picsum.photos/id/1040/600/800" alt="Cổng thành">
+                    <div class="highlight-body">
+                        <span class="highlight-tag">Di tích chính</span>
+                        <h3>Cổng Thành Cổ</h3>
+                        <p>Biểu tượng uy nghi với 3 cửa vòm, được xây từ đá ong và gạch nung thế kỷ XV.</p>
+                    </div>
+                </div>
+                <div class="highlight-card">
+                    <img src="https://picsum.photos/id/1055/600/800" alt="Đền thờ">
+                    <div class="highlight-body">
+                        <span class="highlight-tag">Tâm linh</span>
+                        <h3>Đền Thờ Thành Hoàng</h3>
+                        <p>Nơi thờ vị thần bảo hộ, kiến trúc gỗ chạm khắc tinh xảo còn nguyên vẹn.</p>
+                    </div>
+                </div>
+                <div class="highlight-card">
+                    <img src="https://picsum.photos/id/1062/600/800" alt="Hồ sen">
+                    <div class="highlight-body">
+                        <span class="highlight-tag">Cảnh quan</span>
+                        <h3>Hồ Sen Cổ</h3>
+                        <p>Hồ nước tự nhiên rộng 2ha, nổi tiếng với sen hồng nở rộ tháng 6 âm lịch.</p>
+                    </div>
+                </div>
+                <div class="highlight-card">
+                    <img src="https://picsum.photos/id/1067/600/800" alt="Bảo tàng">
+                    <div class="highlight-body">
+                        <span class="highlight-tag">Bảo tàng</span>
+                        <h3>Nhà Trưng Bày Cổ Vật</h3>
+                        <p>Hơn 500 hiện vật quý: gốm sứ, vũ khí, sắc phong qua các triều đại.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ TOUR 360 MODULE ═══ -->
+    <section class="section" id="tour" data-module="tour">
+        <div class="container">
+            <div class="tour-module">
+                <div class="tour-info">
+                    <div class="section-eyebrow">Trải nghiệm số</div>
+                    <h2>Tour 360°<br>Tham quan ảo</h2>
+                    <p>Dạo bước qua từng góc di tích ngay tại nhà. Chọn một địa điểm để bắt đầu hành trình khám phá.</p>
+
+                    <div class="tour-scenes">
+                        <button class="tour-scene active" data-scene="0">
+                            <span class="tour-scene-num">1</span>
+                            <span>Cổng Thành Cổ</span>
+                        </button>
+                        <button class="tour-scene" data-scene="1">
+                            <span class="tour-scene-num">2</span>
+                            <span>Sân Điện Chính</span>
+                        </button>
+                        <button class="tour-scene" data-scene="2">
+                            <span class="tour-scene-num">3</span>
+                            <span>Hồ Sen Cổ</span>
+                        </button>
+                        <button class="tour-scene" data-scene="3">
+                            <span class="tour-scene-num">4</span>
+                            <span>Nhà Trưng Bày</span>
+                        </button>
+                    </div>
+
+                    <a href="#" class="btn btn-primary" style="align-self:flex-start;">
+                        Mở toàn màn hình
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M15 3h6v6" />
+                            <path d="M9 21H3v-6" />
+                            <path d="M21 3l-7 7" />
+                            <path d="M3 21l7-7" />
+                        </svg>
+                    </a>
+                </div>
+
+                <div class="tour-viewer" id="tourViewer">
+                    <div class="tour-viewer-img" id="tourImg"
+                        style="background-image:url('https://picsum.photos/id/1040/1600/900')"></div>
+                    <div class="tour-viewer-overlay"></div>
+                    <div class="tour-badge">● Panorama 360°</div>
+
+                    <div class="tour-hotspot" style="top:35%;left:28%;" data-hotspot="Cổng phụ phía Đông"></div>
+                    <div class="tour-hotspot" style="top:55%;left:72%;" data-hotspot="Bia đá cổ"></div>
+                    <div class="tour-hotspot" style="top:70%;left:45%;" data-hotspot="Lối vào chính điện"></div>
+
+                    <div class="tour-viewer-label">
+                        <div>
+                            <h4 id="tourLabel">Cổng Thành Cổ</h4>
+                            <p id="tourDesc">Cửa chính dẫn vào khu di tích, xây dựng năm 1428</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ EVENTS MODULE ═══ -->
+    <section class="section" id="events" data-module="events" style="background:#fff;">
+        <div class="container">
+            <div class="section-head"
+                style="display:flex;justify-content:space-between;align-items:flex-end;max-width:none;">
+                <div>
+                    <div class="section-eyebrow">Sự kiện & Lễ hội</div>
+                    <h2 class="section-title">Lịch sự kiện sắp diễn ra</h2>
+                </div>
+                <a href="#" class="btn btn-ghost">
+                    Xem tất cả
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="events-grid">
+                <article class="event-card">
+                    <div class="event-img">
+                        <img src="https://picsum.photos/id/1074/600/400" alt="Lễ hội">
+                        <div class="event-date"><strong>15</strong><span>Tháng 3</span></div>
+                    </div>
+                    <div class="event-body">
+                        <div class="event-cat">Lễ hội truyền thống</div>
+                        <h3>Lễ hội Đền Thành Hoàng</h3>
+                        <p>Nghi lễ rước kiệu, múa lân và các hoạt động văn hóa dân gian đặc sắc.</p>
+                        <div class="event-meta">
+                            <span>🕐 08:00 – 22:00</span>
+                            <span>📍 Sân Điện Chính</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="event-card">
+                    <div class="event-img">
+                        <img src="https://picsum.photos/id/1080/600/400" alt="Triển lãm">
+                        <div class="event-date"><strong>02</strong><span>Tháng 4</span></div>
+                    </div>
+                    <div class="event-body">
+                        <div class="event-cat">Triển lãm</div>
+                        <h3>Cổ Vật Qua Các Triều Đại</h3>
+                        <p>Trưng bày hơn 200 hiện vật quý lần đầu tiên ra mắt công chúng.</p>
+                        <div class="event-meta">
+                            <span>🕐 09:00 – 17:00</span>
+                            <span>📍 Nhà Trưng Bày</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="event-card">
+                    <div class="event-img">
+                        <img src="https://picsum.photos/id/1084/600/400" alt="Đêm thơ">
+                        <div class="event-date"><strong>20</strong><span>Tháng 4</span></div>
+                    </div>
+                    <div class="event-body">
+                        <div class="event-cat">Nghệ thuật</div>
+                        <h3>Đêm Thơ Cổ Thành</h3>
+                        <p>Đêm diễn nghệ thuật kết hợp thơ ca, nhạc cụ truyền thống và ánh sáng 3D mapping.</p>
+                        <div class="event-meta">
+                            <span>🕐 19:30 – 22:00</span>
+                            <span>📍 Hồ Sen Cổ</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ TICKETS MODULE ═══ -->
+    <section class="section tickets" id="tickets" data-module="tickets">
+        <div class="container">
+            <div class="section-head" style="text-align:center;margin-left:auto;margin-right:auto;">
+                <div class="section-eyebrow" style="justify-content:center;">Bán vé trực tuyến</div>
+                <h2 class="section-title">Chọn gói phù hợp với bạn</h2>
+                <p class="section-sub">Đặt vé online, nhận mã QR qua email, không cần xếp hàng tại quầy.</p>
+            </div>
+
+            <div class="tickets-grid">
+                <div class="ticket">
+                    <div class="ticket-name">Vé Tiêu Chuẩn</div>
+                    <div class="ticket-desc">Phù hợp khách lẻ, tham quan tự do</div>
+                    <div class="ticket-price">80.000<span>đ / người</span></div>
+                    <ul class="ticket-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Vào cổng tất cả khu vực</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Bản đồ giấy miễn phí</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Thời gian: 2 giờ</li>
+                    </ul>
+                    <button class="btn btn-outline">Chọn gói này</button>
+                </div>
+
+                <div class="ticket featured">
+                    <div class="ticket-name">Combo Trải Nghiệm</div>
+                    <div class="ticket-desc">Được chọn nhiều nhất — tiết kiệm 30%</div>
+                    <div class="ticket-price">180.000<span>đ / người</span></div>
+                    <ul class="ticket-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Vé vào cổng + HDV</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Tham quan Nhà Trưng Bày</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Trải nghiệm tour 360°</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Đồ uống chào mừng</li>
+                    </ul>
+                    <button class="btn btn-primary">Đặt ngay</button>
+                </div>
+
+                <div class="ticket">
+                    <div class="ticket-name">Gói Gia Đình</div>
+                    <div class="ticket-desc">Dành cho 2 người lớn + 2 trẻ em</div>
+                    <div class="ticket-price">420.000<span>đ / gói</span></div>
+                    <ul class="ticket-features">
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Vé vào cổng cả gia đình</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Hoạt động trải nghiệm trẻ em</li>
+                        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M20 6 9 17l-5-5" />
+                            </svg>Ảnh kỷ niệm miễn phí</li>
+                    </ul>
+                    <button class="btn btn-outline">Chọn gói này</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ NEWS MODULE ═══ -->
+    <section class="section" id="news" data-module="news">
+        <div class="container">
+            <div class="section-head">
+                <div class="section-eyebrow">Tin tức & Bài viết</div>
+                <h2 class="section-title">Câu chuyện từ Cổ Thành</h2>
+            </div>
+
+            <div class="news-grid">
+                <article class="news-feature">
+                    <div class="news-feature-img">
+                        <img src="https://picsum.photos/id/1090/800/450" alt="Tin nổi bật">
+                    </div>
+                    <div class="news-feature-body">
+                        <div class="event-cat">Khảo cổ học</div>
+                        <h3>Phát hiện tầng văn hóa mới tại khu vực Đông Thành</h3>
+                        <p>Các nhà khảo cổ vừa công bố phát hiện dấu tích kiến trúc thế kỷ XIV, mở ra nhiều giả thuyết
+                            mới về lịch sử hình thành khu di tích.</p>
+                    </div>
+                </article>
+
+                <div class="news-list">
+                    <a href="#" class="news-item">
+                        <img src="https://picsum.photos/id/1093/200/200" alt="">
+                        <div>
+                            <div class="event-cat">Bảo tồn</div>
+                            <h4>Khởi công dự án tu bổ Đền Thành Hoàng giai đoạn 2</h4>
+                            <p>15 Tháng 3, 2026</p>
+                        </div>
+                    </a>
+                    <a href="#" class="news-item">
+                        <img src="https://picsum.photos/id/1097/200/200" alt="">
+                        <div>
+                            <div class="event-cat">Sự kiện</div>
+                            <h4>Đêm thơ Cổ Thành trở lại với chủ đề "Ngàn năm soi bóng"</h4>
+                            <p>10 Tháng 3, 2026</p>
+                        </div>
+                    </a>
+                    <a href="#" class="news-item">
+                        <img src="https://picsum.photos/id/1102/200/200" alt="">
+                        <div>
+                            <div class="event-cat">Giáo dục</div>
+                            <h4>Chương trình "Em yêu lịch sử" đón 5.000 học sinh</h4>
+                            <p>05 Tháng 3, 2026</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ PARTNERS MODULE ═══ -->
+    <section class="partners" data-module="partners">
+        <div class="container">
+            <div class="partners-label">Đơn vị đồng hành & Chứng nhận</div>
+            <div class="partners-logos">
+                <span class="partner-logo">UNESCO Việt Nam</span>
+                <span class="partner-logo">Bộ Văn hóa TT&DL</span>
+                <span class="partner-logo">Vietnam Airlines</span>
+                <span class="partner-logo">Vingroup</span>
+                <span class="partner-logo">Sun Group</span>
+                <span class="partner-logo">TripAdvisor</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">
+                        <div class="logo-mark">C</div>
+                        <strong>Cổ Thành</strong>
+                    </div>
+                    <p class="footer-desc">
+                        Khu di tích lịch sử quốc gia đặc biệt — nơi lưu giữ hồn cốt 600 năm của dân tộc. Chúng tôi cam
+                        kết bảo tồn, phát huy và mang di sản đến gần công chúng.
+                    </p>
+                    <div class="newsletter">
+                        <input type="email" placeholder="Email của bạn...">
+                        <button>Đăng ký</button>
+                    </div>
+                </div>
+
+                <div>
+                    <h5>Khám phá</h5>
+                    <ul class="footer-links">
+                        <li><a href="#intro">Giới thiệu</a></li>
+                        <li><a href="#highlights">Điểm tham quan</a></li>
+                        <li><a href="#tour">Tour 360°</a></li>
+                        <li><a href="#events">Sự kiện</a></li>
+                        <li><a href="#news">Tin tức</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5>Hỗ trợ</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Hướng dẫn đặt vé</a></li>
+                        <li><a href="#">Chính sách hoàn vé</a></li>
+                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a href="#">Liên hệ hợp tác</a></li>
+                        <li><a href="#">Tuyển dụng</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5>Liên hệ</h5>
+                    <div class="footer-contact">
+                        <div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            <span>Số 1, đường Di Tích, TP. Cổ Thành, Việt Nam</span>
+                        </div>
+                        <div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                            <span>1900 1234 (Hotline)</span>
+                        </div>
+                        <div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect width="20" height="16" x="2" y="4" rx="2" />
+                                <path d="m22 7-10 5L2 7" />
+                            </svg>
+                            <span>info@cothanh.vn</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>© 2026 Khu Di Tích Cổ Thành. Bảo lưu mọi quyền.</div>
+                <div class="footer-social">
+                    <a href="#" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.61 23.1 24 18.1 24 12.07z" />
+                        </svg></a>
+                    <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect width="20" height="20" x="2" y="2" rx="5" />
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                        </svg></a>
+                    <a href="#" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31.4 31.4 0 0 0 0 12a31.4 31.4 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31.4 31.4 0 0 0 24 12a31.4 31.4 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z" />
+                        </svg></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* ═══ HERO SLIDER ═══ */
+        (function () {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots = document.querySelectorAll('.hero-dot');
+            let current = 0, timer;
+
+            function goTo(i) {
+                slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+                dots.forEach((d, idx) => d.classList.toggle('active', idx === i));
+                current = i;
+            }
+            function next() { goTo((current + 1) % slides.length); }
+            function start() { timer = setInterval(next, 5500); }
+            function stop() { clearInterval(timer); }
+
+            dots.forEach(d => d.addEventListener('click', () => {
+                goTo(parseInt(d.dataset.slide));
+                stop(); start();
+            }));
+            start();
+        })();
+
+        /* ═══ TOUR 360 MODULE ═══ */
+        (function () {
+            const scenes = [
+                { label: 'Cổng Thành Cổ', desc: 'Cửa chính dẫn vào khu di tích, xây dựng năm 1428', img: 'https://picsum.photos/id/1040/1600/900' },
+                { label: 'Sân Điện Chính', desc: 'Nơi diễn ra các nghi lễ quan trọng thời Lê sơ', img: 'https://picsum.photos/id/1055/1600/900' },
+                { label: 'Hồ Sen Cổ', desc: 'Hồ nước tự nhiên rộng 2ha, sen nở rộ tháng 6 âm lịch', img: 'https://picsum.photos/id/1062/1600/900' },
+                { label: 'Nhà Trưng Bày', desc: 'Hơn 500 hiện vật quý qua các triều đại', img: 'https://picsum.photos/id/1067/1600/900' }
+            ];
+
+            const tourImg = document.getElementById('tourImg');
+            const tourLabel = document.getElementById('tourLabel');
+            const tourDesc = document.getElementById('tourDesc');
+            const sceneBtns = document.querySelectorAll('.tour-scene');
+
+            sceneBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.dataset.scene);
+                    const scene = scenes[idx];
+                    sceneBtns.forEach(b => b.classList.toggle('active', b === btn));
+                    tourImg.style.opacity = '0';
+                    setTimeout(() => {
+                        tourImg.style.backgroundImage = `url('${scene.img}')`;
+                        tourLabel.textContent = scene.label;
+                        tourDesc.textContent = scene.desc;
+                        tourImg.style.opacity = '1';
+                    }, 250);
+                });
+            });
+
+            // Hotspot click
+            document.querySelectorAll('.tour-hotspot').forEach(h => {
+                h.addEventListener('click', () => {
+                    alert('Điểm quan tâm: ' + h.dataset.hotspot);
+                });
+            });
+        })();
+
+        /* ═══ ADMIN MODULE TOGGLE ═══ */
+        (function () {
+            const checkboxes = document.querySelectorAll('.admin-panel input[data-module]');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const module = cb.dataset.module;
+                    const section = document.querySelector(`[data-module="${module}"]`);
+                    if (section) {
+                        section.style.display = cb.checked ? '' : 'none';
+                    }
+                });
+            });
+        })();
+    </script>
+
+</body>
+
+</html>

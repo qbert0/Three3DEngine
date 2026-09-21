@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
-import { Viewer, events } from '@photo-sphere-viewer/core';
+import { EquirectangularAdapter, Viewer, events } from '@photo-sphere-viewer/core';
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { PlaceScene } from '~/types/place';
 
@@ -23,41 +23,8 @@ const navMarkerHtml = (destTitle: string) => `
   <button
     class="nav-hotspot-btn"
     aria-label="Đến: ${destTitle}"
-    style="display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;position:relative;"
+    style="position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;padding:0;"
   >
-    <!-- Hover tooltip (destination name) -->
-    <span class="nav-hotspot-tooltip" style="
-      position: absolute;
-      bottom: calc(100% + 10px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(10,10,10,0.88);
-      color: #fff;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 5px 11px;
-      border-radius: 8px;
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.18s ease, transform 0.18s ease;
-      transform: translateX(-50%) translateY(4px);
-      border: 1px solid rgba(255,255,255,0.12);
-      backdrop-filter: blur(8px);
-      letter-spacing: 0.03em;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-    ">
-      ↑ ${destTitle}
-      <!-- Tooltip arrow -->
-      <span style="
-        position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);
-        width:0;height:0;
-        border-left:5px solid transparent;
-        border-right:5px solid transparent;
-        border-top:5px solid rgba(10,10,10,0.88);
-      "></span>
-    </span>
-
     <!-- Circle button -->
     <div style="
       width: 54px;
@@ -83,6 +50,10 @@ const navMarkerHtml = (destTitle: string) => `
 
     <!-- Label pill below -->
     <span style="
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 10px;
       font-weight: 700;
       color: #fff;
@@ -96,6 +67,7 @@ const navMarkerHtml = (destTitle: string) => `
       overflow: hidden;
       text-overflow: ellipsis;
       border: 1px solid rgba(255,255,255,0.1);
+      pointer-events: none;
     ">${destTitle}</span>
   </button>
 `;
@@ -106,7 +78,7 @@ const markersForScene = (scene: PlaceScene) =>
     data: { targetSceneId: h.targetSceneId },
     position: { yaw: h.yaw, pitch: h.pitch },
     html: navMarkerHtml(h.label),
-    anchor: 'bottom center',
+    anchor: 'center center',
     tooltip: undefined,
   }));
 
@@ -122,6 +94,7 @@ const initViewer = async () => {
     viewer = new Viewer({
       container: el,
       panorama: props.scene.panorama,
+      adapter: [EquirectangularAdapter, { useXmpData: false }],
       caption: props.scene.title,
       defaultYaw: props.scene.initialYaw,
       defaultPitch: props.scene.initialPitch,

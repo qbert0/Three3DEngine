@@ -1,4 +1,4 @@
-const places = [
+globalThis.__timing__.logStart('Load chunks/_/catalogService');const places = [
   {
     slug: "heritage-ridge",
     title: "Tour 360\xB0 Th\u1EF1c \u0110\u1ECBa",
@@ -462,5 +462,5 @@ const catalogService = {
   }
 };
 
-export { catalogService as c };
+export { catalogService as c };;globalThis.__timing__.logEnd('Load chunks/_/catalogService');
 //# sourceMappingURL=catalogService.mjs.map

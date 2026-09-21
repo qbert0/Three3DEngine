@@ -1,84 +1,143 @@
 <script setup lang="ts">
 import type { TourConfig, TourScene } from '~/types/tour';
 
-definePageMeta({ ssr: false });
+definePageMeta({ layout: 'editor', ssr: false });
 
 const route = useRoute();
-const slug = route.params.slug as string;
+const slug  = route.params.slug as string;
 
-const { data, refresh } = await useFetch<{ item: TourConfig }>(`/api/tours/${slug}`);
-const tour = computed(() => data.value?.item);
+const { data } = await useFetch<{ item: TourConfig }>(`/api/tours/${slug}`);
+const tour   = computed(() => data.value?.item);
 const scenes = computed<TourScene[]>(() => tour.value?.scenes ?? []);
+
+useHead({ title: computed(() => `${tour.value?.title ?? slug} — Admin · View360`) });
+
+// Marker type counts per scene
+const markerCount = (scene: TourScene, plugin?: string) =>
+  plugin
+    ? scene.markers?.filter(m => m.plugin === plugin).length ?? 0
+    : scene.markers?.length ?? 0;
 </script>
 
 <template>
-  <main class="min-h-screen bg-ink px-6 py-10 text-white">
-    <div class="mx-auto max-w-5xl">
-
-      <!-- Header -->
-      <div class="mb-8 flex items-end justify-between">
-        <div>
-          <NuxtLink to="/admin" class="text-xs text-white/40 hover:text-white/70">← Danh sách tour</NuxtLink>
-          <h1 class="mt-2 text-2xl font-bold">{{ tour?.title }}</h1>
-          <p class="text-sm text-white/40">{{ scenes.length }} cảnh · {{ tour?.location }}</p>
-        </div>
-        <NuxtLink
-          :to="`/${slug}`"
-          class="rounded-lg border border-white/15 px-4 py-2 text-sm text-white/60 hover:text-white transition"
-        >
-          Xem tour →
-        </NuxtLink>
-      </div>
-
-      <!-- Scene list -->
-      <div class="space-y-3">
-        <div
-          v-for="(scene, index) in scenes"
-          :key="scene.id"
-          class="group flex items-center gap-4 rounded-xl border border-white/10 bg-white/5 p-4 hover:border-river/40 transition-all"
-        >
-          <!-- Index -->
-          <span class="w-7 shrink-0 text-center text-sm font-bold text-white/25">
-            {{ String(index + 1).padStart(2, '0') }}
-          </span>
-
-          <!-- Thumbnail -->
-          <img
-            :src="scene.thumbnail"
-            :alt="scene.title"
-            class="h-16 w-28 shrink-0 rounded-lg object-cover"
-          />
-
-          <!-- Info -->
-          <div class="min-w-0 flex-1">
-            <p class="font-semibold text-white">{{ scene.title }}</p>
-            <p class="mt-0.5 text-xs text-white/45">{{ scene.subtitle }}</p>
-            <div class="mt-2 flex flex-wrap gap-1.5">
-              <span
-                v-for="marker in scene.markers"
-                :key="marker.id"
-                class="rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-                :class="{
-                  'bg-river/20 text-river': marker.plugin === 'navigation',
-                  'bg-clay/20 text-clay': marker.plugin === 'info',
-                  'bg-moss/20 text-moss': marker.plugin === 'audio',
-                }"
-              >
-                {{ marker.plugin }} · {{ marker.label }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Edit button -->
-          <NuxtLink
-            :to="`/admin/${slug}/${scene.id}`"
-            class="shrink-0 rounded-lg border border-white/15 px-3 py-2 text-xs text-white/50 hover:border-river/50 hover:text-river transition-all"
-          >
-            Chỉnh sửa
+  <div class="min-h-screen bg-[--ui-color-bg] font-[--ui-font-sans]">
+    <div class="px-6 py-8">
+      <!-- Breadcrumb -->
+      <div class="mb-6 flex items-center gap-2 text-sm">
+        <NuxtLink to="/admin" class="text-[--ui-color-text-muted] hover:text-[--ui-color-text-primary] transition-colors">Admin</NuxtLink>
+        <span class="text-[--ui-color-border-strong]">/</span>
+        <p class="font-semibold text-[--ui-color-text-primary] truncate">{{ tour?.title ?? slug }}</p>
+        <div class="ml-auto">
+          <NuxtLink :to="`/experience/${slug}`">
+            <UiButton variant="ghost" size="sm">Xem tour →</UiButton>
           </NuxtLink>
         </div>
       </div>
 
+      <!-- ── Tour info header ───────────────────────────────────────────────── -->
+      <UiCard variant="surface" padding="md" class="mb-6">
+        <div class="flex items-center gap-4">
+          <UiAvatar :name="tour?.title ?? slug" size="xl" shape="square" />
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-xl font-bold text-[--ui-color-text-primary]">{{ tour?.title }}</h1>
+              <UiBadge variant="primary" pill>{{ tour?.theme ?? 'nature' }}</UiBadge>
+            </div>
+            <p class="mt-1 text-sm text-[--ui-color-text-muted]">{{ tour?.location }}</p>
+            <div class="mt-2 flex items-center gap-3">
+              <UiBadge variant="default">
+                {{ scenes.length }} cảnh
+              </UiBadge>
+              <UiBadge variant="muted">
+                {{ scenes.reduce((n, s) => n + (s.markers?.length ?? 0), 0) }} markers
+              </UiBadge>
+            </div>
+          </div>
+        </div>
+      </UiCard>
+
+      <!-- ── Section label ──────────────────────────────────────────────────── -->
+      <div class="mb-4 flex items-center justify-between">
+        <h2 class="text-base font-semibold text-[--ui-color-text-primary]">Danh sách cảnh</h2>
+        <p class="text-xs text-[--ui-color-text-muted]">Nhấn vào cảnh để chỉnh sửa markers</p>
+      </div>
+
+      <!-- ── Scene list ─────────────────────────────────────────────────────── -->
+      <div v-if="scenes.length" class="space-y-3">
+        <NuxtLink
+          v-for="(scene, index) in scenes"
+          :key="scene.id"
+          :to="`/admin/${slug}/${scene.id}`"
+          class="block group"
+        >
+          <UiCard variant="surface" padding="none" :hoverable="true"
+            class="overflow-hidden transition-all group-hover:ring-[--ui-color-brand]/25">
+            <div class="flex items-center gap-0">
+
+              <!-- Index -->
+              <div class="flex h-full w-12 shrink-0 items-center justify-center border-r border-[--ui-color-border] self-stretch">
+                <span class="text-sm font-bold tabular-nums text-[--ui-color-text-muted]">
+                  {{ String(index + 1).padStart(2, '0') }}
+                </span>
+              </div>
+
+              <!-- Thumbnail -->
+              <div class="shrink-0">
+                <img
+                  :src="scene.thumbnail"
+                  :alt="scene.title"
+                  class="h-20 w-32 object-cover"
+                />
+              </div>
+
+              <!-- Info -->
+              <div class="min-w-0 flex-1 px-4 py-3">
+                <p class="font-semibold text-[--ui-color-text-primary] group-hover:text-[--ui-color-brand] transition-colors">
+                  {{ scene.title }}
+                </p>
+                <p class="mt-0.5 text-xs text-[--ui-color-text-muted]">{{ scene.subtitle }}</p>
+                <!-- Marker badges -->
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                  <UiBadge
+                    v-if="markerCount(scene, 'navigation') > 0"
+                    variant="primary" size="sm"
+                  >
+                    ↑ {{ markerCount(scene, 'navigation') }} nav
+                  </UiBadge>
+                  <UiBadge
+                    v-if="markerCount(scene, 'info') > 0"
+                    variant="warning" size="sm"
+                  >
+                    ⓘ {{ markerCount(scene, 'info') }} info
+                  </UiBadge>
+                  <UiBadge
+                    v-if="markerCount(scene) === 0"
+                    variant="muted" size="sm"
+                  >
+                    Chưa có marker
+                  </UiBadge>
+                </div>
+              </div>
+
+              <!-- Arrow -->
+              <div class="shrink-0 pr-4 text-[--ui-color-text-muted] group-hover:text-[--ui-color-brand] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </div>
+
+            </div>
+          </UiCard>
+        </NuxtLink>
+      </div>
+
+      <!-- Empty -->
+      <UiCard v-else variant="outlined" padding="none">
+        <UiEmptyState
+          icon="🎞️"
+          title="Chưa có cảnh nào"
+          description="Tour này chưa có scene nào được cấu hình trong file YAML."
+        />
+      </UiCard>
+
     </div>
-  </main>
+  </div>
 </template>

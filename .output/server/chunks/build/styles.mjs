@@ -1,12 +1,14 @@
-const interopDefault = r => r.default || r || [];
+globalThis.__timing__.logStart('Load chunks/build/styles');const interopDefault = r => r.default || r || [];
 const styles = {
-  "node_modules/nuxt/dist/app/entry.js": () => import('./entry-styles.DhqcfUzl.mjs').then(interopDefault),
-  "pages/index.vue": () => import('./index-styles.CKG19qNa.mjs').then(interopDefault),
-  "components/Viewer360.vue": () => import('./index-styles.CKG19qNa.mjs').then(interopDefault),
-  "pages/admin/[slug]/[sceneId].vue": () => import('./_sceneId_-styles.89oKS-am.mjs').then(interopDefault),
+  "node_modules/nuxt/dist/app/entry.js": () => import('./entry-styles.Db-w9d65.mjs').then(interopDefault),
+  "pages/index.vue": () => import('./index-styles.9Z8GlUuD.mjs').then(interopDefault),
+  "pages/experience/[tourId].vue": () => import('./_tourId_-styles.vyNjNG2L.mjs').then(interopDefault),
+  "pages/admin/[slug]/[sceneId].vue": () => import('./_sceneId_-styles.Cjq0EXa_.mjs').then(interopDefault),
+  "components/experience/Viewer360.vue": () => import('./Viewer360-styles.D0ZJ48b9.mjs').then(interopDefault),
   "node_modules/nuxt/dist/app/components/error-500.vue": () => import('./error-500-styles.ulHNpcF1.mjs').then(interopDefault),
-  "node_modules/nuxt/dist/app/components/error-404.vue": () => import('./error-404-styles.CiJjK6WX.mjs').then(interopDefault)
+  "node_modules/nuxt/dist/app/components/error-404.vue": () => import('./error-404-styles.CiJjK6WX.mjs').then(interopDefault),
+  "layouts/default.vue": () => import('./default-styles.B6_oApA5.mjs').then(interopDefault)
 };
 
-export { styles as default };
+export { styles as default };;globalThis.__timing__.logEnd('Load chunks/build/styles');
 //# sourceMappingURL=styles.mjs.map

@@ -9,5 +9,7 @@ defineProps<{ tour: TourConfig; activeScene: TourScene }>();
     <span class="text-[10px] font-bold uppercase tracking-widest text-river">View360</span>
     <span class="h-3.5 w-px bg-white/20" />
     <span class="text-xs font-medium text-white/80">{{ activeScene.title }}</span>
+    <span class="h-3.5 w-px bg-white/20" />
+    <ThemeToggle size="text-base" />
   </div>
 </template>
