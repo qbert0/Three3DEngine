@@ -161,6 +161,7 @@ export class View360Engine {
 
     this.currentScene = scene;
     this.notifyPluginsSceneLoad(scene);
+    this.pano.setBrightness(scene.brightness ?? 1.25);
 
     await this.pano.setImmediate(scene.panorama);
 
@@ -233,6 +234,7 @@ export class View360Engine {
     const from = this.currentScene;
     this.bus.emit('scene:transition:start', { from, to: scene });
     this.notifyPluginsSceneLoad(scene);
+    this.pano.setBrightness(scene.brightness ?? 1.25);
 
     // Compute fly direction vector from current camera aim
     const yaw = flyYaw ?? this.camera.getYaw();

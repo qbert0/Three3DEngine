@@ -45,6 +45,7 @@ function getValidator() {
             thumbnail:    { type: 'string', minLength: 1 },
             initialYaw:   { type: 'number', default: 0 },
             initialPitch: { type: 'number', default: 0 },
+            brightness:   { type: 'number', minimum: 0.5, maximum: 2, default: 1.25 },
             coordinates:  {
               type: 'array', minItems: 2, maxItems: 2,
               items: { type: 'number' },
@@ -102,6 +103,7 @@ export function compileTour(raw: unknown): CompileResult {
       thumbnail:    s.thumbnail,
       initialYaw:   s.initialYaw ?? 0,
       initialPitch: s.initialPitch ?? 0,
+      brightness:   s.brightness ?? 1.25,
       coordinates:  s.coordinates,
       markers,
     } satisfies TourScene;

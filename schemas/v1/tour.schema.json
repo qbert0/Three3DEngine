@@ -55,6 +55,7 @@
         "thumbnail": { "type": "string", "minLength": 1 },
         "initialYaw": { "type": "number", "default": 0 },
         "initialPitch": { "type": "number", "default": 0 },
+        "brightness": { "type": "number", "minimum": 0.5, "maximum": 2, "default": 1.25 },
         "markers": {
           "type": "array",
           "default": [],

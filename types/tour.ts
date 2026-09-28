@@ -103,6 +103,8 @@ export interface TourScene {
   thumbnail: string;
   initialYaw: number;
   initialPitch: number;
+  /** Panorama brightness multiplier. 1 = original, recommended range 0.6–1.6. */
+  brightness?: number;
   coordinates?: [number, number];
   markers: TourMarker[];
 }

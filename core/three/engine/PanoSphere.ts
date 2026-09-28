@@ -43,6 +43,7 @@ const FRAGMENT_SHADER = /* glsl */`
   uniform sampler2D map;
   uniform float opacity;
   uniform float radius;
+  uniform float brightness;
 
   const float PI = 3.14159265358979323846;
 
@@ -60,6 +61,7 @@ const FRAGMENT_SHADER = /* glsl */`
     float v = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
 
     gl_FragColor = texture2D(map, vec2(u, v));
+    gl_FragColor.rgb *= brightness;
     gl_FragColor.a *= opacity;
   }
 `;
@@ -101,6 +103,7 @@ export class PanoSphere {
         map:     { value: PanoSphere.blankTex },
         opacity: { value: opacity },
         radius:  { value: this.radius },
+        brightness: { value: 1.25 },
       },
       vertexShader:   VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
@@ -134,6 +137,13 @@ export class PanoSphere {
   }
 
   get busy(): boolean { return this.isTransitioning; }
+
+  /** Adjust panorama luminance without resizing or recompressing the source. */
+  setBrightness(value: number): void {
+    const brightness = Math.max(0.5, Math.min(2, value));
+    this.sphereA.material.uniforms.brightness.value = brightness;
+    this.sphereB.material.uniforms.brightness.value = brightness;
+  }
 
   // ── Texture Loading ────────────────────────────────────────────
 

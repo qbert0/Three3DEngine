@@ -257,7 +257,19 @@ const {
   captureSnapshot,
   refreshMarkers,
   setFov,
+  setBrightness,
 } = useDesignerEngine();
+
+function updateSceneBrightness(event: Event) {
+  setSceneBrightness(Number((event.target as HTMLInputElement).value));
+}
+
+function setSceneBrightness(value: number) {
+  if (!currentScene.value) return;
+  currentScene.value.brightness = value;
+  setBrightness(value);
+  markDirty();
+}
 
 // ── Hotspot drag-to-reposition ───────────────────────────────────────────────
 // Watch lastMarkerMoved (emitted by HotspotPlugin via bus)
@@ -378,6 +390,7 @@ function addScene() {
     thumbnail: currentScene.value?.thumbnail ?? currentScene.value?.panorama ?? '',
     initialYaw: 0,
     initialPitch: 0,
+    brightness: 1.25,
     markers: [],
   };
   tour.value.scenes.push(newScene);
@@ -893,6 +906,27 @@ onMounted(() => {
             </div>
 
             <div class="hint-text">💡 Nhấn vào ô xem trước để chọn file từ máy tính hoặc dán đường dẫn URL trực tiếp.</div>
+          </div>
+
+          <div class="insp-section">
+            <div class="insp-section-title">Ánh sáng hình ảnh</div>
+            <div class="brightness-control">
+              <input
+                :value="currentScene.brightness ?? 1.25"
+                type="range"
+                min="0.5"
+                max="1.6"
+                step="0.05"
+                @input="updateSceneBrightness"
+              >
+              <output>{{ Math.round((currentScene.brightness ?? 1.25) * 100) }}%</output>
+            </div>
+            <div class="brightness-presets">
+              <button type="button" @click="setSceneBrightness(1)">Gốc</button>
+              <button type="button" @click="setSceneBrightness(1.25)">Mặc định</button>
+              <button type="button" @click="setSceneBrightness(1.4)">Sáng rõ</button>
+            </div>
+            <div class="hint-text">Điều chỉnh riêng cho cảnh này, không thay đổi file ảnh gốc.</div>
           </div>
 
           <div class="insp-section">
@@ -1937,6 +1971,13 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.25);
   line-height: 1.5;
 }
+
+.brightness-control { display:grid; grid-template-columns:minmax(0,1fr) 52px; align-items:center; gap:12px; }
+.brightness-control input[type='range'] { width:100%; accent-color:#f59e0b; }
+.brightness-control output { padding:5px 7px; border:1px solid rgba(255,255,255,.1); border-radius:6px; background:#232833; color:#fbbf24; font:600 11px monospace; text-align:center; }
+.brightness-presets { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.brightness-presets button { padding:7px 5px; border:1px solid rgba(255,255,255,.08); border-radius:6px; background:#232833; color:rgba(255,255,255,.65); font-size:10.5px; transition:.15s; }
+.brightness-presets button:hover { border-color:rgba(245,158,11,.5); color:#fff; background:rgba(245,158,11,.12); }
 
 /* Rotation control — slider + reset button inline */
 .rotation-control {

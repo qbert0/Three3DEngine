@@ -37,3 +37,4 @@ export { useToast, ToastVariant, ToastItem } from '../composables/useToast';
 export { useEditorStore, EditorAddMode } from '../stores/editor';
 export { useRuntimeStore } from '../stores/runtime';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';
+export { useNuxtDevTools } from '../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';

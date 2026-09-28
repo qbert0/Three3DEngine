@@ -512,6 +512,7 @@ function getValidator() {
             thumbnail: { type: "string", minLength: 1 },
             initialYaw: { type: "number", default: 0 },
             initialPitch: { type: "number", default: 0 },
+            brightness: { type: "number", minimum: 0.5, maximum: 2, default: 1.25 },
             coordinates: {
               type: "array",
               minItems: 2,
@@ -540,7 +541,7 @@ function compileTour(raw) {
   const data = raw;
   const warnings = [];
   const scenes = data.scenes.map((s, i) => {
-    var _a2, _b2, _c2, _d;
+    var _a2, _b2, _c2, _d, _e;
     const markers = ((_a2 = s.markers) != null ? _a2 : []).map((m) => {
       if (!m.id || !m.plugin || !m.label) {
         warnings.push(`Scene[${i}].markers: marker thi\u1EBFu id/plugin/label \u2014 b\u1ECB b\u1ECF qua.`);
@@ -556,6 +557,7 @@ function compileTour(raw) {
       thumbnail: s.thumbnail,
       initialYaw: (_c2 = s.initialYaw) != null ? _c2 : 0,
       initialPitch: (_d = s.initialPitch) != null ? _d : 0,
+      brightness: (_e = s.brightness) != null ? _e : 1.25,
       coordinates: s.coordinates,
       markers
     };

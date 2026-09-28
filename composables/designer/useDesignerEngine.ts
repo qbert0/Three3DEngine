@@ -201,6 +201,10 @@ export function useDesignerEngine() {
     );
   }
 
+  function setBrightness(value: number): void {
+    engine.value?.pano.setBrightness(value);
+  }
+
   // ── Snapshot ───────────────────────────────────────────────────
 
   /** Capture current frame as a data URL (for thumbnail generation) */
@@ -249,6 +253,7 @@ export function useDesignerEngine() {
     captureSnapshot,
     refreshMarkers,
     setFov,
+    setBrightness,
     destroyEngine,
   };
 }
