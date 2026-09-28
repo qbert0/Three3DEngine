@@ -1,297 +1,351 @@
 slug: trang-bay
-title: Tour 360° Trảng Bay
-location: Rừng Núi Trảng Bay
+title: Tour 360° Sông Vân Art Space
+location: Nam Hoa Lư, Ninh Bình
 summary: >-
-  Khám phá toàn cảnh 360° tại khu vực Trảng Bay và vùng lân cận. Xoay ảnh để quan sát chi tiết địa hình, thảm thực vật
-  và cảnh quan thiên nhiên.
+  Khám phá Sông Vân Art Space giữa làng nghề đá Ninh Vân. Dạo qua không gian sống, xưởng sáng tác và những khoảng trưng
+  bày điêu khắc đá đương đại bằng trải nghiệm panorama 360°.
 duration: Tự do
-theme: nature
+theme: minimal
 initialSceneId: scene-c7
 plugins:
   - navigation
   - info
 scenes:
   - id: scene-c1
-    title: Đỉnh Nhìn Ra Thung Lũng
-    subtitle: Toàn cảnh khu vực trung tâm, điểm khởi đầu của hành trình.
+    title: Xưởng đá
+    subtitle: Điểm nhìn mở đầu, nơi tác phẩm đá gặp ánh sáng và cảnh quan Sông Vân.
     panorama: /images/1788771876123.jpg
-    thumbnail: /thumbnails/new/1788771876123.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876123.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: h1790007426579
         label: Cảnh mới
-        yaw: 6.238
-        pitch: -0.144
+        yaw: -2.9193
+        pitch: -0.3541
         plugin: navigation
         targetScene: scene-c2
+        rotation: 0.05235987755982988
+        rotZ: 0
+        rotX: 0.890117918517108
+        rotY: 0
   - id: scene-c2
-    title: Rìa Rừng Thưa
-    subtitle: Ranh giới giữa rừng và trảng cỏ, ánh sáng lọc qua tán lá.
+    title: Vườn Tượng
+    subtitle: Khoảng trưng bày ngoài trời kết nối cây xanh, mặt nước và điêu khắc.
     panorama: /images/1788771876132.jpg
-    thumbnail: /thumbnails/new/1788771876132.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876132.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
-      - id: h1790007322499
-        label: Cảnh mới
-        yaw: 3.856
-        pitch: -0.134
-        plugin: navigation
-        targetScene: scene-c1
-      - id: h1790007355630
-        label: Cảnh mới
-        yaw: 2.795
-        pitch: -0.111
-        plugin: navigation
-        targetScene: scene-tb1-5
       - id: h1790007374178
-        label: Cảnh mới
-        yaw: 0.793
-        pitch: -0.113
+        label: Khoảng trưng bày mở
+        yaw: 2.3594
+        pitch: -0.2871
         plugin: navigation
         targetScene: scene-c4
+        rotX: 0.890117918517108
+      - id: h1790589811645
+        label: Xưởng đá
+        yaw: -0.6684
+        pitch: -0.1708
+        plugin: navigation
+        targetScene: scene-c1
+        rotX: 0.8726646259971648
+      - id: h1790592598215
+        label: Cổng trừng bày 1
+        yaw: 0.3657
+        pitch: -0.3879
+        plugin: navigation
+        targetScene: scene-tb1-5
+        rotX: 0.8726646259971648
   - id: scene-c3
-    title: Lối Mòn Giữa Trảng
-    subtitle: Con đường nhỏ xuyên qua thảm thực vật, dấu chân người đi trước.
+    title: Sảnh tân gia
+    subtitle: Sân trước khu nhà tân gia
     panorama: /images/1788771876143.jpg
-    thumbnail: /thumbnails/new/1788771876143.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876143.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: h1790007786937
-        label: Cảnh mới
-        yaw: 0.619
-        pitch: -0.146
+        label: Không gian trừng bày mở
+        yaw: -2.7305
+        pitch: -0.3725
         plugin: navigation
         targetScene: scene-c4
+        rotX: 0.8726646259971648
+        rotZ: -0.6981317007977318
+        rotY: 0.6457718232379019
       - id: h1790007866785
-        label: Cảnh mới
-        yaw: 2.645
-        pitch: -0.04
+        label: Khu trưng bày 2
+        yaw: 0.5523
+        pitch: -0.2379
         plugin: navigation
         targetScene: scene-tb2-3
+        rotX: 0.8726646259971648
+      - id: h1790587903930
+        label: Nhà tân gia
+        yaw: -0.5243
+        pitch: 0.4021
+        plugin: info
+        content: 'Khung sảnh chính của tân gia. '
   - id: scene-c4
-    title: Bãi Cỏ Thoáng Đãng
-    subtitle: Không gian mở rộng, tầm nhìn 360° không bị che khuất.
+    title: Khoảng Trưng Bày Mở
+    subtitle: Không gian ngoài trời với tầm nhìn rộng dành cho các tác phẩm điêu khắc.
     panorama: /images/1788771876162.jpg
-    thumbnail: /thumbnails/new/1788771876162.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876162.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: c4-next
         plugin: navigation
-        label: Góc Nhìn Phía Núi
-        yaw: 1.15
-        pitch: -0.15
+        label: Không Gian Bên Sông
+        yaw: 1.9112
+        pitch: -0.3851
         targetScene: scene-c5
+        rotX: 0.8726646259971648
       - id: marker-navigation-1789271121754
         plugin: navigation
-        label: Điểm đến mới
-        yaw: 4.1
-        pitch: -0.093
+        label: Vườn tượng
+        yaw: -0.928
+        pitch: -0.2786
         targetScene: scene-c2
+        rotZ: 0.017453292519943295
+        rotX: 0.8726646259971648
       - id: marker-navigation-1789271195387
         plugin: navigation
-        label: Điểm đến mới
-        yaw: 2.91
-        pitch: -0.078
+        label: Sảnh tân gia
+        yaw: -0.5325
+        pitch: -0.2259
         targetScene: scene-c3
+        rotX: 0.890117918517108
+        rotY: 0.03490658503988659
+        rotZ: 0.20943951023931953
   - id: scene-c5
-    title: Góc Nhìn Phía Núi
-    subtitle: Dãy núi xa phía chân trời, mây trôi nhẹ trên đỉnh.
+    title: Không Gian Bên Sông
+    subtitle: Nơi cảnh quan Ninh Bình trở thành một phần của trải nghiệm nghệ thuật.
     panorama: /images/1788771876173.jpg
-    thumbnail: /thumbnails/new/1788771876173.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876173.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: c5-next
         plugin: navigation
-        label: Vùng Cây Bụi Thấp
-        yaw: 1.4
-        pitch: -0.1
-        targetScene: scene-c7
+        label: Lỗi ra
+        yaw: 1.467
+        pitch: -0.2778
+        targetScene: scene-c4
+        rotation: 0.5759586531581288
+        rotZ: 0.715584993317675
+        rotX: 0.8726646259971648
+        rotY: -0.47123889803846897
       - id: marker-navigation-1789273292044
         plugin: navigation
         label: Điểm đến mới
-        yaw: 3.67
-        pitch: -0.189
+        yaw: -0.1823
+        pitch: -0.3903
         targetScene: scene-c4
+        rotation: -0.9599310885968813
+        rotX: 0.890117918517108
+        rotZ: -1.2566370614359172
+        rotY: 0.6457718232379019
   - id: scene-c6
-    title: Vùng Cây Bụi Thấp
-    subtitle: Thảm cây bụi dày đặc, nơi chuyển tiếp giữa rừng và trảng.
+    title: Vườn Đá
+    subtitle: Những hình khối đá hiện diện giữa cây xanh và nhịp sống thường nhật.
     panorama: /images/1788771876183.jpg
-    thumbnail: /thumbnails/new/1788771876183.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876183.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers: []
   - id: scene-c7
-    title: Điểm Hợp Lưu
-    subtitle: Nơi ba hướng đi gặp nhau – cửa ngõ vào khu Trảng Bay.
+    title: Cổng Sông Vân Art Space
+    subtitle: Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.
     panorama: /images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
-    thumbnail: /thumbnails/new/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
+    thumbnail: /thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: marker-navigation-1789273190758
         plugin: navigation
-        label: Điểm đến mới
-        yaw: -0.01
-        pitch: -0.16
+        label: Lối vào
+        yaw: -3.0244
+        pitch: -0.4339
         targetScene: scene-c5
+        rotZ: -0.47123889803846897
+        rotX: 0.8552113334772214
+        rotY: 0
       - id: marker-info-1789274132769
         plugin: info
-        label: Thông tin
-        yaw: 0.4
-        pitch: 0.07
-        content: Khu du lịch đồng văn. (Đang trong thời gian tu sửa)
+        label: Cổng chính
+        yaw: 2.627
+        pitch: -0.0173
+        content: >-
+          Sông Vân Art space…
+
+          Không gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi
+          khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với
+          đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian
+          trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một
+          điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển
+          lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của
+          Lương Trịnh.
   - id: scene-tb1-1
-    title: Cổng Vào Trảng Bay 1
-    subtitle: Bắt đầu hành trình tại cửa ngõ của Trảng Bay 1.
+    title: Lối Vào Xưởng Đá
+    subtitle: Bắt đầu hành trình tìm hiểu quá trình vật liệu đá trở thành tác phẩm.
     panorama: /images/trbay1/1788771876074.jpg
-    thumbnail: /thumbnails/new/1788771876074.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876074.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: h1790007757751
         label: Cảnh mới
-        yaw: 3.627
-        pitch: -0.243
+        yaw: -0.5348
+        pitch: -0.3802
         plugin: navigation
         targetScene: scene-tb1-2
+        rotX: 0.8726646259971648
   - id: scene-tb1-2
-    title: Đồng Trảng Rộng
-    subtitle: Mặt trảng phẳng rộng, cỏ xanh mướt trải dài tới tận chân trời.
+    title: Sân Tập Kết Đá
+    subtitle: Không gian lưu giữ vật liệu và những hình khối đang chờ được đánh thức.
     panorama: /images/trbay1/1788771876090.jpg
-    thumbnail: /thumbnails/new/1788771876090.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876090.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: h1790007718913
-        label: Cảnh mới
-        yaw: 3.739
-        pitch: -0.202
+        label: Góc chế tác
+        yaw: -0.6099
+        pitch: -0.3349
         plugin: navigation
         targetScene: scene-tb1-3
-      - id: h1790007733246
-        label: Cảnh mới
-        yaw: 0.85
-        pitch: -0.178
+        rotX: 0.8726646259971648
+      - id: h1790593075340
+        label: Lối
+        yaw: 2.3084
+        pitch: -0.3378
         plugin: navigation
         targetScene: scene-tb1-1
+        rotX: 0.8726646259971648
   - id: scene-tb1-3
-    title: Góc Phía Đông Trảng
-    subtitle: Hướng nhìn phía Đông, nơi nắng sáng chiếu rõ từng cọng cỏ.
+    title: Góc Chế Tác
+    subtitle: Nơi có thể quan sát dấu vết lao động và kỹ thuật của làng nghề đá.
     panorama: /images/trbay1/1788771876098.jpg
-    thumbnail: /thumbnails/new/1788771876098.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876098.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: h1790007660078
         label: Thông tin
-        yaw: 5.183
-        pitch: -0.157
+        yaw: -2.3588
+        pitch: -0.0096
         plugin: info
         content: Là một cái gì đó mà dùng để đựng đồ vật
-      - id: h1790007677919
-        label: Cảnh mới
-        yaw: 3.888
-        pitch: -0.233
-        plugin: navigation
-        targetScene: scene-tb1-4
       - id: h1790007689339
-        label: Cảnh mới
-        yaw: 2.081
-        pitch: -0.201
+        label: Trung tâm trừng bày 1
+        yaw: 1.0567
+        pitch: -0.4643
         plugin: navigation
         targetScene: scene-tb1-2
+        rotX: 0.8726646259971648
+      - id: h1790592920728
+        label: Trung tâm xưởng
+        yaw: -0.7255
+        pitch: -0.5227
+        plugin: navigation
+        targetScene: scene-tb1-4
+        rotX: 0.8726646259971648
   - id: scene-tb1-4
-    title: Trung Tâm Trảng Bay 1
-    subtitle: Điểm giữa của Trảng Bay 1, toàn cảnh tứ phía không bị che.
+    title: Trung Tâm Xưởng
+    subtitle: Điểm nhìn bao quát khu vực sáng tác và hoàn thiện tác phẩm.
     panorama: /images/trbay1/1788771876106.jpg
-    thumbnail: /thumbnails/new/1788771876106.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876106.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
-      - id: h1790007599567
-        label: Cảnh mới
-        yaw: 0.551
-        pitch: -0.495
-        plugin: navigation
-        targetScene: scene-tb1-3
       - id: h1790007619346
         label: Cảnh mới
-        yaw: 2.049
-        pitch: -0.196
+        yaw: 1.1279
+        pitch: -0.2731
         plugin: navigation
         targetScene: scene-tb1-5
+        rotX: 0.8726646259971648
+        rotZ: -0.12217304763960307
+      - id: h1790592823753
+        label: Chuyển cảnh
+        yaw: 2.585
+        pitch: -0.266
+        plugin: navigation
+        targetScene: scene-tb1-3
+        rotX: 0.8726646259971648
   - id: scene-tb1-5
-    title: Biên Giới Hai Trảng
-    subtitle: Ranh giới tự nhiên giữa Trảng Bay 1 và Trảng Bay 2.
+    title: Cổng trưng bày 1
+    subtitle: Khoảng nối giữa quá trình chế tác và không gian trưng bày hoàn chỉnh.
     panorama: /images/trbay1/1788771876114.jpg
-    thumbnail: /thumbnails/new/1788771876114.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876114.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: h1790007511095
-        label: Cảnh mới
-        yaw: 6.24
-        pitch: -0.071
-        plugin: navigation
-        targetScene: scene-tb1-4
-      - id: h1790007544963
-        label: Cảnh mới
-        yaw: 4.139
-        pitch: -0.221
+        label: Vườn tượng
+        yaw: -1.3068
+        pitch: -0.3872
         plugin: navigation
         targetScene: scene-c2
+        rotX: 0.8726646259971648
+      - id: h1790592743906
+        label: Chuyển cảnh
+        yaw: -3.11
+        pitch: -0.171
+        plugin: navigation
+        targetScene: scene-tb1-4
+        rotX: 0.8726646259971648
   - id: scene-tb2-1
-    title: Cổng Vào Trảng Bay 2
-    subtitle: Bắt đầu khám phá khu vực Trảng Bay 2, địa hình lạ hơn.
+    title: Lối Vào Khu Trưng Bày
+    subtitle: Cửa ngõ dẫn vào nhóm không gian trưng bày phía trong.
     panorama: /images/trbay2/1788771876042.jpg
-    thumbnail: /thumbnails/new/1788771876042.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876042.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers: []
   - id: scene-tb2-2
-    title: Vùng Cỏ Lau Cao
-    subtitle: Cỏ lau cao vút che phủ, tạo hành lang xanh tự nhiên.
+    title: Hành Lang Tác Phẩm
+    subtitle: Một nhịp chuyển chậm để quan sát hình khối, bề mặt và bóng đổ.
     panorama: /images/trbay2/1788771876050.jpg
-    thumbnail: /thumbnails/new/1788771876050.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876050.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers: []
   - id: scene-tb2-3
-    title: Bờ Rừng Phía Tây
-    subtitle: Cây rừng cao vút phía Tây, bóng mát che phủ mặt trảng.
+    title: Không gian trừng bày 2
+    subtitle: Góc thưởng lãm yên tĩnh, nơi ánh sáng làm thay đổi cảm nhận về đá.
     panorama: /images/trbay2/1788771876058.jpg
-    thumbnail: /thumbnails/new/1788771876058.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876058.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: h1790007893330
         label: Cảnh mới
-        yaw: 2.726
-        pitch: -0.245
+        yaw: 0.4139
+        pitch: -0.4477
         plugin: navigation
         targetScene: scene-c3
+        rotX: 0.890117918517108
   - id: scene-tb2-4
-    title: Cuối Trảng Bay 2
-    subtitle: Điểm kết thúc hành trình – nhìn lại toàn bộ con đường đã đi.
+    title: Điểm Kết Hành Trình
+    subtitle: Điểm nhìn cuối để nhìn lại mối liên hệ giữa tác phẩm, làng nghề và cảnh quan.
     panorama: /images/trbay2/1788771876067.jpg
-    thumbnail: /thumbnails/new/1788771876067.jpg
+    thumbnail: /thumbnails/trang-bay/1788771876067.jpg
     initialYaw: 0
     initialPitch: -0.05
     markers:
       - id: tb2-4-prev
         plugin: navigation
-        label: Bờ Rừng Phía Tây
+        label: Khoảng Tĩnh
         yaw: 3.14
         pitch: -0.35
         targetScene: scene-tb2-3
       - id: tb2-4-home
         plugin: navigation
-        label: Đỉnh Nhìn Ra Thung Lũng
+        label: Sân Điêu Khắc Bên Sông
         yaw: 1.57
         pitch: -0.3
         targetScene: scene-c1

@@ -6,9 +6,9 @@ import addFormats from 'ajv-formats';
 
 const trangBayTour = {
   slug: "trang-bay",
-  title: "Tour 360\xB0 Tr\u1EA3ng Bay",
-  location: "R\u1EEBng N\xFAi Tr\u1EA3ng Bay",
-  summary: "Kh\xE1m ph\xE1 to\xE0n c\u1EA3nh 360\xB0 t\u1EA1i khu v\u1EF1c Tr\u1EA3ng Bay v\xE0 v\xF9ng l\xE2n c\u1EADn. Xoay \u1EA3nh \u0111\u1EC3 quan s\xE1t chi ti\u1EBFt \u0111\u1ECBa h\xECnh, th\u1EA3m th\u1EF1c v\u1EADt v\xE0 c\u1EA3nh quan thi\xEAn nhi\xEAn.",
+  title: "Tour 360\xB0 S\xF4ng V\xE2n Art Space",
+  location: "Nam Hoa L\u01B0, Ninh B\xECnh",
+  summary: "Kh\xE1m ph\xE1 S\xF4ng V\xE2n Art Space gi\u1EEFa l\xE0ng ngh\u1EC1 \u0111\xE1 Ninh V\xE2n qua tr\u1EA3i nghi\u1EC7m panorama 360\xB0.",
   duration: "T\u1EF1 do",
   theme: "nature",
   initialSceneId: "scene-c7",
@@ -19,7 +19,7 @@ const trangBayTour = {
       title: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
       subtitle: "To\xE0n c\u1EA3nh khu v\u1EF1c trung t\xE2m, \u0111i\u1EC3m kh\u1EDFi \u0111\u1EA7u c\u1EE7a h\xE0nh tr\xECnh.",
       panorama: "/images/1788771876123.jpg",
-      thumbnail: "/thumbnails/new/1788771876123.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -38,7 +38,7 @@ const trangBayTour = {
       title: "R\xECa R\u1EEBng Th\u01B0a",
       subtitle: "Ranh gi\u1EDBi gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng c\u1ECF, \xE1nh s\xE1ng l\u1ECDc qua t\xE1n l\xE1.",
       panorama: "/images/1788771876132.jpg",
-      thumbnail: "/thumbnails/new/1788771876132.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -73,7 +73,7 @@ const trangBayTour = {
       title: "L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng",
       subtitle: "Con \u0111\u01B0\u1EDDng nh\u1ECF xuy\xEAn qua th\u1EA3m th\u1EF1c v\u1EADt, d\u1EA5u ch\xE2n ng\u01B0\u1EDDi \u0111i tr\u01B0\u1EDBc.",
       panorama: "/images/1788771876143.jpg",
-      thumbnail: "/thumbnails/new/1788771876143.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -100,7 +100,7 @@ const trangBayTour = {
       title: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
       subtitle: "Kh\xF4ng gian m\u1EDF r\u1ED9ng, t\u1EA7m nh\xECn 360\xB0 kh\xF4ng b\u1ECB che khu\u1EA5t.",
       panorama: "/images/1788771876162.jpg",
-      thumbnail: "/thumbnails/new/1788771876162.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -135,7 +135,7 @@ const trangBayTour = {
       title: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
       subtitle: "D\xE3y n\xFAi xa ph\xEDa ch\xE2n tr\u1EDDi, m\xE2y tr\xF4i nh\u1EB9 tr\xEAn \u0111\u1EC9nh.",
       panorama: "/images/1788771876173.jpg",
-      thumbnail: "/thumbnails/new/1788771876173.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -162,7 +162,7 @@ const trangBayTour = {
       title: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
       subtitle: "Th\u1EA3m c\xE2y b\u1EE5i d\xE0y \u0111\u1EB7c, n\u01A1i chuy\u1EC3n ti\u1EBFp gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng.",
       panorama: "/images/1788771876183.jpg",
-      thumbnail: "/thumbnails/new/1788771876183.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: []
@@ -172,7 +172,7 @@ const trangBayTour = {
       title: "\u0110i\u1EC3m H\u1EE3p L\u01B0u",
       subtitle: "N\u01A1i ba h\u01B0\u1EDBng \u0111i g\u1EB7p nhau \u2013 c\u1EEDa ng\xF5 v\xE0o khu Tr\u1EA3ng Bay.",
       panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-      thumbnail: "/thumbnails/new/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+      thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -199,7 +199,7 @@ const trangBayTour = {
       title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 1",
       subtitle: "B\u1EAFt \u0111\u1EA7u h\xE0nh tr\xECnh t\u1EA1i c\u1EEDa ng\xF5 c\u1EE7a Tr\u1EA3ng Bay 1.",
       panorama: "/images/trbay1/1788771876074.jpg",
-      thumbnail: "/thumbnails/new/1788771876074.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -218,7 +218,7 @@ const trangBayTour = {
       title: "\u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng",
       subtitle: "M\u1EB7t tr\u1EA3ng ph\u1EB3ng r\u1ED9ng, c\u1ECF xanh m\u01B0\u1EDBt tr\u1EA3i d\xE0i t\u1EDBi t\u1EADn ch\xE2n tr\u1EDDi.",
       panorama: "/images/trbay1/1788771876090.jpg",
-      thumbnail: "/thumbnails/new/1788771876090.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -245,7 +245,7 @@ const trangBayTour = {
       title: "G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng",
       subtitle: "H\u01B0\u1EDBng nh\xECn ph\xEDa \u0110\xF4ng, n\u01A1i n\u1EAFng s\xE1ng chi\u1EBFu r\xF5 t\u1EEBng c\u1ECDng c\u1ECF.",
       panorama: "/images/trbay1/1788771876098.jpg",
-      thumbnail: "/thumbnails/new/1788771876098.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -280,7 +280,7 @@ const trangBayTour = {
       title: "Trung T\xE2m Tr\u1EA3ng Bay 1",
       subtitle: "\u0110i\u1EC3m gi\u1EEFa c\u1EE7a Tr\u1EA3ng Bay 1, to\xE0n c\u1EA3nh t\u1EE9 ph\xEDa kh\xF4ng b\u1ECB che.",
       panorama: "/images/trbay1/1788771876106.jpg",
-      thumbnail: "/thumbnails/new/1788771876106.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -307,7 +307,7 @@ const trangBayTour = {
       title: "Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng",
       subtitle: "Ranh gi\u1EDBi t\u1EF1 nhi\xEAn gi\u1EEFa Tr\u1EA3ng Bay 1 v\xE0 Tr\u1EA3ng Bay 2.",
       panorama: "/images/trbay1/1788771876114.jpg",
-      thumbnail: "/thumbnails/new/1788771876114.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -334,7 +334,7 @@ const trangBayTour = {
       title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
       subtitle: "B\u1EAFt \u0111\u1EA7u kh\xE1m ph\xE1 khu v\u1EF1c Tr\u1EA3ng Bay 2, \u0111\u1ECBa h\xECnh l\u1EA1 h\u01A1n.",
       panorama: "/images/trbay2/1788771876042.jpg",
-      thumbnail: "/thumbnails/new/1788771876042.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: []
@@ -344,7 +344,7 @@ const trangBayTour = {
       title: "V\xF9ng C\u1ECF Lau Cao",
       subtitle: "C\u1ECF lau cao v\xFAt che ph\u1EE7, t\u1EA1o h\xE0nh lang xanh t\u1EF1 nhi\xEAn.",
       panorama: "/images/trbay2/1788771876050.jpg",
-      thumbnail: "/thumbnails/new/1788771876050.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: []
@@ -354,7 +354,7 @@ const trangBayTour = {
       title: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
       subtitle: "C\xE2y r\u1EEBng cao v\xFAt ph\xEDa T\xE2y, b\xF3ng m\xE1t che ph\u1EE7 m\u1EB7t tr\u1EA3ng.",
       panorama: "/images/trbay2/1788771876058.jpg",
-      thumbnail: "/thumbnails/new/1788771876058.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -373,7 +373,7 @@ const trangBayTour = {
       title: "Cu\u1ED1i Tr\u1EA3ng Bay 2",
       subtitle: "\u0110i\u1EC3m k\u1EBFt th\xFAc h\xE0nh tr\xECnh \u2013 nh\xECn l\u1EA1i to\xE0n b\u1ED9 con \u0111\u01B0\u1EDDng \u0111\xE3 \u0111i.",
       panorama: "/images/trbay2/1788771876067.jpg",
-      thumbnail: "/thumbnails/new/1788771876067.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [

@@ -4,9 +4,17 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@vercel/speed-insights'],
   css: ['~/assets/css/main.css'],
 
+  // Panorama filenames are stable assets (uploads use unique names). Let the
+  // browser reuse them across scene changes and repeat visits.
+  routeRules: {
+    '/images/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/uploads/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/thumbnails/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+  },
+
   app: {
     head: {
-      title: 'Trảng Bay — Khu Du Lịch Sinh Thái',
+      title: 'Sông Vân Art Space — Không gian nghệ thuật tại Ninh Bình',
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
@@ -18,7 +26,7 @@ export default defineNuxtConfig({
       meta: [
         {
           name: 'description',
-          content: 'Khu du lịch sinh thái Trảng Bay — Trải nghiệm thiên nhiên hoang sơ qua panorama 360°, đặt vé online và khám phá sự kiện.',
+          content: 'Khám phá Sông Vân Art Space tại Ninh Bình qua tour panorama 360° — nơi điêu khắc đá đương đại đối thoại với làng nghề Ninh Vân.',
         },
       ],
     },

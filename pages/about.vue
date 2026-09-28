@@ -1,25 +1,44 @@
 <script setup lang="ts">
 /**
- * pages/about.vue — Giới thiệu khu du lịch Trảng Bay
+ * pages/about.vue — Giới thiệu Sông Vân Art Space
  */
 definePageMeta({ layout: 'default' });
 useHead({
-  title: 'Giới Thiệu — Trảng Bay',
-  meta: [{ name: 'description', content: 'Câu chuyện, sứ mệnh và đội ngũ của khu du lịch sinh thái Trảng Bay.' }],
+  title: 'Giới Thiệu — Sông Vân Art Space',
+  meta: [{ name: 'description', content: 'Câu chuyện Sông Vân Art Space — không gian điêu khắc đá đương đại giữa làng nghề Ninh Vân, Ninh Bình.' }],
 });
 
 const milestones = [
-  { year: '2018', title: 'Thành lập', desc: 'Khởi đầu từ 120 ha rừng tự nhiên, với sứ mệnh bảo tồn và phát triển du lịch bền vững.' },
-  { year: '2020', title: 'Mở rộng', desc: 'Mở rộng lên 600 ha, xây dựng hệ thống đường mòn sinh thái và khu nghỉ dưỡng xanh.' },
-  { year: '2023', title: 'Số hóa', desc: 'Ra mắt hệ thống tour ảo 360°, cho phép du khách khám phá Trảng Bay từ mọi nơi trên thế giới.' },
-  { year: '2026', title: 'Hôm nay', desc: 'Hơn 1.200 ha, 15 điểm tham quan, đón tiếp hàng nghìn du khách mỗi tháng.' },
+  { year: '2018', title: 'Về với đá', desc: 'Lương Gia Art Space khởi động hoạt động điêu khắc đá đương đại với workshop “Về với đá”.' },
+  { year: '2021', title: 'Biến Chuyển', desc: 'Workshop và triển lãm điêu khắc đá “Biến Chuyển” tiếp tục mở rộng đối thoại nghệ thuật tại làng nghề.' },
+  { year: '2026', title: 'Sông Vân Art Space', desc: 'Không gian mang tên mới, hướng đến một nơi trưng bày hoàn chỉnh và hòa đồng hơn với cảnh quan sống.' },
+  { year: '2026', title: 'Triển lãm “Sông Vân”', desc: 'Lê Thị Hiền và Lương Trịnh giới thiệu hơn 30 tác phẩm điêu khắc đá đương đại.' },
 ];
 
 const values = [
-  { icon: '🌿', title: 'Bảo tồn thiên nhiên', desc: '10% doanh thu được dùng để tái trồng rừng và bảo tồn đa dạng sinh học.' },
-  { icon: '🤝', title: 'Cộng đồng địa phương', desc: 'Ưu tiên tuyển dụng và phát triển kỹ năng cho người dân bản địa.' },
-  { icon: '♻️', title: 'Không rác thải nhựa', desc: 'Toàn bộ khu không dùng đồ nhựa dùng một lần kể từ 2022.' },
-  { icon: '📚', title: 'Giáo dục sinh thái', desc: 'Chương trình tham quan giáo dục cho học sinh các cấp, miễn phí cho trường công lập.' },
+  { icon: '🪨', title: 'Tôn trọng vật liệu', desc: 'Đá tự nhiên được lắng nghe như một chất liệu có ký ức, cấu trúc và tiếng nói riêng.' },
+  { icon: '✦', title: 'Ngôn ngữ đương đại', desc: 'Tạo một không gian cho tư duy hình khối tối giản, tự do và giàu tính tự thân.' },
+  { icon: '🤝', title: 'Kết nối làng nghề', desc: 'Đặt nghệ thuật đương đại trong mạch nghề đá lâu đời của Ninh Vân.' },
+  { icon: '◯', title: 'Không gian mở', desc: 'Để tác phẩm đối thoại tự nhiên với ánh sáng, cây xanh, mặt nước và người xem.' },
+];
+
+const artists = [
+  {
+    name: 'Lê Thị Hiền',
+    role: 'Nhà điêu khắc · Trừu tượng hình học',
+    image: '/images/song-van/le-thi-hien.jpg',
+    alt: 'Nhà điêu khắc Lê Thị Hiền giới thiệu tác phẩm tại Sông Vân Art Space',
+    bio: 'Một gương mặt bản lề của điêu khắc đương đại Việt Nam. Thực hành của bà đi từ biểu hình đến phi biểu hình, sử dụng những chuyển động gấp, xoắn, đan và đảo chiều để làm vật liệu nặng trở nên thanh thoát.',
+    note: 'Tại triển lãm “Sông Vân”, bà giới thiệu 15 tác phẩm bằng cẩm thạch trắng, đá đen và granite.',
+  },
+  {
+    name: 'Lương Trịnh',
+    role: 'Nhà điêu khắc · Người sáng lập không gian',
+    image: '/images/song-van/luong-trinh.jpg',
+    alt: 'Nhà điêu khắc Lương Trịnh phác thảo tác phẩm tại Sông Vân Art Space',
+    bio: 'Sinh trưởng trong gia đình có truyền thống làm nghề đá tại Ninh Vân và được đào tạo tại Trường Đại học Mỹ thuật Việt Nam. Anh kết nối kỹ nghệ bản địa với một ngôn ngữ điêu khắc hiện đại, kiệm lời và giàu chất kiến trúc.',
+    note: 'Bộ “Bóng núi” gồm 21 tác phẩm đá đen, chắt lọc từ núi non, mây trời và kiến trúc cổ Ninh Bình.',
+  },
 ];
 </script>
 
@@ -31,9 +50,9 @@ const values = [
       <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg width=60 height=60 viewBox=0 0 60 60 xmlns=http://www.w3.org/2000/svg%3E%3Cg fill=none fill-rule=evenodd%3E%3Cg fill=%23ffffff fill-opacity=1%3E%3Cpath d=M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]" />
       <div class="relative container text-center">
         <div class="section-eyebrow justify-center text-emerald-400">Câu chuyện chúng tôi</div>
-        <h1 class="section-title text-4xl sm:text-5xl lg:text-6xl text-white">Trảng Bay —<br />Sống cùng thiên nhiên</h1>
+        <h1 class="section-title text-4xl sm:text-5xl lg:text-6xl text-white">Sông Vân —<br />Một không gian cho đá</h1>
         <p class="section-sub text-white/70 max-w-2xl mx-auto">
-          Hơn 8 năm phát triển, chúng tôi tin rằng du lịch và bảo tồn không mâu thuẫn — chúng có thể cùng phát triển khi được thiết kế đúng cách.
+          Một điểm gặp giữa truyền thống chế tác đá Ninh Vân, thực hành điêu khắc đương đại và cảnh quan Ninh Bình.
         </p>
       </div>
     </section>
@@ -44,13 +63,13 @@ const values = [
         <div>
           <p class="text-xs font-bold uppercase tracking-widest text-[--ui-color-brand] mb-3">Sứ mệnh</p>
           <h2 class="text-3xl font-bold text-[--ui-color-text-primary] leading-tight">
-            Bảo tồn thiên nhiên,<br />Nâng tầm trải nghiệm
+            Kết nối truyền thống,<br />Mở lối đương đại
           </h2>
           <p class="mt-5 text-[--ui-color-text-muted] leading-relaxed">
-            Trảng Bay được thành lập với mục tiêu bảo vệ 1.200 ha rừng nguyên sinh trong khi tạo ra nguồn thu bền vững cho cộng đồng địa phương thông qua du lịch sinh thái có trách nhiệm.
+            Sông Vân Art Space phát triển từ không gian sống và sáng tác của gia đình nghệ sĩ Lương Trịnh, giữa lòng làng nghề đá Ninh Vân.
           </p>
           <p class="mt-4 text-[--ui-color-text-muted] leading-relaxed">
-            Mỗi trải nghiệm tại đây được thiết kế để kết nối con người với thiên nhiên một cách sâu sắc và có ý nghĩa — từ tour 360° số hóa đến những chuyến trekking mặt đất.
+            Không gian hướng đến việc đưa điêu khắc đá đương đại đến gần hơn với đời sống, đồng thời tạo nơi gặp gỡ giữa nghệ sĩ, người thợ, tác phẩm và công chúng.
           </p>
         </div>
         <div class="grid grid-cols-2 gap-4">
@@ -60,6 +79,50 @@ const values = [
             <h3 class="font-bold text-sm text-[--ui-color-text-primary]">{{ v.title }}</h3>
             <p class="mt-1.5 text-xs text-[--ui-color-text-muted] leading-relaxed">{{ v.desc }}</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Artists -->
+    <section class="bg-[--ui-color-surface] border-y border-[--ui-color-border] py-20">
+      <div class="mx-auto max-w-6xl px-5 lg:px-8">
+        <div class="mb-12 max-w-3xl">
+          <p class="text-xs font-bold uppercase tracking-widest text-[--ui-color-brand] mb-3">Nghệ sĩ</p>
+          <h2 class="text-3xl font-bold text-[--ui-color-text-primary]">Hai thế hệ, một cuộc đối thoại với đá</h2>
+          <p class="mt-4 text-[--ui-color-text-muted] leading-relaxed">
+            Lê Thị Hiền và Lương Trịnh gặp nhau ở tinh thần hình học, tối giản và sự tôn trọng tính tự thân của vật liệu — một người đi qua nhiều môi trường nghệ thuật trở về làng, một người từ làng nghề bước ra thế giới.
+          </p>
+        </div>
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <article v-for="artist in artists" :key="artist.name" class="overflow-hidden rounded-2xl border border-[--ui-color-border] bg-[--ui-color-bg]">
+            <img :src="artist.image" :alt="artist.alt" class="h-72 w-full object-cover" />
+            <div class="p-6">
+              <p class="text-xs font-bold uppercase tracking-widest text-[--ui-color-brand]">{{ artist.role }}</p>
+              <h3 class="mt-2 text-2xl font-bold text-[--ui-color-text-primary]">{{ artist.name }}</h3>
+              <p class="mt-4 text-sm leading-relaxed text-[--ui-color-text-muted]">{{ artist.bio }}</p>
+              <p class="mt-4 border-l-2 border-[--ui-color-brand] pl-4 text-sm font-medium leading-relaxed text-[--ui-color-text-secondary]">{{ artist.note }}</p>
+            </div>
+          </article>
+        </div>
+        <p class="mt-5 text-xs text-[--ui-color-text-muted]">Ảnh: Ngọc Linh / Báo Ninh Bình.</p>
+      </div>
+    </section>
+
+    <!-- Place context -->
+    <section class="container section">
+      <div class="grid grid-cols-1 gap-10 lg:grid-cols-[1.15fr_.85fr] lg:items-center">
+        <img src="/images/song-van/sculpture-garden.jpg" alt="Toàn cảnh khu vườn điêu khắc Sông Vân bên mặt nước" class="h-full min-h-80 w-full rounded-2xl object-cover" />
+        <div>
+          <p class="text-xs font-bold uppercase tracking-widest text-[--ui-color-brand] mb-3">Ninh Vân · Ninh Bình</p>
+          <h2 class="text-3xl font-bold text-[--ui-color-text-primary]">Một art space ở ngay trong mạch sống của làng đá</h2>
+          <p class="mt-5 text-[--ui-color-text-muted] leading-relaxed">
+            Sông Vân Art Space nằm tại Xuân Phúc, phường Nam Hoa Lư, trong vùng nghề đá Ninh Vân. Xưởng, tư gia, hai phòng trưng bày và khu vườn điêu khắc cùng tồn tại bên một nhánh sông Vân, để tác phẩm đối thoại trực tiếp với ánh sáng, mặt nước và đời sống địa phương.
+          </p>
+          <dl class="mt-6 grid grid-cols-2 gap-4 text-sm">
+            <div class="rounded-xl bg-[--ui-color-bg-muted] p-4"><dt class="text-[--ui-color-text-muted]">Không gian</dt><dd class="mt-1 font-bold">02 phòng · 01 khu vườn</dd></div>
+            <div class="rounded-xl bg-[--ui-color-bg-muted] p-4"><dt class="text-[--ui-color-text-muted]">Tọa độ</dt><dd class="mt-1 font-bold">20°12′29.4″N<br />105°57′12.1″E</dd></div>
+          </dl>
+          <a href="https://maps.app.goo.gl/Yzgs3xcSwHCcgq2L9" target="_blank" rel="noreferrer" class="mt-6 inline-flex font-bold text-[--ui-color-brand] hover:underline">Mở Google Maps ↗</a>
         </div>
       </div>
     </section>
@@ -101,9 +164,9 @@ const values = [
       </div>
       <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
         <a v-for="c in [
-          { icon: '📞', label: 'Hotline', value: '0900 000 000', sub: '7:00 – 18:00 hàng ngày', href: 'tel:0900000000' },
-          { icon: '✉️', label: 'Email', value: 'info@trangbay.vn', sub: 'Phản hồi trong 4 giờ', href: 'mailto:info@trangbay.vn' },
-          { icon: '📍', label: 'Địa chỉ', value: 'Rừng Núi Trảng Bay', sub: 'Việt Nam', href: '#' },
+          { icon: '◷', label: 'Lịch tham quan', value: 'Đặt lịch trước khi đến', sub: 'Không gian sẽ xác nhận thời gian', href: '/tickets' },
+          { icon: '☎', label: 'Điện thoại', value: '+84 988 793 456', sub: 'Liên hệ Sông Vân Art Space', href: 'tel:+84988793456' },
+          { icon: '📍', label: 'Địa chỉ', value: 'Xuân Phúc', sub: 'Phường Nam Hoa Lư, Ninh Bình', href: 'https://maps.app.goo.gl/Yzgs3xcSwHCcgq2L9' },
         ]" :key="c.label" :href="c.href"
           class="rounded-2xl border border-[--ui-color-border] bg-[--ui-color-surface] p-6 text-center transition hover:border-[--ui-color-brand]/40 hover:shadow-md">
           <div class="text-3xl mb-3">{{ c.icon }}</div>

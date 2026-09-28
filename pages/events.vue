@@ -1,29 +1,23 @@
 <script setup lang="ts">
 /**
- * pages/events.vue — Sự kiện tại khu du lịch Trảng Bay
+ * pages/events.vue — Sự kiện tại Sông Vân Art Space
  */
 definePageMeta({ layout: 'default' });
 useHead({
-  title: 'Sự Kiện — Trảng Bay',
-  meta: [{ name: 'description', content: 'Các sự kiện sinh thái, âm nhạc, trekking tại khu du lịch Trảng Bay. Đăng ký online.' }],
+  title: 'Sự Kiện — Sông Vân Art Space',
+  meta: [{ name: 'description', content: 'Triển lãm và hoạt động điêu khắc đá đương đại tại Sông Vân Art Space, Ninh Bình.' }],
 });
 
 const activeFilter = ref('all');
 const filters = [
   { id: 'all',      label: 'Tất cả' },
-  { id: 'outdoor',  label: 'Outdoor' },
-  { id: 'music',    label: 'Âm nhạc' },
-  { id: 'science',  label: 'Thiên văn' },
-  { id: 'food',     label: 'Ẩm thực' },
+  { id: 'exhibition', label: 'Triển lãm' },
+  { id: 'workshop', label: 'Workshop' },
+  { id: 'talk', label: 'Trò chuyện' },
 ];
 
 const allEvents = [
-  { id: 1,  title: 'Đêm Ngắm Sao Trảng Bay',          date: '2026-09-20', tag: 'science',  tagLabel: 'Thiên văn', status: 'upcoming', seats: 30,  capacity: 50,  price: 200000, img: '' },
-  { id: 2,  title: 'Trekking Rừng Nguyên Sinh 12km',    date: '2026-09-27', tag: 'outdoor',  tagLabel: 'Outdoor',  status: 'upcoming', seats: 8,   capacity: 20,  price: 350000, img: '' },
-  { id: 3,  title: 'Lễ Hội Âm Nhạc Xanh #3',           date: '2026-10-04', tag: 'music',    tagLabel: 'Âm nhạc',  status: 'upcoming', seats: 150, capacity: 200, price: 120000, img: '' },
-  { id: 4,  title: 'Workshop Nhiếp Ảnh Thiên Nhiên',    date: '2026-10-11', tag: 'outdoor',  tagLabel: 'Outdoor',  status: 'upcoming', seats: 12,  capacity: 15,  price: 450000, img: '' },
-  { id: 5,  title: 'Ẩm Thực Rừng — Mâm Cơm Địa Phương',date: '2026-09-14', tag: 'food',     tagLabel: 'Ẩm thực',  status: 'past',     seats: 0,   capacity: 40,  price: 280000, img: '' },
-  { id: 6,  title: 'Chạy Trail Trảng Bay 5km',          date: '2026-09-07', tag: 'outdoor',  tagLabel: 'Outdoor',  status: 'past',     seats: 0,   capacity: 100, price: 100000, img: '' },
+  { id: 1, title: 'Triển lãm điêu khắc “Sông Vân”', date: '2026-03-22', tag: 'exhibition', tagLabel: 'Triển lãm', status: 'past', seats: 0, capacity: 1, price: 0, img: '' },
 ];
 
 const filtered = computed(() =>
@@ -55,9 +49,9 @@ function seatsColor(e: typeof allEvents[0]) {
 
     <div class="section-head">
       <div class="section-eyebrow">Lịch trình</div>
-      <h1 class="section-title">Sự kiện tại Trảng Bay</h1>
+      <h1 class="section-title">Sự kiện tại Sông Vân</h1>
       <p class="section-sub">
-        Trekking, đêm ngắm sao, âm nhạc acoustic và nhiều trải nghiệm sinh thái đặc sắc. Cập nhật hàng tháng.
+        Theo dõi các triển lãm, workshop và cuộc trò chuyện xoay quanh điêu khắc, vật liệu và làng nghề đá.
       </p>
     </div>
 

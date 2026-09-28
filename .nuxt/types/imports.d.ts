@@ -135,7 +135,6 @@ declare global {
   const useRuntimeConfig: typeof import('../../node_modules/nuxt/dist/app/nuxt').useRuntimeConfig
   const useRuntimeHook: typeof import('../../node_modules/nuxt/dist/app/composables/runtime-hook').useRuntimeHook
   const useRuntimeStore: typeof import('../../stores/runtime').useRuntimeStore
-  const useSceneTransition: typeof import('../../composables/useSceneTransition').useSceneTransition
   const useScript: typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs').useScript
   const useScriptAhrefsAnalytics: typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs').useScriptAhrefsAnalytics
   const useScriptBingUet: typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs').useScriptBingUet
@@ -185,16 +184,11 @@ declare global {
   const useServerSeoMeta: typeof import('../../node_modules/nuxt/dist/app/composables/head').useServerSeoMeta
   const useShadowRoot: typeof import('vue').useShadowRoot
   const useSlots: typeof import('vue').useSlots
-  const useSnapshot: typeof import('../../composables/useSnapshot').useSnapshot
   const useState: typeof import('../../node_modules/nuxt/dist/app/composables/state').useState
   const useTemplateRef: typeof import('vue').useTemplateRef
   const useTheme: typeof import('../../composables/useTheme').useTheme
-  const useThree360Engine: typeof import('../../composables/useThree360Engine').useThree360Engine
   const useToast: typeof import('../../composables/useToast').useToast
-  const useTransition: typeof import('../../composables/useTransition').useTransition
   const useTransitionState: typeof import('vue').useTransitionState
-  const useViewer360: typeof import('../../composables/useViewer360').useViewer360
-  const useWarpTransition: typeof import('../../composables/useWarpTransition').useWarpTransition
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
   const watchPostEffect: typeof import('vue').watchPostEffect
@@ -215,23 +209,11 @@ declare global {
   export type { ImageLoadResult } from '../../composables/useImageLoader'
   import('../../composables/useImageLoader')
   // @ts-ignore
-  export type { SceneTransitionHandle } from '../../composables/useSceneTransition'
-  import('../../composables/useSceneTransition')
-  // @ts-ignore
   export type { ToggleVariant } from '../../composables/useTheme'
   import('../../composables/useTheme')
   // @ts-ignore
-  export type { UseThree360Options } from '../../composables/useThree360Engine'
-  import('../../composables/useThree360Engine')
-  // @ts-ignore
   export type { ToastVariant, ToastItem } from '../../composables/useToast'
   import('../../composables/useToast')
-  // @ts-ignore
-  export type { TransitionStyle, TransitionHandle, TransitionOptions } from '../../composables/useTransition'
-  import('../../composables/useTransition')
-  // @ts-ignore
-  export type { UseViewer360Options } from '../../composables/useViewer360'
-  import('../../composables/useViewer360')
   // @ts-ignore
   export type { EditorAddMode } from '../../stores/editor'
   import('../../stores/editor')
@@ -374,7 +356,6 @@ declare module 'vue' {
     readonly useRuntimeConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['useRuntimeConfig']>
     readonly useRuntimeHook: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/runtime-hook')['useRuntimeHook']>
     readonly useRuntimeStore: UnwrapRef<typeof import('../../stores/runtime')['useRuntimeStore']>
-    readonly useSceneTransition: UnwrapRef<typeof import('../../composables/useSceneTransition')['useSceneTransition']>
     readonly useScript: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs')['useScript']>
     readonly useScriptAhrefsAnalytics: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs')['useScriptAhrefsAnalytics']>
     readonly useScriptBingUet: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/script-stubs')['useScriptBingUet']>
@@ -424,16 +405,11 @@ declare module 'vue' {
     readonly useServerSeoMeta: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/head')['useServerSeoMeta']>
     readonly useShadowRoot: UnwrapRef<typeof import('vue')['useShadowRoot']>
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
-    readonly useSnapshot: UnwrapRef<typeof import('../../composables/useSnapshot')['useSnapshot']>
     readonly useState: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/state')['useState']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
     readonly useTheme: UnwrapRef<typeof import('../../composables/useTheme')['useTheme']>
-    readonly useThree360Engine: UnwrapRef<typeof import('../../composables/useThree360Engine')['useThree360Engine']>
     readonly useToast: UnwrapRef<typeof import('../../composables/useToast')['useToast']>
-    readonly useTransition: UnwrapRef<typeof import('../../composables/useTransition')['useTransition']>
     readonly useTransitionState: UnwrapRef<typeof import('vue')['useTransitionState']>
-    readonly useViewer360: UnwrapRef<typeof import('../../composables/useViewer360')['useViewer360']>
-    readonly useWarpTransition: UnwrapRef<typeof import('../../composables/useWarpTransition')['useWarpTransition']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>
     readonly watchPostEffect: UnwrapRef<typeof import('vue')['watchPostEffect']>

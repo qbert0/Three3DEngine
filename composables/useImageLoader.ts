@@ -127,11 +127,16 @@ export function useImageLoader() {
     const start = performance.now();
     const fromCache = cache.has(src) && !!cache.get(src)?.element;
 
-    return loadImage(src).then(() => ({
-      src,
-      fromCache,
-      loadMs: performance.now() - start,
-    }));
+    return loadImage(src).then(async (img) => {
+      // A background preload intentionally skips decode. Decode on demand so
+      // PSV does not have to do this expensive work during the transition.
+      if ('decode' in img) await img.decode().catch(() => {});
+      return {
+        src,
+        fromCache,
+        loadMs: performance.now() - start,
+      };
+    });
   }
 
   /**

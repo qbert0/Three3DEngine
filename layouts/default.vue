@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * layouts/default.vue — Trảng Bay Business Layout
+ * layouts/default.vue — Sông Vân Art Space Layout
  * Học từ Heritage Design System (design/index.html):
  * - Topbar info strip (hotline, giờ mở cửa, mạng xã hội)
  * - Sticky header: logo tròn serif + nav links + CTA
@@ -12,7 +12,7 @@ const mobileOpen = ref(false);
 const navLinks = [
   { to: '/',        label: 'Trang chủ',  exact: true  },
   { to: '/tours',   label: 'Tour 360°',  exact: false },
-  { to: '/tickets', label: 'Đặt vé',     exact: false },
+  { to: '/tickets', label: 'Tham quan',  exact: false },
   { to: '/events',  label: 'Sự kiện',    exact: false },
   { to: '/about',   label: 'Giới thiệu', exact: false },
 ];
@@ -28,12 +28,12 @@ watch(() => route.path, () => { mobileOpen.value = false; });
       <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; gap: 6px;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Mở cửa: <strong style="color: var(--tb-bronze); margin-left: 4px;">7:00 – 18:00</strong> &nbsp;·&nbsp; Hàng ngày
+          Tham quan: <strong style="color: var(--tb-bronze); margin-left: 4px;">Đặt lịch trước khi đến</strong>
         </div>
         <div style="display: flex; align-items: center; gap: 20px;">
-          <a href="tel:0900000000" style="color: rgba(245,239,230,.7); text-decoration: none; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.color='var(--tb-bronze)'" onmouseout="this.style.color='rgba(245,239,230,.7)'">
+          <a href="tel:+84988793456" style="color: rgba(245,239,230,.7); text-decoration: none; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.color='var(--tb-bronze)'" onmouseout="this.style.color='rgba(245,239,230,.7)'">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Hotline: <strong style="color: var(--tb-bronze);">0900 000 000</strong>
+            <strong style="color: var(--tb-bronze);">+84 988 793 456</strong>
           </a>
           <ThemeToggle size="text-base" />
           <NuxtLink to="/admin" style="color: rgba(245,239,230,.6); font-size: 11px; text-decoration: none;">Quản trị</NuxtLink>
@@ -48,11 +48,11 @@ watch(() => route.path, () => { mobileOpen.value = false; });
         <!-- Logo -->
         <NuxtLink to="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
           <div style="width: 44px; height: 44px; display: grid; place-items: center; background: linear-gradient(135deg, var(--tb-forest), var(--tb-forest-dk)); color: #fff; border-radius: 50%; font-family: var(--font-serif); font-weight: 600; font-size: 19px; box-shadow: var(--shadow-md); flex-shrink: 0;">
-            T
+            SV
           </div>
           <div style="line-height: 1.1;">
-            <strong style="display: block; font-family: var(--font-serif); font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: var(--tb-ink);">Trảng Bay</strong>
-            <span style="font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--tb-muted);">Khu du lịch sinh thái</span>
+            <strong style="display: block; font-family: var(--font-serif); font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: var(--tb-ink);">Sông Vân</strong>
+            <span style="font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--tb-muted);">Art Space · Ninh Bình</span>
           </div>
         </NuxtLink>
 
@@ -80,7 +80,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
               onmouseover="this.style.background='var(--tb-forest-dk)'; this.style.transform='translateY(-1px)'"
               onmouseout="this.style.background='var(--tb-forest)'; this.style.transform='translateY(0)'">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
-              Đặt vé
+              Đăng ký tham quan
             </button>
           </NuxtLink>
 
@@ -103,7 +103,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
           </NuxtLink>
           <NuxtLink to="/tickets" style="display: block; margin-top: 8px;">
             <button type="button" style="width: 100%; padding: 11px; border-radius: 999px; background: var(--tb-forest); color: #fff; font-weight: 600; font-size: 14px; border: none; cursor: pointer; font-family: var(--font-sans);">
-              Đặt vé ngay
+              Đăng ký tham quan
             </button>
           </NuxtLink>
         </div>
@@ -124,11 +124,11 @@ watch(() => route.path, () => { mobileOpen.value = false; });
           <!-- Brand + newsletter -->
           <div>
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-              <div style="width: 40px; height: 40px; display: grid; place-items: center; background: linear-gradient(135deg, var(--tb-forest), var(--tb-forest-dk)); color: #fff; border-radius: 50%; font-family: var(--font-serif); font-weight: 600; font-size: 17px;">T</div>
-              <strong style="color: #fff; font-family: var(--font-serif); font-size: 18px;">Trảng Bay</strong>
+              <div style="width: 40px; height: 40px; display: grid; place-items: center; background: linear-gradient(135deg, var(--tb-forest), var(--tb-forest-dk)); color: #fff; border-radius: 50%; font-family: var(--font-serif); font-weight: 600; font-size: 15px;">SV</div>
+              <strong style="color: #fff; font-family: var(--font-serif); font-size: 18px;">Sông Vân Art Space</strong>
             </div>
             <p style="font-size: 13px; line-height: 1.7; max-width: 300px; margin-bottom: 20px;">
-              Khu du lịch sinh thái Trảng Bay — 1.200 ha thiên nhiên nguyên sinh, nơi bảo tồn và mang trải nghiệm tự nhiên đến gần công chúng.
+              Không gian nghệ thuật bên dòng sông Vân, nơi điêu khắc đá đương đại gặp gỡ truyền thống làng nghề Ninh Vân.
             </p>
             <div style="display: flex; gap: 8px;">
               <input type="email" placeholder="Email của bạn..."
@@ -155,7 +155,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
           <div>
             <h5 style="color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 20px;">Hỗ trợ</h5>
             <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 10px;">
-              <li v-for="item in ['Hướng dẫn đặt vé','Chính sách hoàn vé','Câu hỏi thường gặp','Liên hệ hợp tác']" :key="item">
+              <li v-for="item in ['Hướng dẫn tham quan','Thông tin không gian','Câu hỏi thường gặp','Liên hệ hợp tác']" :key="item">
                 <a href="#" style="font-size: 13px; color: rgba(245,239,230,.7); text-decoration: none; transition: color .15s;" onmouseover="this.style.color='var(--tb-bronze)'" onmouseout="this.style.color='rgba(245,239,230,.7)'">
                   {{ item }}
                 </a>
@@ -168,9 +168,9 @@ watch(() => route.path, () => { mobileOpen.value = false; });
             <h5 style="color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 20px;">Liên hệ</h5>
             <div style="display: grid; gap: 12px; font-size: 13px;">
               <div v-for="c in [
-                { icon: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0', text: 'Rừng Núi Trảng Bay, Việt Nam' },
-                { icon: 'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z', text: '0900 000 000' },
-                { icon: 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M22 6l-10 7L2 6', text: 'info@trangbay.vn' },
+                { icon: 'M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0', text: 'Thôn Xuân Phúc, phường Nam Hoa Lư, Ninh Bình' },
+                { icon: 'M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 1 2.81.7A2 2 0 0 1 22 16.92z', text: 'Liên hệ trước khi tham quan' },
+                { icon: 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z M22 6l-10 7L2 6', text: 'Sông Vân Art Space' },
               ]" :key="c.text" style="display: flex; gap: 10px; align-items: flex-start;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--tb-bronze)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 2px;">
                   <path :d="c.icon" />
@@ -183,7 +183,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
 
         <!-- Footer bottom -->
         <div style="padding: 20px 0; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 12px;">
-          <div>© 2026 Khu Du Lịch Trảng Bay. Bảo lưu mọi quyền.</div>
+          <div>© 2026 Sông Vân Art Space. Bảo lưu mọi quyền.</div>
           <div style="display: flex; gap: 8px; align-items: center;">
             <a v-for="s in ['facebook','instagram','youtube']" :key="s" href="#"
               style="width: 34px; height: 34px; display: grid; place-items: center; background: rgba(255,255,255,.05); border-radius: 50%; color: rgba(245,239,230,.7); text-decoration: none; transition: all .2s;"

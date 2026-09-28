@@ -3,16 +3,13 @@
  * pages/experience/[tourId].vue
  * ──────────────────────────────────────────────────────────────────────────────
  * Route: /experience/:tourId
- * Immersive 360° Viewer page matching design/viewer.html.
- * Includes glassmorphic TopBar, Slide-in Side Panels (Help & Info), FAB Stack,
- * Collapsible Bottom Dock (with auto-collapse, hover timer reset, scene flash),
- * Keyboard shortcuts (D, F, H, ?, Arrow keys, Esc), and Immersive Mode.
+ * Immersive 360° Viewer page — Three.js core engine via useViewerEngine bridge.
  * ──────────────────────────────────────────────────────────────────────────────
  */
-import type { TourConfig, TourScene } from '~/types/tour';
+import type { TourConfig, TourScene, TourMarker } from '~/types/tour';
 import { useRuntimeStore } from '~/stores/runtime';
 import { useToast } from '~/composables/useToast';
-import ExperienceViewer360 from '~/components/experience/Viewer360.vue';
+import { useViewerEngine } from '~/composables/viewer/useViewerEngine';
 
 definePageMeta({ layout: 'experience', ssr: false });
 
@@ -56,6 +53,45 @@ watch(tour, (t) => {
 }, { immediate: true });
 
 onBeforeUnmount(() => store.reset());
+
+// ── Three.js Engine Bridge ────────────────────────────────────────────────────
+const canvasContainerRef = ref<HTMLElement | null>(null);
+const activeHotspot = ref<TourMarker | null>(null);
+
+const { isLoading: engineLoading, isTransitioning, errorMessage: engineError,
+        currentScene: engineScene, initEngine, navigateTo,
+        getDiagnostics, setQualityMode } = useViewerEngine({
+  onNavigate: (sceneId) => handleNavigate(sceneId),
+  onHotspotClick: (marker) => { activeHotspot.value = marker; },
+  autorotate: computed(() => tour.value?.autoRotate ?? false).value,
+  transition: 'fly-through',
+});
+
+// Mount engine once canvas container is available
+watch(canvasContainerRef, async (el) => {
+  if (!el || !activeScene.value) return;
+  await initEngine(el, activeScene.value, tour.value ?? undefined);
+}, { once: true });
+
+// Navigate engine when activeSceneId changes (from UI)
+watch(activeSceneId, async (id) => {
+  const scene = scenes.value.find(s => s.id === id);
+  if (!scene || !engineScene.value || engineScene.value.id === id) return;
+  await navigateTo(scene, scenes.value);
+});
+
+// ── Dev tools state (chỉ dùng trong development) ───────────────────────────
+const devQualityMode = ref<import('~/composables/viewer/useViewerEngine').QualityMode>('quality');
+const devCompareMode = ref<'panorama' | 'flat-100' | 'fit-screen'>('panorama');
+const devPanoUrl    = computed(() => engineScene.value?.panorama ?? '');
+
+function handleDevQualityChange(mode: typeof devQualityMode.value) {
+  devQualityMode.value = mode;
+  setQualityMode(mode);
+}
+function handleDevCompareMode(mode: typeof devCompareMode.value) {
+  devCompareMode.value = mode;
+}
 
 // ── UI State ──────────────────────────────────────────────────────────────────
 const toast = useToast();
@@ -277,13 +313,49 @@ onBeforeUnmount(() => {
 
     <!-- Main 360 Full-Bleed Viewer -->
     <template v-else>
-      <!-- ═══ 360 PANORAMA VIEW360 ENGINE ═══ -->
-      <ExperienceViewer360
-        :tour="tour"
-        :scene="activeScene"
-        @navigate="handleNavigate"
-        @info-open="handleInfoOpen"
+      <!-- ═══ 360 PANORAMA — Three.js Engine ═══ -->
+      <!-- Image comparison overlay (dev) -->
+      <DevImageComparison
+        v-if="$dev && devCompareMode !== 'panorama'"
+        :url="devPanoUrl"
+        :mode="devCompareMode as 'flat-100' | 'fit-screen'"
+        @close="devCompareMode = 'panorama'"
       />
+
+      <!-- Canvas (always rendered, hidden when compare overlay is active) -->
+      <div
+        ref="canvasContainerRef"
+        class="absolute inset-0 h-full w-full"
+        :style="{ visibility: devCompareMode !== 'panorama' ? 'hidden' : 'visible' }"
+        aria-label="Panorama 360°"
+      />
+
+      <!-- Engine HUD (loading / error / scene badge) -->
+      <ViewerHUD
+        :is-loading="engineLoading"
+        :is-transitioning="isTransitioning"
+        :error-message="engineError"
+        :current-scene="engineScene"
+      />
+
+      <!-- Hotspot info panel -->
+      <ViewerHotspotPanel
+        :marker="activeHotspot"
+        @close="activeHotspot = null"
+        @audio-play="(src) => new Audio(src).play().catch(() => {})"
+      />
+
+      <!-- ═══ DEV TOOLS (only in development) ═══ -->
+      <DevDiagnosticPanel
+        v-if="$dev"
+        :get-diagnostics="getDiagnostics"
+        :set-quality-mode="setQualityMode"
+        :current-quality="devQualityMode"
+        :panorama-url="devPanoUrl"
+        @quality-change="handleDevQualityChange"
+        @compare-mode="handleDevCompareMode"
+      />
+
 
       <!-- ═══ TOP BAR ═══ -->
       <div class="topbar">

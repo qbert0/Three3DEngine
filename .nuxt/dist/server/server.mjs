@@ -387,9 +387,24 @@ const createError = (error) => {
   });
   return nuxtError;
 };
-const matcher = (m, p) => {
-  return [];
-};
+const matcher = /* @__PURE__ */ (() => {
+  const $0 = {};
+  return (m, p) => {
+    let r = [];
+    if (p.charCodeAt(p.length - 1) === 47) p = p.slice(0, -1) || "/";
+    let s = p.split("/"), l = s.length;
+    if (l > 1) {
+      if (s[1] === "images") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "uploads") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "thumbnails") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      }
+    }
+    return r;
+  };
+})();
 const _routeRulesMatcher = (path) => defu({}, ...matcher("", typeof path === "string" ? path.toLowerCase() : path).map((r) => r.data).reverse());
 const routeRulesMatcher$1 = _routeRulesMatcher;
 function getRouteRules(arg) {
@@ -455,19 +470,19 @@ const _routes = [
     name: "about",
     path: "/about",
     meta: __nuxt_page_meta$b || {},
-    component: () => import("./_nuxt/about-C_Gbpl7V.js")
+    component: () => import("./_nuxt/about-Xrtdkedn.js")
   },
   {
     name: "index",
     path: "/",
     meta: __nuxt_page_meta$a || {},
-    component: () => import("./_nuxt/index-BaUuIVlm.js")
+    component: () => import("./_nuxt/index-C21fRdyK.js")
   },
   {
     name: "tours",
     path: "/tours",
     meta: __nuxt_page_meta$8 || {},
-    component: () => import("./_nuxt/tours-h7uahMRf.js"),
+    component: () => import("./_nuxt/tours-BdMhSJk0.js"),
     children: [
       {
         name: "tours-tourId",
@@ -481,13 +496,13 @@ const _routes = [
     name: "events",
     path: "/events",
     meta: __nuxt_page_meta$7 || {},
-    component: () => import("./_nuxt/events-CixTEtzv.js")
+    component: () => import("./_nuxt/events-waVQst3L.js")
   },
   {
     name: "tickets",
     path: "/tickets",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import("./_nuxt/tickets-ChZBhEmS.js")
+    component: () => import("./_nuxt/tickets-BPZGju5V.js")
   },
   {
     name: "ui-demo",
@@ -511,7 +526,7 @@ const _routes = [
     name: "experience-tourId",
     path: "/experience/:tourId()",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import("./_nuxt/_tourId_-putQEqR3.js"),
+    component: () => import("./_nuxt/_tourId_-BQUY8yLm.js"),
     children: [
       {
         name: "experience-tourId-ownerTourId-sceneId",
@@ -525,7 +540,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import("./_nuxt/_sceneId_-CGshubEZ.js")
+    component: () => import("./_nuxt/_sceneId_-DvDigOmH.js")
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -987,7 +1002,7 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import("./_nuxt/default-CcMUy8W3.js").then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import("./_nuxt/default-Dvg2ORgr.js").then((m) => m.default || m)),
   editor: defineAsyncComponent(() => import("./_nuxt/editor-D0JMPdjq.js").then((m) => m.default || m)),
   experience: defineAsyncComponent(() => import("./_nuxt/experience-MhrPHmsv.js").then((m) => m.default || m))
 };

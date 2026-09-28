@@ -32,9 +32,7 @@ export const UiToastProvider: typeof import("../components/ui/ToastProvider.vue"
 export const UiTooltip: typeof import("../components/ui/Tooltip.vue")['default']
 export const HotspotPanel: typeof import("../components/experience/HotspotPanel.vue")['default']
 export const SceneList: typeof import("../components/experience/SceneList.vue")['default']
-export const ThreeViewer360: typeof import("../components/experience/ThreeViewer360.vue")['default']
 export const TourSidebar: typeof import("../components/experience/TourSidebar.vue")['default']
-export const Viewer360: typeof import("../components/experience/Viewer360.vue")['default']
 export const SceneGraph: typeof import("../components/editor/SceneGraph.vue")['default']
 export const SceneGraphNode: typeof import("../components/editor/SceneGraphNode.vue")['default']
 export const TourCard: typeof import("../components/catalog/TourCard.vue")['default']
@@ -85,9 +83,7 @@ export const LazyUiToastProvider: LazyComponent<typeof import("../components/ui/
 export const LazyUiTooltip: LazyComponent<typeof import("../components/ui/Tooltip.vue")['default']>
 export const LazyHotspotPanel: LazyComponent<typeof import("../components/experience/HotspotPanel.vue")['default']>
 export const LazySceneList: LazyComponent<typeof import("../components/experience/SceneList.vue")['default']>
-export const LazyThreeViewer360: LazyComponent<typeof import("../components/experience/ThreeViewer360.vue")['default']>
 export const LazyTourSidebar: LazyComponent<typeof import("../components/experience/TourSidebar.vue")['default']>
-export const LazyViewer360: LazyComponent<typeof import("../components/experience/Viewer360.vue")['default']>
 export const LazySceneGraph: LazyComponent<typeof import("../components/editor/SceneGraph.vue")['default']>
 export const LazySceneGraphNode: LazyComponent<typeof import("../components/editor/SceneGraphNode.vue")['default']>
 export const LazyTourCard: LazyComponent<typeof import("../components/catalog/TourCard.vue")['default']>

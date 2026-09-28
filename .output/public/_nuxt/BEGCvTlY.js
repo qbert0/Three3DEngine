@@ -1,0 +1,1 @@
+import{e as n,o,c as s,B as r}from"./BVol67qB.js";const t={class:"h-screen w-screen overflow-hidden bg-ink"},_=n({__name:"experience",setup(c){return(e,a)=>(o(),s("div",t,[r(e.$slots,"default")]))}});export{_ as default};

@@ -2,10 +2,10 @@ import type { TourConfig } from '../../../types/tour';
 
 export const trangBayTour: TourConfig = {
   slug: 'trang-bay',
-  title: 'Tour 360° Trảng Bay',
-  location: 'Rừng Núi Trảng Bay',
+  title: 'Tour 360° Sông Vân Art Space',
+  location: 'Nam Hoa Lư, Ninh Bình',
   summary:
-    'Khám phá toàn cảnh 360° tại khu vực Trảng Bay và vùng lân cận. Xoay ảnh để quan sát chi tiết địa hình, thảm thực vật và cảnh quan thiên nhiên.',
+    'Khám phá Sông Vân Art Space giữa làng nghề đá Ninh Vân qua trải nghiệm panorama 360°.',
   duration: 'Tự do',
   theme: 'nature',
   initialSceneId: 'scene-c7',
@@ -16,7 +16,7 @@ export const trangBayTour: TourConfig = {
       title: 'Đỉnh Nhìn Ra Thung Lũng',
       subtitle: 'Toàn cảnh khu vực trung tâm, điểm khởi đầu của hành trình.',
       panorama: '/images/1788771876123.jpg',
-      thumbnail: '/thumbnails/new/1788771876123.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876123.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -35,7 +35,7 @@ export const trangBayTour: TourConfig = {
       title: 'Rìa Rừng Thưa',
       subtitle: 'Ranh giới giữa rừng và trảng cỏ, ánh sáng lọc qua tán lá.',
       panorama: '/images/1788771876132.jpg',
-      thumbnail: '/thumbnails/new/1788771876132.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876132.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -70,7 +70,7 @@ export const trangBayTour: TourConfig = {
       title: 'Lối Mòn Giữa Trảng',
       subtitle: 'Con đường nhỏ xuyên qua thảm thực vật, dấu chân người đi trước.',
       panorama: '/images/1788771876143.jpg',
-      thumbnail: '/thumbnails/new/1788771876143.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876143.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -97,7 +97,7 @@ export const trangBayTour: TourConfig = {
       title: 'Bãi Cỏ Thoáng Đãng',
       subtitle: 'Không gian mở rộng, tầm nhìn 360° không bị che khuất.',
       panorama: '/images/1788771876162.jpg',
-      thumbnail: '/thumbnails/new/1788771876162.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876162.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -132,7 +132,7 @@ export const trangBayTour: TourConfig = {
       title: 'Góc Nhìn Phía Núi',
       subtitle: 'Dãy núi xa phía chân trời, mây trôi nhẹ trên đỉnh.',
       panorama: '/images/1788771876173.jpg',
-      thumbnail: '/thumbnails/new/1788771876173.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876173.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -159,7 +159,7 @@ export const trangBayTour: TourConfig = {
       title: 'Vùng Cây Bụi Thấp',
       subtitle: 'Thảm cây bụi dày đặc, nơi chuyển tiếp giữa rừng và trảng.',
       panorama: '/images/1788771876183.jpg',
-      thumbnail: '/thumbnails/new/1788771876183.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876183.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [],
@@ -169,7 +169,7 @@ export const trangBayTour: TourConfig = {
       title: 'Điểm Hợp Lưu',
       subtitle: 'Nơi ba hướng đi gặp nhau – cửa ngõ vào khu Trảng Bay.',
       panorama: '/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg',
-      thumbnail: '/thumbnails/new/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg',
+      thumbnail: '/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -196,7 +196,7 @@ export const trangBayTour: TourConfig = {
       title: 'Cổng Vào Trảng Bay 1',
       subtitle: 'Bắt đầu hành trình tại cửa ngõ của Trảng Bay 1.',
       panorama: '/images/trbay1/1788771876074.jpg',
-      thumbnail: '/thumbnails/new/1788771876074.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876074.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -215,7 +215,7 @@ export const trangBayTour: TourConfig = {
       title: 'Đồng Trảng Rộng',
       subtitle: 'Mặt trảng phẳng rộng, cỏ xanh mướt trải dài tới tận chân trời.',
       panorama: '/images/trbay1/1788771876090.jpg',
-      thumbnail: '/thumbnails/new/1788771876090.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876090.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -242,7 +242,7 @@ export const trangBayTour: TourConfig = {
       title: 'Góc Phía Đông Trảng',
       subtitle: 'Hướng nhìn phía Đông, nơi nắng sáng chiếu rõ từng cọng cỏ.',
       panorama: '/images/trbay1/1788771876098.jpg',
-      thumbnail: '/thumbnails/new/1788771876098.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876098.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -277,7 +277,7 @@ export const trangBayTour: TourConfig = {
       title: 'Trung Tâm Trảng Bay 1',
       subtitle: 'Điểm giữa của Trảng Bay 1, toàn cảnh tứ phía không bị che.',
       panorama: '/images/trbay1/1788771876106.jpg',
-      thumbnail: '/thumbnails/new/1788771876106.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876106.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -304,7 +304,7 @@ export const trangBayTour: TourConfig = {
       title: 'Biên Giới Hai Trảng',
       subtitle: 'Ranh giới tự nhiên giữa Trảng Bay 1 và Trảng Bay 2.',
       panorama: '/images/trbay1/1788771876114.jpg',
-      thumbnail: '/thumbnails/new/1788771876114.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876114.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -331,7 +331,7 @@ export const trangBayTour: TourConfig = {
       title: 'Cổng Vào Trảng Bay 2',
       subtitle: 'Bắt đầu khám phá khu vực Trảng Bay 2, địa hình lạ hơn.',
       panorama: '/images/trbay2/1788771876042.jpg',
-      thumbnail: '/thumbnails/new/1788771876042.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876042.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [],
@@ -341,7 +341,7 @@ export const trangBayTour: TourConfig = {
       title: 'Vùng Cỏ Lau Cao',
       subtitle: 'Cỏ lau cao vút che phủ, tạo hành lang xanh tự nhiên.',
       panorama: '/images/trbay2/1788771876050.jpg',
-      thumbnail: '/thumbnails/new/1788771876050.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876050.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [],
@@ -351,7 +351,7 @@ export const trangBayTour: TourConfig = {
       title: 'Bờ Rừng Phía Tây',
       subtitle: 'Cây rừng cao vút phía Tây, bóng mát che phủ mặt trảng.',
       panorama: '/images/trbay2/1788771876058.jpg',
-      thumbnail: '/thumbnails/new/1788771876058.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876058.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -370,7 +370,7 @@ export const trangBayTour: TourConfig = {
       title: 'Cuối Trảng Bay 2',
       subtitle: 'Điểm kết thúc hành trình – nhìn lại toàn bộ con đường đã đi.',
       panorama: '/images/trbay2/1788771876067.jpg',
-      thumbnail: '/thumbnails/new/1788771876067.jpg',
+      thumbnail: '/thumbnails/trang-bay/1788771876067.jpg',
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [

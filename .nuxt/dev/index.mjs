@@ -684,6 +684,21 @@ const _inlineRuntimeConfig = {
       "/__nuxt_error": {
         "cache": false
       },
+      "/images/**": {
+        "headers": {
+          "cache-control": "public, max-age=31536000, immutable"
+        }
+      },
+      "/uploads/**": {
+        "headers": {
+          "cache-control": "public, max-age=31536000, immutable"
+        }
+      },
+      "/thumbnails/**": {
+        "headers": {
+          "cache-control": "public, max-age=31536000, immutable"
+        }
+      },
       "/_nuxt/builds/meta/**": {
         "headers": {
           "cache-control": "public, max-age=31536000, immutable"
@@ -2110,7 +2125,7 @@ const _q1ZScfGbj9qCMgFQOe8zWkedPEk9DBJBLIHVGM7K5V8 = (function(nitro) {
 
 const rootDir = "/run/media/qbert/1C8099B8809998BA/codedao/view360";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Khu du lịch sinh thái Trảng Bay — Trải nghiệm thiên nhiên hoang sơ qua panorama 360°, đặt vé online và khám phá sự kiện."}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"preconnect","href":"https://fonts.gstatic.com","crossorigin":""},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap"}],"style":[],"script":[],"noscript":[],"title":"Trảng Bay — Khu Du Lịch Sinh Thái"};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Khám phá Sông Vân Art Space tại Ninh Bình qua tour panorama 360° — nơi điêu khắc đá đương đại đối thoại với làng nghề Ninh Vân."}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"preconnect","href":"https://fonts.gstatic.com","crossorigin":""},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap"}],"style":[],"script":[],"noscript":[],"title":"Sông Vân Art Space — Không gian nghệ thuật tại Ninh Bình"};
 
 const appRootTag = "div";
 
@@ -2771,6 +2786,7 @@ async function getIslandContext(event) {
 const _lazy_xXCZDw = () => Promise.resolve().then(function () { return media_post$1; });
 const _lazy_PGQEaE = () => Promise.resolve().then(function () { return _slug__post$1; });
 const _lazy_VypIyW = () => Promise.resolve().then(function () { return markers_post$1; });
+const _lazy_rMCeiW = () => Promise.resolve().then(function () { return validate_post$1; });
 const _lazy_Cu4gt4 = () => Promise.resolve().then(function () { return places_get$1; });
 const _lazy_5853ui = () => Promise.resolve().then(function () { return _slug__get$3; });
 const _lazy_exYNoq = () => Promise.resolve().then(function () { return tours_get$1; });
@@ -2783,6 +2799,7 @@ const handlers = [
   { route: '/api/admin/media', handler: _lazy_xXCZDw, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/tours/:slug', handler: _lazy_PGQEaE, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/tours/:slug/scenes/:sceneId/markers', handler: _lazy_VypIyW, lazy: true, middleware: false, method: "post" },
+  { route: '/api/panorama/validate', handler: _lazy_rMCeiW, lazy: true, middleware: false, method: "post" },
   { route: '/api/places', handler: _lazy_Cu4gt4, lazy: true, middleware: false, method: "get" },
   { route: '/api/places/:slug', handler: _lazy_5853ui, lazy: true, middleware: false, method: "get" },
   { route: '/api/tours', handler: _lazy_exYNoq, lazy: true, middleware: false, method: "get" },
@@ -3229,9 +3246,9 @@ const media_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProper
 
 const trangBayTour = {
   slug: "trang-bay",
-  title: "Tour 360\xB0 Tr\u1EA3ng Bay",
-  location: "R\u1EEBng N\xFAi Tr\u1EA3ng Bay",
-  summary: "Kh\xE1m ph\xE1 to\xE0n c\u1EA3nh 360\xB0 t\u1EA1i khu v\u1EF1c Tr\u1EA3ng Bay v\xE0 v\xF9ng l\xE2n c\u1EADn. Xoay \u1EA3nh \u0111\u1EC3 quan s\xE1t chi ti\u1EBFt \u0111\u1ECBa h\xECnh, th\u1EA3m th\u1EF1c v\u1EADt v\xE0 c\u1EA3nh quan thi\xEAn nhi\xEAn.",
+  title: "Tour 360\xB0 S\xF4ng V\xE2n Art Space",
+  location: "Nam Hoa L\u01B0, Ninh B\xECnh",
+  summary: "Kh\xE1m ph\xE1 S\xF4ng V\xE2n Art Space gi\u1EEFa l\xE0ng ngh\u1EC1 \u0111\xE1 Ninh V\xE2n qua tr\u1EA3i nghi\u1EC7m panorama 360\xB0.",
   duration: "T\u1EF1 do",
   theme: "nature",
   initialSceneId: "scene-c7",
@@ -3242,7 +3259,7 @@ const trangBayTour = {
       title: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
       subtitle: "To\xE0n c\u1EA3nh khu v\u1EF1c trung t\xE2m, \u0111i\u1EC3m kh\u1EDFi \u0111\u1EA7u c\u1EE7a h\xE0nh tr\xECnh.",
       panorama: "/images/1788771876123.jpg",
-      thumbnail: "/thumbnails/new/1788771876123.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3261,7 +3278,7 @@ const trangBayTour = {
       title: "R\xECa R\u1EEBng Th\u01B0a",
       subtitle: "Ranh gi\u1EDBi gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng c\u1ECF, \xE1nh s\xE1ng l\u1ECDc qua t\xE1n l\xE1.",
       panorama: "/images/1788771876132.jpg",
-      thumbnail: "/thumbnails/new/1788771876132.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3296,7 +3313,7 @@ const trangBayTour = {
       title: "L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng",
       subtitle: "Con \u0111\u01B0\u1EDDng nh\u1ECF xuy\xEAn qua th\u1EA3m th\u1EF1c v\u1EADt, d\u1EA5u ch\xE2n ng\u01B0\u1EDDi \u0111i tr\u01B0\u1EDBc.",
       panorama: "/images/1788771876143.jpg",
-      thumbnail: "/thumbnails/new/1788771876143.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3323,7 +3340,7 @@ const trangBayTour = {
       title: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
       subtitle: "Kh\xF4ng gian m\u1EDF r\u1ED9ng, t\u1EA7m nh\xECn 360\xB0 kh\xF4ng b\u1ECB che khu\u1EA5t.",
       panorama: "/images/1788771876162.jpg",
-      thumbnail: "/thumbnails/new/1788771876162.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3358,7 +3375,7 @@ const trangBayTour = {
       title: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
       subtitle: "D\xE3y n\xFAi xa ph\xEDa ch\xE2n tr\u1EDDi, m\xE2y tr\xF4i nh\u1EB9 tr\xEAn \u0111\u1EC9nh.",
       panorama: "/images/1788771876173.jpg",
-      thumbnail: "/thumbnails/new/1788771876173.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3385,7 +3402,7 @@ const trangBayTour = {
       title: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
       subtitle: "Th\u1EA3m c\xE2y b\u1EE5i d\xE0y \u0111\u1EB7c, n\u01A1i chuy\u1EC3n ti\u1EBFp gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng.",
       panorama: "/images/1788771876183.jpg",
-      thumbnail: "/thumbnails/new/1788771876183.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: []
@@ -3395,7 +3412,7 @@ const trangBayTour = {
       title: "\u0110i\u1EC3m H\u1EE3p L\u01B0u",
       subtitle: "N\u01A1i ba h\u01B0\u1EDBng \u0111i g\u1EB7p nhau \u2013 c\u1EEDa ng\xF5 v\xE0o khu Tr\u1EA3ng Bay.",
       panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-      thumbnail: "/thumbnails/new/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+      thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3422,7 +3439,7 @@ const trangBayTour = {
       title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 1",
       subtitle: "B\u1EAFt \u0111\u1EA7u h\xE0nh tr\xECnh t\u1EA1i c\u1EEDa ng\xF5 c\u1EE7a Tr\u1EA3ng Bay 1.",
       panorama: "/images/trbay1/1788771876074.jpg",
-      thumbnail: "/thumbnails/new/1788771876074.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3441,7 +3458,7 @@ const trangBayTour = {
       title: "\u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng",
       subtitle: "M\u1EB7t tr\u1EA3ng ph\u1EB3ng r\u1ED9ng, c\u1ECF xanh m\u01B0\u1EDBt tr\u1EA3i d\xE0i t\u1EDBi t\u1EADn ch\xE2n tr\u1EDDi.",
       panorama: "/images/trbay1/1788771876090.jpg",
-      thumbnail: "/thumbnails/new/1788771876090.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3468,7 +3485,7 @@ const trangBayTour = {
       title: "G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng",
       subtitle: "H\u01B0\u1EDBng nh\xECn ph\xEDa \u0110\xF4ng, n\u01A1i n\u1EAFng s\xE1ng chi\u1EBFu r\xF5 t\u1EEBng c\u1ECDng c\u1ECF.",
       panorama: "/images/trbay1/1788771876098.jpg",
-      thumbnail: "/thumbnails/new/1788771876098.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3503,7 +3520,7 @@ const trangBayTour = {
       title: "Trung T\xE2m Tr\u1EA3ng Bay 1",
       subtitle: "\u0110i\u1EC3m gi\u1EEFa c\u1EE7a Tr\u1EA3ng Bay 1, to\xE0n c\u1EA3nh t\u1EE9 ph\xEDa kh\xF4ng b\u1ECB che.",
       panorama: "/images/trbay1/1788771876106.jpg",
-      thumbnail: "/thumbnails/new/1788771876106.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3530,7 +3547,7 @@ const trangBayTour = {
       title: "Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng",
       subtitle: "Ranh gi\u1EDBi t\u1EF1 nhi\xEAn gi\u1EEFa Tr\u1EA3ng Bay 1 v\xE0 Tr\u1EA3ng Bay 2.",
       panorama: "/images/trbay1/1788771876114.jpg",
-      thumbnail: "/thumbnails/new/1788771876114.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3557,7 +3574,7 @@ const trangBayTour = {
       title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
       subtitle: "B\u1EAFt \u0111\u1EA7u kh\xE1m ph\xE1 khu v\u1EF1c Tr\u1EA3ng Bay 2, \u0111\u1ECBa h\xECnh l\u1EA1 h\u01A1n.",
       panorama: "/images/trbay2/1788771876042.jpg",
-      thumbnail: "/thumbnails/new/1788771876042.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: []
@@ -3567,7 +3584,7 @@ const trangBayTour = {
       title: "V\xF9ng C\u1ECF Lau Cao",
       subtitle: "C\u1ECF lau cao v\xFAt che ph\u1EE7, t\u1EA1o h\xE0nh lang xanh t\u1EF1 nhi\xEAn.",
       panorama: "/images/trbay2/1788771876050.jpg",
-      thumbnail: "/thumbnails/new/1788771876050.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: []
@@ -3577,7 +3594,7 @@ const trangBayTour = {
       title: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
       subtitle: "C\xE2y r\u1EEBng cao v\xFAt ph\xEDa T\xE2y, b\xF3ng m\xE1t che ph\u1EE7 m\u1EB7t tr\u1EA3ng.",
       panorama: "/images/trbay2/1788771876058.jpg",
-      thumbnail: "/thumbnails/new/1788771876058.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3596,7 +3613,7 @@ const trangBayTour = {
       title: "Cu\u1ED1i Tr\u1EA3ng Bay 2",
       subtitle: "\u0110i\u1EC3m k\u1EBFt th\xFAc h\xE0nh tr\xECnh \u2013 nh\xECn l\u1EA1i to\xE0n b\u1ED9 con \u0111\u01B0\u1EDDng \u0111\xE3 \u0111i.",
       panorama: "/images/trbay2/1788771876067.jpg",
-      thumbnail: "/thumbnails/new/1788771876067.jpg",
+      thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
       initialYaw: 0,
       initialPitch: -0.05,
       markers: [
@@ -3869,12 +3886,141 @@ const markers_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
   default: markers_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
+const MIN_WIDTH = 4096;
+const MIN_HEIGHT = 2048;
+const IDEAL_WIDTH = 5760;
+const IDEAL_RATIO_MIN = 1.9;
+const IDEAL_RATIO_MAX = 2.1;
+const MAX_FILE_SIZE_MB = 60;
+const THUMBNAIL_MAX_PX = 1024;
+const validate_post = defineEventHandler(async (event) => {
+  var _a, _b, _c, _d, _e, _f;
+  const errors = [];
+  const warnings = [];
+  const recommendations = [];
+  let buffer;
+  let filename = "unknown";
+  let fileSizeKB = 0;
+  const contentType = (_a = getHeader(event, "content-type")) != null ? _a : "";
+  if (contentType.includes("multipart/form-data")) {
+    const form = await readMultipartFormData(event);
+    const file = form == null ? void 0 : form.find((f) => f.name === "file");
+    if (!(file == null ? void 0 : file.data)) {
+      throw createError({ statusCode: 400, statusMessage: 'Kh\xF4ng t\xECm th\u1EA5y file "file" trong form-data.' });
+    }
+    buffer = file.data;
+    filename = (_b = file.filename) != null ? _b : "unknown";
+    fileSizeKB = Math.round(buffer.length / 1024);
+  } else {
+    const body = await readBody(event);
+    if (!(body == null ? void 0 : body.url)) {
+      throw createError({ statusCode: 400, statusMessage: "C\u1EA7n g\u1EEDi url ho\u1EB7c file multipart." });
+    }
+    const res = await fetch(body.url);
+    if (!res.ok) {
+      throw createError({ statusCode: 400, statusMessage: `Kh\xF4ng t\u1EA3i \u0111\u01B0\u1EE3c URL: ${res.status}` });
+    }
+    const ab = await res.arrayBuffer();
+    buffer = Buffer.from(ab);
+    filename = (_c = body.url.split("/").pop()) != null ? _c : "unknown";
+    fileSizeKB = Math.round(buffer.length / 1024);
+  }
+  const img = sharp(buffer);
+  const meta = await img.metadata();
+  const width = (_d = meta.width) != null ? _d : 0;
+  const height = (_e = meta.height) != null ? _e : 0;
+  const format = (_f = meta.format) != null ? _f : "unknown";
+  const aspectRatio = height > 0 ? +(width / height).toFixed(3) : 0;
+  if (fileSizeKB > MAX_FILE_SIZE_MB * 1024) {
+    warnings.push(`File qu\xE1 l\u1EDBn (${(fileSizeKB / 1024).toFixed(1)} MB). Khuy\u1EBFn ngh\u1ECB d\u01B0\u1EDBi ${MAX_FILE_SIZE_MB} MB.`);
+  }
+  if (fileSizeKB < 500) {
+    warnings.push(`File r\u1EA5t nh\u1ECF (${fileSizeKB} KB) \u2014 c\xF3 th\u1EC3 \u0111\xE3 b\u1ECB n\xE9n qu\xE1 m\u1EA1nh.`);
+  }
+  if (width <= THUMBNAIL_MAX_PX || height <= THUMBNAIL_MAX_PX) {
+    errors.push(`\u1EA2nh qu\xE1 nh\u1ECF (${width}\xD7${height}). \u0110\xE2y c\xF3 th\u1EC3 l\xE0 thumbnail, kh\xF4ng ph\u1EA3i panorama.`);
+  }
+  if (aspectRatio < IDEAL_RATIO_MIN || aspectRatio > IDEAL_RATIO_MAX) {
+    errors.push(`T\u1EF7 l\u1EC7 ${aspectRatio}:1 kh\xF4ng ph\xF9 h\u1EE3p. Equirectangular c\u1EA7n t\u1EF7 l\u1EC7 2:1 (width = height \xD7 2).`);
+  }
+  if (width < MIN_WIDTH || height < MIN_HEIGHT) {
+    errors.push(`\u0110\u1ED9 ph\xE2n gi\u1EA3i ${width}\xD7${height} th\u1EA5p h\u01A1n t\u1ED1i thi\u1EC3u ${MIN_WIDTH}\xD7${MIN_HEIGHT}.`);
+  } else if (width < IDEAL_WIDTH) {
+    warnings.push(`\u0110\u1ED9 ph\xE2n gi\u1EA3i ${width}px. Khuy\u1EBFn ngh\u1ECB ${IDEAL_WIDTH}px \u0111\u1EC3 tr\xE1nh m\u1EDD khi zoom.`);
+  }
+  if (format !== "jpeg" && format !== "webp") {
+    warnings.push(`Format "${format}" \u2014 JPEG ho\u1EB7c WebP \u0111\u01B0\u1EE3c \u01B0u ti\xEAn cho panorama.`);
+  }
+  let jpegQualityEstimate = -1;
+  if (format === "jpeg") {
+    const reencoded = await sharp(buffer).jpeg({ quality: 95 }).toBuffer();
+    const ratio = buffer.length / reencoded.length;
+    if (ratio < 0.35) {
+      jpegQualityEstimate = 50;
+      warnings.push(`JPEG quality \u01B0\u1EDBc l\u01B0\u1EE3ng th\u1EA5p (~50) \u2014 \u1EA3nh c\xF3 th\u1EC3 \u0111\xE3 b\u1ECB n\xE9n qu\xE1 m\u1EA1nh.`);
+    } else if (ratio < 0.55) {
+      jpegQualityEstimate = 65;
+      warnings.push(`JPEG quality \u01B0\u1EDBc l\u01B0\u1EE3ng trung b\xECnh (~65).`);
+    } else if (ratio < 0.75) {
+      jpegQualityEstimate = 80;
+    } else {
+      jpegQualityEstimate = 90;
+    }
+  }
+  let sharpnessScore = 0;
+  try {
+    const gray = await sharp(buffer).resize(512, 256, { fit: "fill" }).grayscale().raw().toBuffer({ resolveWithObject: true });
+    const { data, info } = gray;
+    const totalPx = info.width * info.height;
+    let sum = 0, sumSq = 0;
+    for (let i = 0; i < data.length; i++) {
+      sum += data[i];
+      sumSq += data[i] * data[i];
+    }
+    const mean = sum / totalPx;
+    const variance = sumSq / totalPx - mean * mean;
+    sharpnessScore = +variance.toFixed(1);
+    if (sharpnessScore < 150) {
+      warnings.push(`\u0110\u1ED9 n\xE9t \u01B0\u1EDBc l\u01B0\u1EE3ng th\u1EA5p (score: ${sharpnessScore}). \u1EA2nh c\xF3 th\u1EC3 \u0111\xE3 b\u1ECB denoise ho\u1EB7c over-smooth.`);
+    } else if (sharpnessScore < 350) {
+      recommendations.push(`\u0110\u1ED9 n\xE9t trung b\xECnh (score: ${sharpnessScore}). C\xF3 th\u1EC3 th\xEAm nh\u1EB9 sharpen.`);
+    }
+  } catch {
+    warnings.push("Kh\xF4ng th\u1EC3 t\xEDnh to\xE1n \u0111\u1ED9 n\xE9t.");
+  }
+  if (errors.length === 0 && warnings.length === 0) {
+    recommendations.push("\u2713 \u1EA2nh \u0111\u1EA1t ti\xEAu chu\u1EA9n panorama 360\xB0.");
+  }
+  if (width >= IDEAL_WIDTH && sharpnessScore >= 350) {
+    recommendations.push("\u2713 Ch\u1EA5t l\u01B0\u1EE3ng \u1EA3nh r\u1EA5t t\u1ED1t.");
+  }
+  return {
+    ok: errors.length === 0,
+    filename,
+    width,
+    height,
+    aspectRatio,
+    format,
+    fileSizeKB,
+    jpegQualityEstimate,
+    sharpnessScore,
+    errors,
+    warnings,
+    recommendations
+  };
+});
+
+const validate_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: validate_post
+}, Symbol.toStringTag, { value: 'Module' }));
+
 const places = [
   {
     slug: "heritage-ridge",
     title: "Tour 360\xB0 Th\u1EF1c \u0110\u1ECBa",
-    location: "Tr\u1EA3ng Bay \u2013 Khu V\u1EF1c R\u1EEBng N\xFAi",
-    summary: "Kh\xE1m ph\xE1 to\xE0n c\u1EA3nh 360\xB0 t\u1EA1i khu v\u1EF1c Tr\u1EA3ng Bay v\xE0 v\xF9ng l\xE2n c\u1EADn. Xoay \u1EA3nh \u0111\u1EC3 quan s\xE1t chi ti\u1EBFt \u0111\u1ECBa h\xECnh, th\u1EA3m th\u1EF1c v\u1EADt v\xE0 c\u1EA3nh quan thi\xEAn nhi\xEAn.",
+    location: "S\xF4ng V\xE2n Art Space \u2013 Nam Hoa L\u01B0, Ninh B\xECnh",
+    summary: "Kh\xE1m ph\xE1 kh\xF4ng gian \u0111i\xEAu kh\u1EAFc \u0111\xE1 \u0111\u01B0\u01A1ng \u0111\u1EA1i S\xF4ng V\xE2n gi\u1EEFa l\xE0ng ngh\u1EC1 Ninh V\xE2n qua panorama 360\xB0.",
     duration: "T\u1EF1 do",
     curator: "View360 Studio",
     scenes: [
@@ -3884,7 +4030,7 @@ const places = [
         title: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
         subtitle: "To\xE0n c\u1EA3nh khu v\u1EF1c trung t\xE2m, \u0111i\u1EC3m kh\u1EDFi \u0111\u1EA7u c\u1EE7a h\xE0nh tr\xECnh.",
         panorama: "/images/1788771876123.jpg",
-        thumbnail: "/thumbnails/new/1788771876123.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -3911,7 +4057,7 @@ const places = [
         title: "R\xECa R\u1EEBng Th\u01B0a",
         subtitle: "Ranh gi\u1EDBi gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng c\u1ECF, \xE1nh s\xE1ng l\u1ECDc qua t\xE1n l\xE1.",
         panorama: "/images/1788771876132.jpg",
-        thumbnail: "/thumbnails/new/1788771876132.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -3938,7 +4084,7 @@ const places = [
         title: "L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng",
         subtitle: "Con \u0111\u01B0\u1EDDng nh\u1ECF xuy\xEAn qua th\u1EA3m th\u1EF1c v\u1EADt, d\u1EA5u ch\xE2n ng\u01B0\u1EDDi \u0111i tr\u01B0\u1EDBc.",
         panorama: "/images/1788771876143.jpg",
-        thumbnail: "/thumbnails/new/1788771876143.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -3965,7 +4111,7 @@ const places = [
         title: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
         subtitle: "Kh\xF4ng gian m\u1EDF r\u1ED9ng, t\u1EA7m nh\xECn 360\xB0 kh\xF4ng b\u1ECB che khu\u1EA5t.",
         panorama: "/images/1788771876162.jpg",
-        thumbnail: "/thumbnails/new/1788771876162.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -3992,7 +4138,7 @@ const places = [
         title: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
         subtitle: "D\xE3y n\xFAi xa ph\xEDa ch\xE2n tr\u1EDDi, m\xE2y tr\xF4i nh\u1EB9 tr\xEAn \u0111\u1EC9nh.",
         panorama: "/images/1788771876173.jpg",
-        thumbnail: "/thumbnails/new/1788771876173.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4019,7 +4165,7 @@ const places = [
         title: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
         subtitle: "Th\u1EA3m c\xE2y b\u1EE5i d\xE0y \u0111\u1EB7c, n\u01A1i chuy\u1EC3n ti\u1EBFp gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng.",
         panorama: "/images/1788771876183.jpg",
-        thumbnail: "/thumbnails/new/1788771876183.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4046,7 +4192,7 @@ const places = [
         title: "\u0110i\u1EC3m H\u1EE3p L\u01B0u",
         subtitle: "N\u01A1i ba h\u01B0\u1EDBng \u0111i g\u1EB7p nhau \u2013 c\u1EEDa ng\xF5 v\xE0o khu Tr\u1EA3ng Bay.",
         panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-        thumbnail: "/thumbnails/new/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+        thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4074,7 +4220,7 @@ const places = [
         title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 1",
         subtitle: "B\u1EAFt \u0111\u1EA7u h\xE0nh tr\xECnh t\u1EA1i c\u1EEDa ng\xF5 c\u1EE7a Tr\u1EA3ng Bay 1.",
         panorama: "/images/trbay1/1788771876074.jpg",
-        thumbnail: "/thumbnails/new/1788771876074.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4101,7 +4247,7 @@ const places = [
         title: "\u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng",
         subtitle: "M\u1EB7t tr\u1EA3ng ph\u1EB3ng r\u1ED9ng, c\u1ECF xanh m\u01B0\u1EDBt tr\u1EA3i d\xE0i t\u1EDBi t\u1EADn ch\xE2n tr\u1EDDi.",
         panorama: "/images/trbay1/1788771876090.jpg",
-        thumbnail: "/thumbnails/new/1788771876090.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4128,7 +4274,7 @@ const places = [
         title: "G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng",
         subtitle: "H\u01B0\u1EDBng nh\xECn ph\xEDa \u0110\xF4ng, n\u01A1i n\u1EAFng s\xE1ng chi\u1EBFu r\xF5 t\u1EEBng c\u1ECDng c\u1ECF.",
         panorama: "/images/trbay1/1788771876098.jpg",
-        thumbnail: "/thumbnails/new/1788771876098.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4155,7 +4301,7 @@ const places = [
         title: "Trung T\xE2m Tr\u1EA3ng Bay 1",
         subtitle: "\u0110i\u1EC3m gi\u1EEFa c\u1EE7a Tr\u1EA3ng Bay 1, to\xE0n c\u1EA3nh t\u1EE9 ph\xEDa kh\xF4ng b\u1ECB che.",
         panorama: "/images/trbay1/1788771876106.jpg",
-        thumbnail: "/thumbnails/new/1788771876106.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4182,7 +4328,7 @@ const places = [
         title: "Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng",
         subtitle: "Ranh gi\u1EDBi t\u1EF1 nhi\xEAn gi\u1EEFa Tr\u1EA3ng Bay 1 v\xE0 Tr\u1EA3ng Bay 2.",
         panorama: "/images/trbay1/1788771876114.jpg",
-        thumbnail: "/thumbnails/new/1788771876114.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4210,7 +4356,7 @@ const places = [
         title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
         subtitle: "B\u1EAFt \u0111\u1EA7u kh\xE1m ph\xE1 khu v\u1EF1c Tr\u1EA3ng Bay 2, \u0111\u1ECBa h\xECnh l\u1EA1 h\u01A1n.",
         panorama: "/images/trbay2/1788771876042.jpg",
-        thumbnail: "/thumbnails/new/1788771876042.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4237,7 +4383,7 @@ const places = [
         title: "V\xF9ng C\u1ECF Lau Cao",
         subtitle: "C\u1ECF lau cao v\xFAt che ph\u1EE7, t\u1EA1o h\xE0nh lang xanh t\u1EF1 nhi\xEAn.",
         panorama: "/images/trbay2/1788771876050.jpg",
-        thumbnail: "/thumbnails/new/1788771876050.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4264,7 +4410,7 @@ const places = [
         title: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
         subtitle: "C\xE2y r\u1EEBng cao v\xFAt ph\xEDa T\xE2y, b\xF3ng m\xE1t che ph\u1EE7 m\u1EB7t tr\u1EA3ng.",
         panorama: "/images/trbay2/1788771876058.jpg",
-        thumbnail: "/thumbnails/new/1788771876058.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [
@@ -4291,7 +4437,7 @@ const places = [
         title: "Cu\u1ED1i Tr\u1EA3ng Bay 2",
         subtitle: "\u0110i\u1EC3m k\u1EBFt th\xFAc h\xE0nh tr\xECnh \u2013 nh\xECn l\u1EA1i to\xE0n b\u1ED9 con \u0111\u01B0\u1EDDng \u0111\xE3 \u0111i.",
         panorama: "/images/trbay2/1788771876067.jpg",
-        thumbnail: "/thumbnails/new/1788771876067.jpg",
+        thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
         initialYaw: 0,
         initialPitch: -0.05,
         hotspots: [

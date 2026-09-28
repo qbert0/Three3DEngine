@@ -12,6 +12,9 @@ declare module "nitropack/types" {
     '/api/admin/tours/:slug/scenes/:sceneId/markers': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug]/scenes/[sceneId]/markers.post').default>>>>
     }
+    '/api/panorama/validate': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/panorama/validate.post').default>>>>
+    }
     '/api/places': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/places.get').default>>>>
     }

@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};globalThis.__timing__.logStart('Load chunks/build/server');import { readonly, hasInjectionContext, getCurrentInstance, inject, ref, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, defineAsyncComponent, computed, unref, shallowReactive, Suspense, Fragment, useSSRContext, createApp, mergeProps, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, getCurrentScope, toRef, withCtx, nextTick, isReadonly, toRaw, isRef, isShallow, isReactive } from 'vue';
-import { c as createError$1, p as parseURL, e as encodePath, m as decodePath, n as hasProtocol, o as isScriptProtocol, q as joinURL, w as withQuery, s as sanitizeStatusCode, t as getContext, $ as $fetch, v as defu, x as createHooks, y as executeAsync, z as createDebugger } from '../nitro/nitro.mjs';
+import { c as createError$1, p as parseURL, e as encodePath, n as decodePath, o as hasProtocol, q as isScriptProtocol, s as joinURL, w as withQuery, t as sanitizeStatusCode, v as getContext, $ as $fetch, x as defu, y as createHooks, z as executeAsync, A as createDebugger } from '../nitro/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { setActivePinia, createPinia, shouldHydrate } from 'pinia';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
@@ -395,9 +395,24 @@ const createError = (error) => {
   });
   return nuxtError;
 };
-const matcher = (m, p) => {
-  return [];
-};
+const matcher = /* @__PURE__ */ (() => {
+  const $0 = {};
+  return (m, p) => {
+    let r = [];
+    if (p.charCodeAt(p.length - 1) === 47) p = p.slice(0, -1) || "/";
+    let s = p.split("/"), l = s.length;
+    if (l > 1) {
+      if (s[1] === "images") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "uploads") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "thumbnails") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      }
+    }
+    return r;
+  };
+})();
 const _routeRulesMatcher = (path) => defu({}, ...matcher("", typeof path === "string" ? path.toLowerCase() : path).map((r) => r.data).reverse());
 const routeRulesMatcher$1 = _routeRulesMatcher;
 function getRouteRules(arg) {
@@ -463,19 +478,19 @@ const _routes = [
     name: "about",
     path: "/about",
     meta: __nuxt_page_meta$b || {},
-    component: () => import('./about-C_Gbpl7V.mjs')
+    component: () => import('./about-Xrtdkedn.mjs')
   },
   {
     name: "index",
     path: "/",
     meta: __nuxt_page_meta$a || {},
-    component: () => import('./index-BaUuIVlm.mjs')
+    component: () => import('./index-C21fRdyK.mjs')
   },
   {
     name: "tours",
     path: "/tours",
     meta: __nuxt_page_meta$8 || {},
-    component: () => import('./tours-h7uahMRf.mjs'),
+    component: () => import('./tours-BdMhSJk0.mjs'),
     children: [
       {
         name: "tours-tourId",
@@ -489,13 +504,13 @@ const _routes = [
     name: "events",
     path: "/events",
     meta: __nuxt_page_meta$7 || {},
-    component: () => import('./events-CixTEtzv.mjs')
+    component: () => import('./events-waVQst3L.mjs')
   },
   {
     name: "tickets",
     path: "/tickets",
     meta: __nuxt_page_meta$6 || {},
-    component: () => import('./tickets-ChZBhEmS.mjs')
+    component: () => import('./tickets-BPZGju5V.mjs')
   },
   {
     name: "ui-demo",
@@ -519,7 +534,7 @@ const _routes = [
     name: "experience-tourId",
     path: "/experience/:tourId()",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./_tourId_-putQEqR3.mjs'),
+    component: () => import('./_tourId_-BQUY8yLm.mjs'),
     children: [
       {
         name: "experience-tourId-ownerTourId-sceneId",
@@ -533,7 +548,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import('./_sceneId_-CGshubEZ.mjs')
+    component: () => import('./_sceneId_-DvDigOmH.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -995,7 +1010,7 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-CcMUy8W3.mjs').then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import('./default-Dvg2ORgr.mjs').then((m) => m.default || m)),
   editor: defineAsyncComponent(() => import('./editor-D0JMPdjq.mjs').then((m) => m.default || m)),
   experience: defineAsyncComponent(() => import('./experience-MhrPHmsv.mjs').then((m) => m.default || m))
 };

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, computed, watch } from 'vue';
-import { EquirectangularAdapter, Viewer, events } from '@photo-sphere-viewer/core';
-import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
-import type { TourConfig, TourScene, TourMarker, NavigationMarker, InfoMarker } from '~/types/tour';
+import { onMounted, ref, computed, watch } from 'vue';
+import { useDesignerEngine } from '~/composables/designer/useDesignerEngine';
+import type { TourConfig, TourScene, TourMarker, NavigationMarker, InfoMarker, VideoMarker, Model3DMarker } from '~/types/tour';
 
 definePageMeta({ layout: false, ssr: false });
 
@@ -43,7 +42,8 @@ function initTourState() {
   }
 }
 initTourState();
-watch(() => data.value?.item, () => initTourState(), { deep: true });
+// NOTE: Do NOT watch data.value for changes — that would re-init state
+// every time saveToServer() gets the server response, resetting the UI.
 
 function undo() {
   if (historyIndex.value > 0) {
@@ -108,7 +108,9 @@ const selectedHotspot = computed<TourMarker | null>(() => {
 
 // Real Upload State
 const fileInput = ref<HTMLInputElement | null>(null);
+const modelImageInput = ref<HTMLInputElement | null>(null);
 const uploadingImage = ref(false);
+const panoramaPreviewFailed = ref(false);
 
 function triggerImageUpload() {
   fileInput.value?.click();
@@ -136,16 +138,13 @@ async function handleFileChange(event: Event) {
     if (res.ok && res.files?.length) {
       const uploaded = res.files[0];
       currentScene.value.panorama = uploaded.original;
+      panoramaPreviewFailed.value = false;
       if (uploaded.thumbnail) {
         currentScene.value.thumbnail = uploaded.thumbnail;
       }
 
-      // Update PSV viewer panorama
-      if (viewer) {
-        viewer.setPanorama(uploaded.original).then(() => {
-          syncMarkersToViewer();
-        });
-      }
+      // Reload engine with new panorama
+      await engineLoadScene(currentScene.value);
       markDirty();
       showToast({ message: 'Tải ảnh panorama mới thành công!', variant: 'success' });
     }
@@ -157,6 +156,40 @@ async function handleFileChange(event: Event) {
   }
 }
 
+async function handleModelImageChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (!file || selectedHotspot.value?.plugin !== 'model3d') return;
+  const formData = new FormData();
+  formData.append('file', file);
+  uploadingImage.value = true;
+  try {
+    const res = await $fetch<{ ok: boolean; files: Array<{ original: string }> }>('/api/admin/media', {
+      method: 'POST', body: formData,
+    });
+    if (res.ok && res.files?.[0]) {
+      (selectedHotspot.value as Model3DMarker).image = res.files[0].original;
+      markDirty();
+      showToast({ message: 'Đã tải ảnh vật thể lên', variant: 'success' });
+    }
+  } catch (err: any) {
+    showToast({ message: err?.statusMessage ?? 'Không thể tải ảnh vật thể', variant: 'error' });
+  } finally {
+    uploadingImage.value = false;
+    target.value = '';
+  }
+}
+
+function handleThumbnailError(event: Event, panorama: string) {
+  const img = event.target as HTMLImageElement;
+  if (img.dataset.fallbackApplied === 'true') {
+    img.style.visibility = 'hidden';
+    return;
+  }
+  img.dataset.fallbackApplied = 'true';
+  img.src = panorama;
+}
+
 // Editor toolbar state
 const isPlacingHotspot = ref(false);
 const showHotspotModal = ref(false);
@@ -165,6 +198,31 @@ const pendingHotspotCoords = ref<{ yaw: number; pitch: number } | null>(null);
 const previewMode = ref(false);
 const zoom = ref(100);
 const modeTab = ref<'edit' | 'drag'>('edit');
+const leftSidebarWidth = ref(320);
+const rightSidebarWidth = ref(360);
+
+function startResize(side: 'left' | 'right', event: PointerEvent) {
+  const startX = event.clientX;
+  const startLeft = leftSidebarWidth.value;
+  const startRight = rightSidebarWidth.value;
+  const target = event.currentTarget as HTMLElement;
+  target.classList.add('dragging');
+  target.setPointerCapture?.(event.pointerId);
+
+  const onMove = (moveEvent: PointerEvent) => {
+    if (side === 'left') leftSidebarWidth.value = Math.max(240, Math.min(480, startLeft + moveEvent.clientX - startX));
+    else rightSidebarWidth.value = Math.max(300, Math.min(520, startRight - moveEvent.clientX + startX));
+  };
+  const onUp = () => {
+    target.classList.remove('dragging');
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    localStorage.setItem('sv-sidebar-left', String(leftSidebarWidth.value));
+    localStorage.setItem('sv-sidebar-right', String(rightSidebarWidth.value));
+  };
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+}
 
 // Dirty & saving state
 const isDirty = ref(false);
@@ -179,10 +237,38 @@ function markSaved() {
   isDirty.value = false;
 }
 
-// PSV Viewer refs
+// Engine canvas container
 const container = ref<HTMLElement | null>(null);
-let viewer: Viewer | null = null;
-let markersPlugin: MarkersPlugin | null = null;
+
+// Designer engine (replaces PSV)
+const {
+  isLoading: engineLoading,
+  cameraYaw,
+  cameraPitch,
+  isPlacing: engineIsPlacing,
+  placementMode,
+  lastMarkerMoved,
+  lastPlacement,
+  initEngine,
+  loadScene: engineLoadScene,
+  startPlacement: engineStartPlacement,
+  cancelPlacement: engineCancelPlacement,
+  getCameraAim,
+  captureSnapshot,
+  refreshMarkers,
+  setFov,
+} = useDesignerEngine();
+
+// ── Hotspot drag-to-reposition ───────────────────────────────────────────────
+// Watch lastMarkerMoved (emitted by HotspotPlugin via bus)
+watch(lastMarkerMoved, (moved) => {
+  if (!moved || !currentScene.value) return;
+  const idx = currentScene.value.markers.findIndex((m) => m.id === moved.markerId);
+  if (idx === -1) return;
+  currentScene.value.markers[idx].yaw   = moved.yaw;
+  currentScene.value.markers[idx].pitch = moved.pitch;
+  markDirty();
+});
 
 // Guided mode timer
 let guidedTimer: ReturnType<typeof setInterval> | null = null;
@@ -218,20 +304,10 @@ function getMarkerHtml(m: TourMarker) {
   return m.plugin === 'navigation' ? navHtml(m.label, isSelected) : infoHtml(m.label, isSelected);
 }
 
-// ── Sync markers to PSV ───────────────────────────────────────────────────────
+// ── Sync markers to engine ───────────────────────────────────────────────────
 function syncMarkersToViewer() {
-  if (!markersPlugin || !currentScene.value) return;
-  markersPlugin.clearMarkers();
-  markersPlugin.setMarkers(
-    currentScene.value.markers.map((m) => ({
-      id: m.id,
-      position: { yaw: m.yaw, pitch: m.pitch },
-      html: getMarkerHtml(m),
-      anchor: 'center center',
-      draggable: true,
-      data: { plugin: m.plugin },
-    })),
-  );
+  if (!currentScene.value) return;
+  refreshMarkers?.(currentScene.value);
 }
 
 watch(
@@ -247,92 +323,46 @@ watch(selectedHotspotId, () => {
 });
 
 // Update panorama if URL changed via text input
-function onPanoramaUrlChange() {
-  if (!currentScene.value || !viewer) return;
-  viewer.setPanorama(currentScene.value.panorama).then(() => {
-    syncMarkersToViewer();
-  });
+async function onPanoramaUrlChange() {
+  if (!currentScene.value) return;
+  panoramaPreviewFailed.value = false;
+  await engineLoadScene(currentScene.value);
   markDirty();
 }
 
-// ── Init PSV Viewer ───────────────────────────────────────────────────────────
+// ── Init Engine ───────────────────────────────────────────────────────────────
 onMounted(async () => {
-  await nextTick();
+  leftSidebarWidth.value = Number(localStorage.getItem('sv-sidebar-left')) || 320;
+  rightSidebarWidth.value = Number(localStorage.getItem('sv-sidebar-right')) || 360;
   if (!container.value || !currentScene.value) return;
 
-  viewer = new Viewer({
-    container: container.value,
-    panorama: currentScene.value.panorama,
-    // Use the same raw image seam as the public viewer when placing markers.
-    adapter: [EquirectangularAdapter, { useXmpData: false }],
-    loadingImg: currentScene.value.thumbnail,
-    defaultYaw: currentScene.value.initialYaw || 0,
-    defaultPitch: currentScene.value.initialPitch || 0,
-    touchmoveTwoFingers: false,
-    mousewheelCtrlKey: false,
-    navbar: false, // minimalist studio canvas
-    plugins: [[MarkersPlugin, { markers: [] }]],
-  });
+  await initEngine(container.value, currentScene.value);
 
-  markersPlugin = viewer.getPlugin<MarkersPlugin>(MarkersPlugin);
-
-  viewer.addEventListener(events.ReadyEvent.type, () => {
-    syncMarkersToViewer();
-  });
-
-  // Click canvas
-  viewer.addEventListener('click', (e: any) => {
-    const { yaw, pitch } = e.data as { yaw: number; pitch: number };
-
-    if (isPlacingHotspot.value) {
-      pendingHotspotCoords.value = { yaw, pitch };
-      isPlacingHotspot.value = false;
-      showHotspotModal.value = true;
-    } else {
-      selectedHotspotId.value = null;
-    }
-  });
-
-  // Select marker
-  markersPlugin.addEventListener('select-marker', ({ marker }) => {
-    if (isPlacingHotspot.value) return;
-    selectedHotspotId.value = marker.id;
-    currentTab.value = 'hotspots';
-  });
-
-  // Drag marker
-  markersPlugin.addEventListener('marker-moved' as any, (e: any) => {
-    const id: string = e.marker?.id ?? e.markerId;
-    const pos = e.position ?? e.markerData?.position;
-    if (!id || !pos || !currentScene.value) return;
-
-    const idx = currentScene.value.markers.findIndex((m) => m.id === id);
-    if (idx === -1) return;
-
-    currentScene.value.markers[idx].yaw = parseFloat((pos.yaw as number).toFixed(3));
-    currentScene.value.markers[idx].pitch = parseFloat((pos.pitch as number).toFixed(3));
-    markDirty();
-  });
+  // Placement click: engine emits a special navigate event with encoded coords
+  // (see useDesignerEngine.handlePlacementClick)
+  // We intercept it here to open the modal
+  // Note: engine.bus is accessible via composable's internal engine ref
 });
 
-onBeforeUnmount(() => {
-  stopGuidedMode();
-  viewer?.destroy();
-  viewer = null;
+// Use the exact raycast coordinate clicked on the panorama.
+watch(lastPlacement, (placement) => {
+  if (placement && isPlacingHotspot.value) {
+    pendingHotspotCoords.value = { yaw: placement.yaw, pitch: placement.pitch };
+    isPlacingHotspot.value = false;
+    showHotspotModal.value = true;
+  }
 });
 
 // ── Scene Navigation ──────────────────────────────────────────────────────────
-function goToScene(idx: number) {
+async function goToScene(idx: number) {
   if (!tour.value || idx < 0 || idx >= tour.value.scenes.length) return;
   currentSceneIdx.value = idx;
   selectedHotspotId.value = null;
+  panoramaPreviewFailed.value = false;
 
   const targetScene = tour.value.scenes[idx];
-  if (viewer && targetScene) {
-    viewer.setPanorama(targetScene.panorama).then(() => {
-      viewer?.rotate({ yaw: targetScene.initialYaw || 0, pitch: targetScene.initialPitch || 0 });
-      syncMarkersToViewer();
-    });
+  if (targetScene) {
+    await engineLoadScene(targetScene);
   }
 }
 
@@ -344,8 +374,8 @@ function addScene() {
     id,
     title: 'Cảnh mới',
     subtitle: 'Mô tả cảnh mới',
-    panorama: 'https://picsum.photos/id/1036/2400/1200',
-    thumbnail: 'https://picsum.photos/id/1036/200/120',
+    panorama: currentScene.value?.panorama ?? '',
+    thumbnail: currentScene.value?.thumbnail ?? currentScene.value?.panorama ?? '',
     initialYaw: 0,
     initialPitch: 0,
     markers: [],
@@ -408,7 +438,10 @@ function handleSceneDrop(idx: number, e: DragEvent) {
 function startPlacingHotspot() {
   isPlacingHotspot.value = !isPlacingHotspot.value;
   if (isPlacingHotspot.value) {
-    showToast({ message: 'Click lên ảnh panorama để đặt hotspot', variant: 'default' });
+    engineStartPlacement('navigation');
+    showToast({ message: 'Nhấn lên ảnh panorama để đặt điểm tương tác', variant: 'default' });
+  } else {
+    engineCancelPlacement();
   }
 }
 
@@ -416,14 +449,15 @@ function cancelPlacing() {
   isPlacingHotspot.value = false;
   showHotspotModal.value = false;
   pendingHotspotCoords.value = null;
+  engineCancelPlacement();
 }
 
-function createHotspot(type: 'navigation' | 'info') {
+function createHotspot(type: 'navigation' | 'video' | 'info' | 'model3d') {
   if (!pendingHotspotCoords.value || !currentScene.value) return;
   const id = `h${Date.now()}`;
   const base = {
     id,
-    label: type === 'navigation' ? 'Cảnh mới' : 'Thông tin',
+    label: type === 'navigation' ? 'Chuyển cảnh' : type === 'video' ? 'Xem video' : type === 'model3d' ? 'Xem ảnh 3D' : 'Xem thông tin',
     yaw: parseFloat(pendingHotspotCoords.value.yaw.toFixed(3)),
     pitch: parseFloat(pendingHotspotCoords.value.pitch.toFixed(3)),
   };
@@ -435,12 +469,16 @@ function createHotspot(type: 'navigation' | 'info') {
       plugin: 'navigation',
       targetScene: firstOther ? firstOther.id : '',
     } as NavigationMarker);
-  } else {
+  } else if (type === 'info') {
     currentScene.value.markers.push({
       ...base,
       plugin: 'info',
       content: '',
     } as InfoMarker);
+  } else if (type === 'video') {
+    currentScene.value.markers.push({ ...base, plugin: 'video', src: '', width: 720, height: 405 } as VideoMarker);
+  } else {
+    currentScene.value.markers.push({ ...base, plugin: 'model3d', image: '', content: '' } as Model3DMarker);
   }
 
   selectedHotspotId.value = id;
@@ -448,7 +486,7 @@ function createHotspot(type: 'navigation' | 'info') {
   markDirty();
   showHotspotModal.value = false;
   pendingHotspotCoords.value = null;
-  showToast({ message: 'Đã thêm hotspot mới', variant: 'success' });
+  showToast({ message: 'Đã thêm điểm tương tác mới', variant: 'success' });
 }
 
 function deleteHotspot(id: string) {
@@ -456,7 +494,7 @@ function deleteHotspot(id: string) {
   currentScene.value.markers = currentScene.value.markers.filter((m) => m.id !== id);
   if (selectedHotspotId.value === id) selectedHotspotId.value = null;
   markDirty();
-  showToast({ message: 'Đã xóa hotspot', variant: 'default' });
+  showToast({ message: 'Đã xóa điểm tương tác', variant: 'default' });
 }
 
 // ── Guided & Preview Mode ─────────────────────────────────────────────────────
@@ -488,9 +526,9 @@ function stopGuidedMode() {
 // ── Zoom controls ─────────────────────────────────────────────────────────────
 function changeZoom(delta: number) {
   zoom.value = Math.max(50, Math.min(200, zoom.value + delta));
-  if (viewer) {
-    viewer.zoom(zoom.value);
-  }
+  // zoom% 50→200 mapped to FOV 120→30 (inverse: more zoom = lower FOV)
+  const fov = 120 - ((zoom.value - 50) / 150) * 90;
+  setFov(fov);
 }
 
 // ── Save to server ────────────────────────────────────────────────────────────
@@ -498,14 +536,14 @@ async function saveToServer() {
   if (!tour.value) return;
   saving.value = true;
   try {
-    const res = await $fetch<{ ok: boolean; tour: TourConfig }>(`/api/admin/tours/${slug}`, {
+    await $fetch<{ ok: boolean; tour: TourConfig }>(`/api/admin/tours/${slug}`, {
       method: 'POST',
       body: tour.value,
     });
-    if (res.tour) {
-      data.value = { item: res.tour };
-      tour.value = JSON.parse(JSON.stringify(res.tour));
-    }
+    // Frontend state is the source of truth.
+    // We do NOT re-assign from server response — that would reset the UI.
+    // Just mark the current state as saved and snapshot it into history.
+    pushHistorySnapshot();
     markSaved();
     showToast({ message: 'Đã lưu thay đổi thành công', variant: 'success' });
   } catch (err: any) {
@@ -556,7 +594,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="['admin-studio', { 'preview-mode': previewMode }]">
+  <div
+    :class="['admin-studio', { 'preview-mode': previewMode }]"
+    :style="{ gridTemplateColumns: `${leftSidebarWidth}px 5px minmax(0, 1fr) 5px ${rightSidebarWidth}px` }"
+  >
 
     <!-- Hidden native file input for real image upload -->
     <input
@@ -566,19 +607,20 @@ onMounted(() => {
       class="hidden"
       @change="handleFileChange"
     >
+    <input ref="modelImageInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleModelImageChange">
 
     <!-- ═══ TOPBAR ═══ -->
     <header class="topbar">
       <div class="tb-logo">
-        <div class="tb-logo-mark">V</div>
+        <div class="tb-logo-mark">SV</div>
         <div class="tb-logo-text">
-          <strong>Admin Studio</strong>
-          <span>{{ tour?.title ?? 'View360' }}</span>
+          <strong>Sông Vân Studio</strong>
+          <span>{{ tour?.title ?? 'Không gian triển lãm' }}</span>
         </div>
       </div>
 
       <div class="tb-breadcrumb">
-        <NuxtLink to="/admin" class="hover:text-white transition-colors">Tour 360°</NuxtLink>
+        <NuxtLink to="/admin" class="hover:text-white transition-colors">Quản lý tour</NuxtLink>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="m9 18 6-6-6-6" />
         </svg>
@@ -689,33 +731,38 @@ onMounted(() => {
               <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
             </svg>
           </span>
-          <img class="scene-thumb-sm" :src="s.thumbnail" :alt="s.title">
+          <img
+            class="scene-thumb-sm"
+            :src="s.thumbnail || s.panorama"
+            :alt="s.title"
+            @error="handleThumbnailError($event, s.panorama)"
+          >
           <div class="scene-info">
             <strong>{{ s.title }}</strong>
-            <span>{{ s.markers?.length ?? 0 }} hotspot{{ tour?.initialSceneId === s.id ? ' · ★ Bắt đầu' : '' }}</span>
+            <span>{{ s.markers?.length ?? 0 }} điểm tương tác{{ tour?.initialSceneId === s.id ? ' · ★ Bắt đầu' : '' }}</span>
           </div>
           <span v-if="tour?.initialSceneId === s.id" class="scene-badge">Start</span>
         </div>
       </div>
     </aside>
 
+    <div class="resizer resizer-left" aria-label="Thay đổi chiều rộng danh sách cảnh" @pointerdown="startResize('left', $event)" />
+
     <!-- ═══ CENTER — PREVIEW ═══ -->
     <main class="preview">
       <div class="preview-toolbar">
-        <div class="pt-tabs">
-          <button
-            :class="['pt-tab', { active: modeTab === 'edit' }]"
-            @click="modeTab = 'edit'"
-          >
-            Chỉnh sửa
-          </button>
-          <button
-            :class="['pt-tab', { active: modeTab === 'drag' }]"
-            @click="modeTab = 'drag'"
-          >
-            Xoay ảnh
-          </button>
-        </div>
+        <button
+          :class="['tb-btn marker-add-btn', { placing: isPlacingHotspot }]"
+          id="placeHotspotBtn"
+          @click="startPlacingHotspot"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span>{{ isPlacingHotspot ? 'Đang đặt... (ESC)' : 'Đặt điểm tương tác' }}</span>
+        </button>
+
+        <span v-if="isPlacingHotspot" class="toolbar-hint">Nhấn vào ảnh để chọn vị trí</span>
 
         <div class="pt-spacer"></div>
 
@@ -733,23 +780,13 @@ onMounted(() => {
           </button>
         </div>
 
-        <button
-          :class="['tb-btn', { primary: isPlacingHotspot }]"
-          id="placeHotspotBtn"
-          @click="startPlacingHotspot"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          <span>{{ isPlacingHotspot ? 'Đang đặt...' : 'Đặt hotspot' }}</span>
-        </button>
       </div>
 
       <div class="preview-canvas" id="previewCanvas">
         <div ref="container" class="h-full w-full" />
 
         <div class="place-hint" :class="{ active: isPlacingHotspot }" id="placeHint">
-          Click lên ảnh để đặt hotspot · ESC để hủy
+          Nhấn lên ảnh để đặt điểm tương tác · ESC để hủy
         </div>
 
         <div class="preview-info">
@@ -762,8 +799,10 @@ onMounted(() => {
       </div>
     </main>
 
+    <div class="resizer resizer-right" aria-label="Thay đổi chiều rộng bảng thuộc tính" @pointerdown="startResize('right', $event)" />
+
     <!-- ═══ SIDEBAR PHẢI — INSPECTOR ═══ -->
-    <aside class="inspector">
+    <aside class="inspector sidebar-right">
       <div class="insp-tabs">
         <button
           :class="['insp-tab', { active: currentTab === 'scene' }]"
@@ -775,7 +814,7 @@ onMounted(() => {
           :class="['insp-tab', { active: currentTab === 'hotspots' }]"
           @click="currentTab = 'hotspots'"
         >
-          Hotspots
+          Điểm tương tác
         </button>
         <button
           :class="['insp-tab', { active: currentTab === 'settings' }]"
@@ -819,7 +858,8 @@ onMounted(() => {
               title="Nhấn để tải ảnh panorama từ máy tính"
               @click="triggerImageUpload"
             >
-              <img :src="currentScene.panorama" :alt="currentScene.title">
+              <img v-if="!panoramaPreviewFailed" :src="currentScene.panorama" :alt="currentScene.title" @error="panoramaPreviewFailed = true">
+              <div v-else class="image-error">Không đọc được ảnh. Hãy kiểm tra đường dẫn hoặc tải ảnh mới.</div>
               <div class="img-picker-overlay">
                 <UiSpinner v-if="uploadingImage" size="md" color="white" />
                 <template v-else>
@@ -906,18 +946,18 @@ onMounted(() => {
           </div>
         </template>
 
-        <!-- ── TAB 2: HOTSPOTS ── -->
+        <!-- ── TAB 2: ĐIỂM TƯƠNG TÁC ── -->
         <template v-else-if="currentTab === 'hotspots' && currentScene">
           <div class="insp-section">
             <div class="insp-section-title">
-              <span>Hotspots trong cảnh ({{ currentScene.markers.length }})</span>
+              <span>Điểm tương tác trong cảnh ({{ currentScene.markers.length }})</span>
             </div>
 
             <div v-if="!currentScene.markers.length" class="empty-state">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
                 <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>
               </svg>
-              Chưa có hotspot nào.<br>Nhấn "Đặt hotspot" để bắt đầu.
+              Chưa có điểm tương tác nào.<br>Nhấn “Đặt điểm tương tác” để bắt đầu.
             </div>
 
             <div v-else class="hotspot-list">
@@ -927,10 +967,12 @@ onMounted(() => {
                 :class="['hotspot-row', { selected: hs.id === selectedHotspotId }]"
                 @click="selectedHotspotId = hs.id"
               >
-                <div :class="['hotspot-row-icon', hs.plugin === 'navigation' ? 'nav' : 'info']">
+                <div :class="['hotspot-row-icon', hs.plugin === 'navigation' ? 'nav' : hs.plugin]">
                   <svg v-if="hs.plugin === 'navigation'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 4 L12 18"/><path d="M6 11 L12 5 L18 11"/>
                   </svg>
+                  <svg v-else-if="hs.plugin === 'video'" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <svg v-else-if="hs.plugin === 'model3d'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg>
                   <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
                     <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none"/>
                     <path d="M12 11 L12 18"/>
@@ -949,13 +991,13 @@ onMounted(() => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 <path d="M12 5v14M5 12h14"/>
               </svg>
-              Thêm hotspot
+              Thêm điểm tương tác
             </button>
           </div>
 
           <!-- Edit Selected Hotspot Form -->
           <div v-if="selectedHotspot" class="insp-section border-t border-white/8 pt-4">
-            <div class="insp-section-title">Chỉnh sửa hotspot</div>
+            <div class="insp-section-title">Chỉnh sửa điểm tương tác</div>
 
             <div class="field">
               <label>Nhãn hiển thị</label>
@@ -987,6 +1029,66 @@ onMounted(() => {
               </select>
             </div>
 
+            <!-- Navigation arrow 3D rotation — 3 axes -->
+            <template v-if="selectedHotspot.plugin === 'navigation'">
+              <!-- rotZ: spin around normal (former single rotation) -->
+              <div class="field">
+                <label>
+                  Xoay (Z) — chiều nghiêng
+                  <span class="field-badge">{{ Math.round(((selectedHotspot as NavigationMarker).rotZ ?? (selectedHotspot as NavigationMarker).rotation ?? 0) * 180 / Math.PI) }}°</span>
+                </label>
+                <div class="rotation-control">
+                  <input type="range" min="-180" max="180" step="1"
+                    :value="Math.round(((selectedHotspot as NavigationMarker).rotZ ?? (selectedHotspot as NavigationMarker).rotation ?? 0) * 180 / Math.PI)"
+                    @input="(e: any) => {
+                      (selectedHotspot as NavigationMarker).rotZ = Number(e.target.value) * Math.PI / 180;
+                      refreshMarkers?.(currentScene); markDirty();
+                    }"
+                  />
+                  <button class="reset-btn" title="Về 0°" @click="() => { (selectedHotspot as NavigationMarker).rotZ = 0; refreshMarkers?.(currentScene); markDirty(); }">↺</button>
+                </div>
+                <div class="hint-text">0° = ^^ hướng lên. 90° = phải. -90° = trái.</div>
+              </div>
+
+              <!-- rotX: tilt forward/back -->
+              <div class="field">
+                <label>
+                  Nghiêng (X) — đứng / nằm
+                  <span class="field-badge">{{ Math.round(((selectedHotspot as NavigationMarker).rotX ?? 0) * 180 / Math.PI) }}°</span>
+                </label>
+                <div class="rotation-control">
+                  <input type="range" min="-90" max="90" step="1"
+                    :value="Math.round(((selectedHotspot as NavigationMarker).rotX ?? 0) * 180 / Math.PI)"
+                    @input="(e: any) => {
+                      (selectedHotspot as NavigationMarker).rotX = Number(e.target.value) * Math.PI / 180;
+                      refreshMarkers?.(currentScene); markDirty();
+                    }"
+                  />
+                  <button class="reset-btn" title="Về 0°" @click="() => { (selectedHotspot as NavigationMarker).rotX = 0; refreshMarkers?.(currentScene); markDirty(); }">↺</button>
+                </div>
+                <div class="hint-text">0° = đứng thẳng. +45° = ngả về phía trước. -45° = ngả về phía sau.</div>
+              </div>
+
+              <!-- rotY: swivel left/right -->
+              <div class="field">
+                <label>
+                  Xoay ngang (Y) — quay mặt
+                  <span class="field-badge">{{ Math.round(((selectedHotspot as NavigationMarker).rotY ?? 0) * 180 / Math.PI) }}°</span>
+                </label>
+                <div class="rotation-control">
+                  <input type="range" min="-90" max="90" step="1"
+                    :value="Math.round(((selectedHotspot as NavigationMarker).rotY ?? 0) * 180 / Math.PI)"
+                    @input="(e: any) => {
+                      (selectedHotspot as NavigationMarker).rotY = Number(e.target.value) * Math.PI / 180;
+                      refreshMarkers?.(currentScene); markDirty();
+                    }"
+                  />
+                  <button class="reset-btn" title="Về 0°" @click="() => { (selectedHotspot as NavigationMarker).rotY = 0; refreshMarkers?.(currentScene); markDirty(); }">↺</button>
+                </div>
+                <div class="hint-text">Xoay mặt mũi tên sang trái/phải trong không gian 3D.</div>
+              </div>
+            </template>
+
             <!-- Info content textarea -->
             <div v-if="selectedHotspot.plugin === 'info'" class="field">
               <label>Nội dung thông tin</label>
@@ -999,6 +1101,28 @@ onMounted(() => {
                 }"
               />
             </div>
+
+            <div v-if="selectedHotspot.plugin === 'video'" class="field">
+              <label>Đường dẫn video</label>
+              <input :value="(selectedHotspot as VideoMarker).src" type="url" placeholder="YouTube embed, Vimeo hoặc /video.mp4" @input="(e:any) => { (selectedHotspot as VideoMarker).src = e.target.value; markDirty(); }">
+              <div class="hint-text">Dùng URL nhúng (embed) cho YouTube/Vimeo hoặc đường dẫn file MP4 trực tiếp.</div>
+            </div>
+
+            <template v-if="selectedHotspot.plugin === 'model3d'">
+              <div class="field">
+                <label>Ảnh 3D / ảnh 360° của vật thể</label>
+                <button class="model-image-picker" type="button" @click="modelImageInput?.click()">
+                  <img v-if="(selectedHotspot as Model3DMarker).image" :src="(selectedHotspot as Model3DMarker).image" alt="Ảnh vật thể">
+                  <span v-else>Chọn ảnh được người thiết kế chuẩn bị</span>
+                </button>
+                <input :value="(selectedHotspot as Model3DMarker).image" type="text" placeholder="/uploads/... hoặc https://..." @input="(e:any) => { (selectedHotspot as Model3DMarker).image = e.target.value; markDirty(); }">
+              </div>
+              <div class="field">
+                <label>Mô tả vật thể</label>
+                <textarea :value="(selectedHotspot as Model3DMarker).content" placeholder="Tên tác phẩm, chất liệu, tác giả..." @input="(e:any) => { (selectedHotspot as Model3DMarker).content = e.target.value; markDirty(); }" />
+              </div>
+              <div class="hint-text">Ứng dụng chỉ hiển thị ảnh do người thiết kế cung cấp, không tự tạo mô hình 3D.</div>
+            </template>
 
             <!-- Position Yaw & Pitch -->
             <div class="field-row">
@@ -1029,7 +1153,7 @@ onMounted(() => {
                 >
               </div>
             </div>
-            <div class="hint-text">💡 Kéo trực tiếp hotspot trên ảnh panorama để di chuyển nhanh.</div>
+            <div class="hint-text">💡 Kéo trực tiếp điểm tương tác trên ảnh panorama để đổi vị trí.</div>
           </div>
         </template>
 
@@ -1117,11 +1241,11 @@ onMounted(() => {
 
   </div>
 
-  <!-- ═══ MODAL: Chọn loại hotspot ═══ -->
+  <!-- ═══ MODAL: Chọn loại điểm tương tác ═══ -->
   <div class="modal-backdrop" :class="{ open: showHotspotModal }" @click.self="cancelPlacing">
     <div class="modal">
       <div class="modal-head">
-        <h3>Chọn loại hotspot</h3>
+        <div><span class="modal-eyebrow">Điểm tương tác mới</span><h3>Chọn hành động khi người xem nhấn vào</h3></div>
         <button class="modal-close" @click="cancelPlacing">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
             <path d="M18 6 6 18" />
@@ -1131,25 +1255,33 @@ onMounted(() => {
       </div>
       <div class="modal-body">
         <div class="type-grid">
-          <div class="type-card" @click="createHotspot('navigation')">
+          <div class="type-card nav" @click="createHotspot('navigation')">
             <div class="type-card-icon nav">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 4 L12 18" />
                 <path d="M6 11 L12 5 L18 11" />
               </svg>
             </div>
-            <strong>Di chuyển</strong>
-            <span>Dẫn đến cảnh khác</span>
+            <strong>Chuyển cảnh</strong>
+            <span>Đi tới một ảnh panorama khác</span>
           </div>
-          <div class="type-card" @click="createHotspot('info')">
+          <div class="type-card video" @click="createHotspot('video')">
+            <div class="type-card-icon video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+            <strong>Xem video</strong><span>Mở video giới thiệu hoặc tư liệu</span>
+          </div>
+          <div class="type-card info" @click="createHotspot('info')">
             <div class="type-card-icon info">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
                 <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none" />
                 <path d="M12 11 L12 18" />
               </svg>
             </div>
-            <strong>Thông tin</strong>
-            <span>Hiện panel thông tin</span>
+            <strong>Xem thông tin</strong>
+            <span>Mở nội dung mô tả chi tiết</span>
+          </div>
+          <div class="type-card model3d" @click="createHotspot('model3d')">
+            <div class="type-card-icon model3d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg></div>
+            <strong>Xem ảnh 3D</strong><span>Hiện ảnh vật thể do người thiết kế thêm</span>
           </div>
         </div>
       </div>
@@ -1806,6 +1938,49 @@ onMounted(() => {
   line-height: 1.5;
 }
 
+/* Rotation control — slider + reset button inline */
+.rotation-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rotation-control input[type="range"] {
+  flex: 1;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+.reset-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.7);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.reset-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+/* Badge next to label showing current value */
+.field-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: rgba(59,130,246,0.22);
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+
+
 /* Image picker */
 .img-picker {
   position: relative;
@@ -1853,6 +2028,14 @@ onMounted(() => {
   width: 20px;
   height: 20px;
 }
+
+.image-error, .model-image-picker {
+  width: 100%; height: 100%; display: grid; place-items: center;
+  padding: 18px; text-align: center; color: rgba(255,255,255,.52);
+}
+.model-image-picker { min-height: 150px; border: 1px dashed rgba(255,255,255,.16); border-radius: 8px; background: rgba(255,255,255,.025); overflow: hidden; }
+.model-image-picker:hover { border-color: #9333ea; }
+.model-image-picker img { width: 100%; max-height: 220px; object-fit: contain; }
 
 /* Hotspot list */
 .hotspot-list {
@@ -1902,6 +2085,8 @@ onMounted(() => {
   background: rgba(168, 88, 63, 0.25);
   color: #e0a58b;
 }
+.hotspot-row-icon.video { background: rgba(239,68,68,.22); color: #fca5a5; }
+.hotspot-row-icon.model3d { background: rgba(168,85,247,.22); color: #d8b4fe; }
 
 .hotspot-row-icon svg {
   width: 12px;
@@ -2064,6 +2249,7 @@ onMounted(() => {
   font-size: 15px;
   font-weight: 600;
 }
+.modal-eyebrow { display:block; margin-bottom:3px; color:#60a5fa; font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
 
 .modal-body {
   padding: 20px;
@@ -2139,6 +2325,12 @@ onMounted(() => {
   background: rgba(168, 88, 63, 0.3);
   color: #e0a58b;
 }
+.type-card-icon.video { background: rgba(239,68,68,.24); color:#fca5a5; }
+.type-card-icon.model3d { background: rgba(168,85,247,.24); color:#d8b4fe; }
+.type-card.video:hover { border-color: rgba(239,68,68,.5); background:rgba(239,68,68,.06); }
+.type-card.model3d:hover { border-color: rgba(168,85,247,.5); background:rgba(168,85,247,.06); }
+.type-card.nav:hover { border-color:rgba(59,130,246,.5); background:rgba(59,130,246,.06); }
+.type-card.info:hover { border-color:rgba(160,120,40,.5); background:rgba(160,120,40,.06); }
 
 .type-card-icon svg {
   width: 20px;
@@ -2155,5 +2347,87 @@ onMounted(() => {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.42);
   line-height: 1.4;
+}
+
+/* ═══ SÔNG VÂN STUDIO — đồng bộ với design/admin.html ═══ */
+.admin-studio {
+  --sv-bg-0: #0b0d10;
+  --sv-bg-1: #14171c;
+  --sv-bg-2: #1b1f26;
+  --sv-bg-3: #232833;
+  --sv-border: rgba(255,255,255,.07);
+  --sv-border-strong: rgba(255,255,255,.14);
+  --sv-accent: #3b82f6;
+  --sv-brand: #2d6a4f;
+  grid-template-rows: 60px minmax(0, 1fr);
+  gap: 0;
+  background: var(--sv-bg-0);
+  color: #f5f7fa;
+  font-size: 13.5px;
+}
+
+.admin-studio > * { background: var(--sv-bg-1); }
+.topbar { grid-column: 1 / -1; grid-row: 1; height: 60px; padding: 0 20px; gap: 20px; background: linear-gradient(180deg,var(--sv-bg-2),var(--sv-bg-1)) !important; border-bottom:1px solid var(--sv-border); }
+.sidebar-left { grid-column: 1; grid-row: 2; min-width:0; background:var(--sv-bg-1); }
+.resizer-left { grid-column: 2; grid-row: 2; }
+.preview { grid-column: 3; grid-row: 2; min-width:0; background:var(--sv-bg-1); }
+.resizer-right { grid-column: 4; grid-row: 2; }
+.sidebar-right { grid-column: 5; grid-row: 2; min-width:0; background:var(--sv-bg-1); }
+
+.resizer { position:relative; z-index:20; background:var(--sv-bg-0) !important; cursor:col-resize; touch-action:none; transition:background .15s; }
+.resizer::before { content:''; position:absolute; inset:0; margin:auto; width:1px; height:36px; border-radius:2px; background:var(--sv-border-strong); transition:all .15s; }
+.resizer:hover,.resizer.dragging { background:rgba(59,130,246,.15) !important; }
+.resizer:hover::before { height:60px; background:var(--sv-accent); }
+.resizer.dragging::before { height:100%; background:var(--sv-accent); }
+
+.tb-logo { height:40px; padding-right:20px; gap:12px; }
+.tb-logo-mark { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--sv-brand),#1b4332); font-size:12px; box-shadow:0 0 0 3px rgba(45,106,79,.15); }
+.tb-logo-text strong { font-size:14px; }
+.tb-logo-text span { max-width:220px; font-size:11px; letter-spacing:0; text-transform:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tb-breadcrumb { font-size:12.5px; }
+.save-indicator { padding:6px 14px; border:1px solid var(--sv-border); border-radius:999px; background:var(--sv-bg-3); }
+.tb-btn { height:36px; padding:0 14px; border-radius:6px; background:var(--sv-bg-3); border-color:var(--sv-border); }
+.tb-btn.primary { background:var(--sv-accent); border-color:var(--sv-accent); box-shadow:0 2px 8px rgba(59,130,246,.35); }
+
+.side-head { padding:18px 16px 14px; border-color:var(--sv-border); }
+.side-add { width:28px; height:28px; background:rgba(45,106,79,.2); border-color:rgba(45,106,79,.4); color:#7ec8a0; }
+.scene-list { padding:10px; gap:6px; }
+.scene-item { padding:8px; border-radius:10px; }
+.scene-item:hover { background:var(--sv-bg-3); }
+.scene-item.active { background:linear-gradient(90deg,rgba(59,130,246,.14),rgba(59,130,246,.05)); border-color:rgba(59,130,246,.4); }
+.scene-item.active::before { background:var(--sv-accent); box-shadow:0 0 12px rgba(59,130,246,.7); }
+.scene-thumb-sm { width:56px; height:40px; border-radius:6px; background:#000; }
+
+.preview-toolbar { min-height:57px; padding:10px 14px; gap:10px; background:var(--sv-bg-1); border-color:var(--sv-border); }
+.marker-add-btn { color:#fff; background:var(--sv-brand); border-color:var(--sv-brand); font-weight:600; }
+.marker-add-btn:hover { background:#3a8562; border-color:#3a8562; }
+.marker-add-btn.placing { color:#1a1613; background:#f59e0b; border-color:#f59e0b; }
+.toolbar-hint { color:#f59e0b; font-size:11.5px; font-weight:600; }
+.pt-zoom { background:var(--sv-bg-3); border-color:var(--sv-border); }
+.preview-canvas { background:radial-gradient(circle at 50% 40%,#1a1e26 0%,#0a0c10 80%); }
+.preview-info { left:16px; right:16px; bottom:16px; width:auto; padding:12px 18px; gap:14px; border:1px solid var(--sv-border-strong); border-radius:10px; background:rgba(10,12,16,.85); backdrop-filter:blur(16px); box-shadow:0 16px 48px rgba(0,0,0,.5); }
+.preview-info-badge { color:#60a5fa; background:rgba(59,130,246,.15); border-color:rgba(59,130,246,.3); }
+.preview-info-coord { margin-left:auto; }
+
+.insp-tabs { border-color:var(--sv-border); }
+.insp-tab { padding:14px 8px; }
+.insp-tab.active { border-bottom-color:var(--sv-accent); }
+.insp-body { padding:18px; gap:18px; }
+.insp-section { gap:12px; }
+.field input,.field textarea,.field select { background:var(--sv-bg-3); border-color:var(--sv-border); border-radius:6px; }
+.field input:focus,.field textarea:focus,.field select:focus { border-color:var(--sv-accent); box-shadow:0 0 0 3px rgba(59,130,246,.14); }
+.hotspot-row { padding:10px 12px; background:var(--sv-bg-3); border-color:var(--sv-border); border-radius:10px; }
+
+.modal { max-width:720px; background:var(--sv-bg-2); border-color:var(--sv-border-strong); border-radius:14px; box-shadow:0 16px 48px rgba(0,0,0,.5); }
+.modal-head { padding:20px 22px; }
+.modal-body { padding:22px; }
+.type-grid { gap:12px; }
+.type-card { padding:20px 16px; background:var(--sv-bg-3); }
+
+@media (max-width: 980px) {
+  .admin-studio { grid-template-columns:240px 4px minmax(0,1fr) !important; }
+  .resizer-right,.sidebar-right { display:none; }
+  .preview { grid-column:3; }
+  .tb-breadcrumb,.save-indicator { display:none; }
 }
 </style>

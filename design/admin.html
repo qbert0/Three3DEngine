@@ -1,2404 +1,1034 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin · Tùy chỉnh Tour 360° — Trảng Bay</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap"
-        rel="stylesheet">
-
-    <style>
-        :root {
-            --bg-0: #0a0a0a;
-            --bg-1: #141414;
-            --bg-2: #1c1c1c;
-            --bg-3: #242424;
-            --line: rgba(255, 255, 255, 0.08);
-            --line-strong: rgba(255, 255, 255, 0.16);
-
-            --text-1: #ffffff;
-            --text-2: rgba(255, 255, 255, 0.68);
-            --text-3: rgba(255, 255, 255, 0.42);
-            --text-4: rgba(255, 255, 255, 0.25);
-
-            --river: #1f6f8b;
-            --river-2: #2d8fb0;
-            --clay: #a8583f;
-            --bronze: #c9a227;
-            --green: #22c55e;
-            --red: #ef4444;
-
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 14px;
-
-            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
-
-            --ease: cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html,
-        body {
-            height: 100%;
-            overflow: hidden;
-            font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-            background: var(--bg-0);
-            color: var(--text-1);
-            font-size: 14px;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        button {
-            font-family: inherit;
-            cursor: pointer;
-            border: none;
-            background: none;
-            color: inherit;
-        }
-
-        input,
-        textarea,
-        select {
-            font-family: inherit;
-        }
-
-        /* ═══ ROOT LAYOUT ═══ */
-        .admin {
-            display: grid;
-            grid-template-columns: 300px 1fr 340px;
-            grid-template-rows: 56px 1fr;
-            height: 100vh;
-            gap: 1px;
-            background: var(--line);
-        }
-
-        .admin>* {
-            background: var(--bg-1);
-        }
-
-        /* ═══ TOPBAR ═══ */
-        .topbar {
-            grid-column: 1 / -1;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 0 16px;
-            background: var(--bg-1) !important;
-        }
-
-        .tb-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-right: 16px;
-            border-right: 1px solid var(--line);
-            height: 32px;
-        }
-
-        .tb-logo-mark {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--river), #155d75);
-            display: grid;
-            place-items: center;
-            font-weight: 700;
-            font-size: 14px;
-            box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.15);
-        }
-
-        .tb-logo-text {
-            font-size: 13px;
-            line-height: 1.2;
-        }
-
-        .tb-logo-text strong {
-            display: block;
-            font-weight: 600;
-        }
-
-        .tb-logo-text span {
-            color: var(--text-3);
-            font-size: 10px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .tb-breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: var(--text-3);
-        }
-
-        .tb-breadcrumb strong {
-            color: var(--text-1);
-            font-weight: 500;
-        }
-
-        .tb-breadcrumb svg {
-            width: 12px;
-            height: 12px;
-            opacity: 0.4;
-        }
-
-        .tb-spacer {
-            flex: 1;
-        }
-
-        .tb-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .tb-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            height: 32px;
-            padding: 0 12px;
-            border-radius: var(--radius-sm);
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--line);
-            color: var(--text-2);
-            font-size: 12px;
-            font-weight: 500;
-            transition: all 0.15s;
-            white-space: nowrap;
-        }
-
-        .tb-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-1);
-            border-color: var(--line-strong);
-        }
-
-        .tb-btn svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .tb-btn.primary {
-            background: var(--river);
-            border-color: var(--river);
-            color: #fff;
-        }
-
-        .tb-btn.primary:hover {
-            background: var(--river-2);
-            border-color: var(--river-2);
-        }
-
-        .tb-btn.icon-only {
-            padding: 0;
-            width: 32px;
-            justify-content: center;
-        }
-
-        .tb-btn.danger {
-            color: #fca5a5;
-        }
-
-        .tb-btn.danger:hover {
-            background: rgba(239, 68, 68, 0.12);
-            color: #fff;
-            border-color: rgba(239, 68, 68, 0.4);
-        }
-
-        .save-indicator {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--text-3);
-            padding: 0 12px;
-        }
-
-        .save-indicator .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--green);
-        }
-
-        .save-indicator.saving .dot {
-            background: var(--bronze);
-            animation: pulse 1s infinite;
-        }
-
-        .save-indicator.dirty .dot {
-            background: var(--clay);
-        }
-
-        @keyframes pulse {
-            50% {
-                opacity: 0.4;
-            }
-        }
-
-        /* ═══ SIDEBAR TRÁI — SCENE LIST ═══ */
-        .sidebar-left {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .side-head {
-            padding: 16px;
-            border-bottom: 1px solid var(--line);
-            flex-shrink: 0;
-        }
-
-        .side-head-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .side-head h3 {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .side-head p {
-            font-size: 11px;
-            color: var(--text-3);
-        }
-
-        .side-add {
-            width: 26px;
-            height: 26px;
-            border-radius: var(--radius-sm);
-            background: rgba(31, 111, 139, 0.2);
-            border: 1px solid rgba(31, 111, 139, 0.35);
-            color: #7ec8e3;
-            display: grid;
-            place-items: center;
-            transition: all 0.15s;
-        }
-
-        .side-add:hover {
-            background: rgba(31, 111, 139, 0.35);
-            color: #fff;
-        }
-
-        .side-add svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .scene-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .scene-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .scene-list::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .scene-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.15s;
-            border: 1px solid transparent;
-            position: relative;
-        }
-
-        .scene-item:hover {
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        .scene-item.active {
-            background: rgba(31, 111, 139, 0.14);
-            border-color: rgba(31, 111, 139, 0.4);
-        }
-
-        .scene-item.active::before {
-            content: '';
-            position: absolute;
-            left: -1px;
-            top: 20%;
-            bottom: 20%;
-            width: 3px;
-            border-radius: 0 3px 3px 0;
-            background: var(--river);
-        }
-
-        .scene-item.dragging {
-            opacity: 0.4;
-        }
-
-        .scene-item.drag-over {
-            border-top: 2px solid var(--river);
-        }
-
-        .scene-drag {
-            cursor: grab;
-            color: var(--text-4);
-            padding: 0 2px;
-            flex-shrink: 0;
-        }
-
-        .scene-drag:active {
-            cursor: grabbing;
-        }
-
-        .scene-drag svg {
-            width: 12px;
-            height: 12px;
-        }
-
-        .scene-thumb-sm {
-            width: 44px;
-            height: 30px;
-            border-radius: 4px;
-            object-fit: cover;
-            flex-shrink: 0;
-            background: #000;
-            border: 1px solid var(--line);
-        }
-
-        .scene-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .scene-info strong {
-            display: block;
-            font-size: 12.5px;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .scene-info span {
-            display: block;
-            font-size: 10px;
-            color: var(--text-3);
-            font-family: 'JetBrains Mono', monospace;
-            margin-top: 2px;
-        }
-
-        .scene-badge {
-            font-size: 9px;
-            padding: 1px 6px;
-            border-radius: 999px;
-            background: rgba(201, 162, 39, 0.2);
-            color: var(--bronze);
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        /* ═══ CENTER — PREVIEW ═══ */
-        .preview {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .preview-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            border-bottom: 1px solid var(--line);
-            background: var(--bg-1);
-            flex-shrink: 0;
-        }
-
-        .pt-tabs {
-            display: flex;
-            gap: 2px;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 3px;
-            border-radius: var(--radius-sm);
-        }
-
-        .pt-tab {
-            padding: 5px 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-3);
-            transition: all 0.15s;
-        }
-
-        .pt-tab.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-1);
-        }
-
-        .pt-tab:hover:not(.active) {
-            color: var(--text-2);
-        }
-
-        .pt-spacer {
-            flex: 1;
-        }
-
-        .pt-zoom {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px;
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: var(--radius-sm);
-        }
-
-        .pt-zoom button {
-            width: 26px;
-            height: 26px;
-            border-radius: 5px;
-            color: var(--text-3);
-            display: grid;
-            place-items: center;
-            transition: all 0.15s;
-        }
-
-        .pt-zoom button:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--text-1);
-        }
-
-        .pt-zoom svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .pt-zoom-label {
-            font-size: 11px;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-3);
-            padding: 0 6px;
-            min-width: 42px;
-            text-align: center;
-        }
-
-        /* Preview canvas */
-        .preview-canvas {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background: #000;
-            cursor: crosshair;
-        }
-
-        .preview-canvas.mode-drag {
-            cursor: grab;
-        }
-
-        .preview-canvas.mode-drag:active {
-            cursor: grabbing;
-        }
-
-        .preview-bg {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            transition: opacity 0.4s var(--ease);
-        }
-
-        .preview-vignette {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            background:
-                radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.4) 100%);
-        }
-
-        /* Edit hotspots in preview */
-        .edit-hotspot {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            z-index: 5;
-            cursor: move;
-            user-select: none;
-        }
-
-        .edit-hotspot .hs-circle {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: rgba(31, 111, 139, 0.9);
-            border: 2.5px solid rgba(255, 255, 255, 0.9);
-            box-shadow: 0 4px 24px rgba(31, 111, 139, 0.6), 0 0 0 6px rgba(31, 111, 139, 0.2);
-            display: grid;
-            place-items: center;
-            transition: box-shadow 0.15s;
-        }
-
-        .edit-hotspot:hover .hs-circle {
-            box-shadow: 0 6px 32px rgba(31, 111, 139, 0.85), 0 0 0 10px rgba(31, 111, 139, 0.28);
-        }
-
-        .edit-hotspot.selected .hs-circle {
-            box-shadow: 0 0 0 3px var(--bronze), 0 6px 32px rgba(201, 162, 39, 0.6);
-        }
-
-        .edit-hotspot .hs-circle svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .edit-hotspot.info .hs-circle {
-            background: rgba(168, 88, 63, 0.9);
-            width: 40px;
-            height: 40px;
-            box-shadow: 0 4px 20px rgba(168, 88, 63, 0.55), 0 0 0 6px rgba(168, 88, 63, 0.18);
-        }
-
-        .edit-hotspot.info .hs-circle svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        .edit-hotspot.info.selected .hs-circle {
-            box-shadow: 0 0 0 3px var(--bronze), 0 4px 20px rgba(168, 88, 63, 0.7);
-        }
-
-        .edit-hotspot .hs-label {
-            position: absolute;
-            top: calc(100% + 4px);
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 10px;
-            font-weight: 700;
-            color: #fff;
-            background: rgba(10, 10, 10, 0.78);
-            padding: 3px 8px;
-            border-radius: 999px;
-            white-space: nowrap;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-        }
-
-        /* Preview bottom info */
-        .preview-info {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            background: rgba(10, 10, 10, 0.8);
-            border: 1px solid var(--line-strong);
-            border-radius: var(--radius-md);
-            backdrop-filter: blur(14px);
-            z-index: 6;
-        }
-
-        .preview-info-badge {
-            font-size: 10px;
-            font-family: 'JetBrains Mono', monospace;
-            padding: 3px 8px;
-            background: rgba(31, 111, 139, 0.3);
-            color: #7ec8e3;
-            border-radius: 999px;
-            font-weight: 600;
-        }
-
-        .preview-info-title {
-            font-size: 13px;
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .preview-info-coord {
-            font-size: 11px;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text-3);
-        }
-
-        /* Hint overlay for hotspot placement */
-        .place-hint {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 8px 16px;
-            background: rgba(201, 162, 39, 0.95);
-            color: #1a1613;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 999px;
-            z-index: 10;
-            display: none;
-            box-shadow: 0 8px 24px rgba(201, 162, 39, 0.4);
-            animation: hint-pulse 1.5s infinite;
-        }
-
-        .place-hint.active {
-            display: block;
-        }
-
-        @keyframes hint-pulse {
-
-            0%,
-            100% {
-                transform: translateX(-50%) scale(1);
-            }
-
-            50% {
-                transform: translateX(-50%) scale(1.03);
-            }
-        }
-
-        /* ═══ SIDEBAR PHẢI — INSPECTOR ═══ */
-        .inspector {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            background: var(--bg-1) !important;
-        }
-
-        .insp-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--line);
-            flex-shrink: 0;
-            background: var(--bg-1);
-        }
-
-        .insp-tab {
-            flex: 1;
-            padding: 14px 8px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-3);
-            border-bottom: 2px solid transparent;
-            transition: all 0.15s;
-            position: relative;
-        }
-
-        .insp-tab:hover {
-            color: var(--text-2);
-        }
-
-        .insp-tab.active {
-            color: var(--text-1);
-            border-bottom-color: var(--river);
-        }
-
-        .insp-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .insp-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .insp-body::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-        }
-
-        .insp-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .insp-section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-4);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .field label {
-            font-size: 12px;
-            color: var(--text-2);
-            font-weight: 500;
-        }
-
-        .field input[type="text"],
-        .field input[type="number"],
-        .field textarea,
-        .field select {
-            width: 100%;
-            padding: 8px 10px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            color: var(--text-1);
-            font-size: 13px;
-            outline: none;
-            transition: all 0.15s;
-        }
-
-        .field input:focus,
-        .field textarea:focus,
-        .field select:focus {
-            border-color: var(--river);
-            background: rgba(31, 111, 139, 0.08);
-            box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.15);
-        }
-
-        .field textarea {
-            resize: vertical;
-            min-height: 70px;
-            font-family: inherit;
-        }
-
-        .field select {
-            cursor: pointer;
-        }
-
-        .field select option {
-            background: var(--bg-2);
-        }
-
-        .field-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .hint-text {
-            font-size: 11px;
-            color: var(--text-4);
-            line-height: 1.5;
-        }
-
-        /* Image picker */
-        .img-picker {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 16/10;
-            border-radius: var(--radius-sm);
-            overflow: hidden;
-            border: 1px dashed var(--line-strong);
-            background: rgba(255, 255, 255, 0.02);
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .img-picker:hover {
-            border-color: var(--river);
-            background: rgba(31, 111, 139, 0.06);
-        }
-
-        .img-picker img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .img-picker-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.6);
-            color: #fff;
-            opacity: 0;
-            transition: opacity 0.15s;
-            font-size: 12px;
-        }
-
-        .img-picker:hover .img-picker-overlay {
-            opacity: 1;
-        }
-
-        .img-picker-overlay svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Hotspot list */
-        .hotspot-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .hotspot-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all 0.15s;
-            font-size: 12px;
-        }
-
-        .hotspot-row:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: var(--line-strong);
-        }
-
-        .hotspot-row.selected {
-            background: rgba(31, 111, 139, 0.14);
-            border-color: rgba(31, 111, 139, 0.4);
-        }
-
-        .hotspot-row-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            flex-shrink: 0;
-        }
-
-        .hotspot-row-icon.nav {
-            background: rgba(31, 111, 139, 0.25);
-            color: #7ec8e3;
-        }
-
-        .hotspot-row-icon.info {
-            background: rgba(168, 88, 63, 0.25);
-            color: #e0a58b;
-        }
-
-        .hotspot-row-icon svg {
-            width: 12px;
-            height: 12px;
-        }
-
-        .hotspot-row-name {
-            flex: 1;
-            font-weight: 500;
-        }
-
-        .hotspot-row-delete {
-            width: 22px;
-            height: 22px;
-            border-radius: 4px;
-            color: var(--text-4);
-            display: grid;
-            place-items: center;
-            transition: all 0.15s;
-        }
-
-        .hotspot-row-delete:hover {
-            background: rgba(239, 68, 68, 0.2);
-            color: #fca5a5;
-        }
-
-        .hotspot-row-delete svg {
-            width: 12px;
-            height: 12px;
-        }
-
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 24px 16px;
-            color: var(--text-4);
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        .empty-state svg {
-            width: 32px;
-            height: 32px;
-            margin: 0 auto 8px;
-            opacity: 0.3;
-        }
-
-        /* Buttons */
-        .btn-block {
-            width: 100%;
-            padding: 9px 12px;
-            border-radius: var(--radius-sm);
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--line);
-            color: var(--text-2);
-            font-size: 12px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: all 0.15s;
-        }
-
-        .btn-block:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-1);
-            border-color: var(--line-strong);
-        }
-
-        .btn-block svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        .btn-block.primary {
-            background: rgba(31, 111, 139, 0.2);
-            border-color: rgba(31, 111, 139, 0.4);
-            color: #7ec8e3;
-        }
-
-        .btn-block.primary:hover {
-            background: rgba(31, 111, 139, 0.35);
-            color: #fff;
-        }
-
-        .btn-block.danger {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-        }
-
-        .btn-block.danger:hover {
-            background: rgba(239, 68, 68, 0.22);
-            color: #fff;
-        }
-
-        /* Toggle switch */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 0;
-            cursor: pointer;
-        }
-
-        .toggle-row label {
-            font-size: 12.5px;
-            color: var(--text-2);
-            cursor: pointer;
-        }
-
-        .toggle {
-            position: relative;
-            width: 36px;
-            height: 20px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-            transition: background 0.2s;
-            flex-shrink: 0;
-        }
-
-        .toggle::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #fff;
-            transition: transform 0.25s var(--ease);
-        }
-
-        .toggle.on {
-            background: var(--river);
-        }
-
-        .toggle.on::after {
-            transform: translateX(16px);
-        }
-
-        /* ═══ PREVIEW MODE — ẩn admin UI ═══ */
-        body.preview-mode .sidebar-left,
-        body.preview-mode .inspector,
-        body.preview-mode .preview-toolbar {
-            display: none;
-        }
-
-        body.preview-mode .admin {
-            grid-template-columns: 1fr;
-            grid-template-rows: 56px 1fr;
-        }
-
-        body.preview-mode .topbar {
-            grid-column: 1;
-        }
-
-        body.preview-mode .preview {
-            grid-column: 1;
-        }
-
-        /* ═══ TOAST ═══ */
-        .toast-wrap {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-        }
-
-        .toast {
-            padding: 10px 18px;
-            background: rgba(20, 20, 20, 0.95);
-            border: 1px solid var(--line-strong);
-            border-radius: 999px;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 500;
-            backdrop-filter: blur(16px);
-            box-shadow: var(--shadow-md);
-            animation: toast-in 0.3s var(--ease);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .toast.success {
-            border-color: rgba(34, 197, 94, 0.4);
-        }
-
-        .toast.success svg {
-            color: var(--green);
-        }
-
-        .toast svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        @keyframes toast-in {
-            from {
-                opacity: 0;
-                transform: translateY(8px) scale(0.96);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* ═══ MODAL ═══ */
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(6px);
-            z-index: 200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal-backdrop.open {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg-2);
-            border: 1px solid var(--line-strong);
-            border-radius: var(--radius-lg);
-            max-width: 480px;
-            width: 100%;
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-        }
-
-        .modal-head {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--line);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .modal-head h3 {
-            font-size: 15px;
-            font-weight: 600;
-        }
-
-        .modal-body {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        .modal-foot {
-            padding: 14px 20px;
-            border-top: 1px solid var(--line);
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .modal-close {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            color: var(--text-3);
-            display: grid;
-            place-items: center;
-            transition: all 0.15s;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #fff;
-        }
-
-        .modal-close svg {
-            width: 14px;
-            height: 14px;
-        }
-
-        /* Hotspot type picker */
-        .type-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .type-card {
-            padding: 16px;
-            border-radius: var(--radius-md);
-            border: 1.5px solid var(--line);
-            background: rgba(255, 255, 255, 0.03);
-            cursor: pointer;
-            transition: all 0.15s;
-            text-align: center;
-        }
-
-        .type-card:hover {
-            border-color: var(--line-strong);
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .type-card.selected {
-            border-color: var(--river);
-            background: rgba(31, 111, 139, 0.15);
-            box-shadow: 0 0 0 3px rgba(31, 111, 139, 0.15);
-        }
-
-        .type-card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin: 0 auto 10px;
-            display: grid;
-            place-items: center;
-        }
-
-        .type-card-icon.nav {
-            background: rgba(31, 111, 139, 0.3);
-            color: #7ec8e3;
-        }
-
-        .type-card-icon.info {
-            background: rgba(168, 88, 63, 0.3);
-            color: #e0a58b;
-        }
-
-        .type-card-icon svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .type-card strong {
-            display: block;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-
-        .type-card span {
-            font-size: 11px;
-            color: var(--text-3);
-            line-height: 1.4;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sông Vân Studio — Admin</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-0:#0b0d10; --bg-1:#14171c; --bg-2:#1b1f26; --bg-3:#232833;
+  --border:rgba(255,255,255,.07); --border-strong:rgba(255,255,255,.14);
+  --text-1:#f5f7fa; --text-2:rgba(245,247,250,.72); --text-3:rgba(245,247,250,.45); --text-4:rgba(245,247,250,.28);
+  --accent:#3b82f6; --accent-hover:#60a5fa; --accent-soft:rgba(59,130,246,.15);
+  --video:#ef4444; --video-soft:rgba(239,68,68,.15);
+  --model:#a855f7; --model-soft:rgba(168,85,247,.15);
+  --success:#22c55e; --warning:#f59e0b; --danger:#ef4444;
+  --brand:#2d6a4f; --brand-hover:#3a8562; --bronze:#a07828;
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-full:999px;
+  --shadow-md:0 4px 14px rgba(0,0,0,.35);
+  --shadow-lg:0 16px 48px rgba(0,0,0,.5);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Be Vietnam Pro',system-ui,sans-serif;font-size:13.5px;line-height:1.5;color:var(--text-1);background:var(--bg-0);-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit}
+svg{display:block}
+
+.studio{display:grid;grid-template-columns:320px 5px 1fr 5px 360px;grid-template-rows:60px 1fr;height:100vh;background:var(--bg-0)}
+.topbar{grid-column:1/-1;grid-row:1}
+.sidebar-left{grid-column:1;grid-row:2}
+.resizer-left{grid-column:2;grid-row:2}
+.canvas{grid-column:3;grid-row:2}
+.resizer-right{grid-column:4;grid-row:2}
+.sidebar-right{grid-column:5;grid-row:2}
+
+.resizer{background:var(--bg-0);cursor:col-resize;position:relative;transition:background .15s}
+.resizer::before{content:'';position:absolute;inset:0;margin:auto;width:1px;height:36px;background:var(--border-strong);border-radius:2px;transition:all .15s}
+.resizer:hover{background:var(--accent-soft)}
+.resizer:hover::before{background:var(--accent);height:60px}
+.resizer.dragging{background:var(--accent-soft)}
+.resizer.dragging::before{background:var(--accent);height:100%}
+
+.topbar{display:flex;align-items:center;gap:20px;padding:0 20px;background:linear-gradient(180deg,var(--bg-2),var(--bg-1));border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px;padding-right:20px;border-right:1px solid var(--border);height:40px}
+.brand-mark{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--brand),#1b4332);color:#fff;font-weight:700;font-size:13px;box-shadow:0 0 0 3px rgba(45,106,79,.15)}
+.brand-text strong{display:block;font-size:14px;font-weight:600}
+.brand-text span{display:block;font-size:11px;color:var(--text-3);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-3)}
+.breadcrumb svg{width:12px;height:12px;opacity:.4}
+.breadcrumb strong{color:var(--text-1);font-weight:500}
+.spacer{flex:1}
+.save-status{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:var(--r-full);background:var(--bg-3);font-size:12px;color:var(--text-2);border:1px solid var(--border)}
+.save-status .dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px rgba(34,197,94,.18)}
+.save-status.saving .dot{background:var(--warning);box-shadow:0 0 0 3px rgba(245,158,11,.18);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.topbar-actions{display:flex;align-items:center;gap:6px}
+.divider{width:1px;height:22px;background:var(--border);margin:0 4px}
+
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;border:1px solid transparent;transition:all .15s var(--ease);white-space:nowrap;color:var(--text-2);background:transparent}
+.btn svg{width:15px;height:15px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:var(--bg-3);border-color:var(--border)}
+.btn-ghost:hover:not(:disabled){background:var(--surface-hover);color:var(--text-1);border-color:var(--border-strong)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;box-shadow:0 2px 8px rgba(59,130,246,.35)}
+.btn-primary:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover);transform:translateY(-1px)}
+.btn-accent{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
+.btn-accent:hover:not(:disabled){background:var(--brand-hover);border-color:var(--brand-hover);transform:translateY(-1px)}
+.btn-placing{background:var(--warning);color:#1a1613;border-color:var(--warning);font-weight:700;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.7}}
+.btn-danger{background:rgba(239,68,68,.12);color:#fca5a5;border-color:rgba(239,68,68,.3)}
+.btn-danger:hover:not(:disabled){background:rgba(239,68,68,.22);color:#fff}
+.btn-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:var(--r-sm);background:var(--bg-3);border:1px solid var(--border);color:var(--text-2);transition:all .15s var(--ease)}
+.btn-icon:hover:not(:disabled){background:var(--surface-hover);color:var(--text-1);border-color:var(--border-strong)}
+.btn-icon:disabled{opacity:.35;cursor:not-allowed}
+.btn-icon svg{width:16px;height:16px}
+.btn-icon-sm{width:28px;height:28px;display:grid;place-items:center;border-radius:var(--r-sm);color:var(--text-3);background:var(--bg-3);border:1px solid var(--border);transition:all .15s var(--ease)}
+.btn-icon-sm:hover{background:var(--surface-hover);color:var(--text-1);border-color:var(--border-strong)}
+.btn-icon-sm.accent{background:rgba(45,106,79,.2);color:#7ec8a0;border-color:rgba(45,106,79,.4)}
+.btn-icon-sm.accent:hover{background:rgba(45,106,79,.35);color:#fff}
+.btn-icon-sm svg{width:14px;height:14px}
+.btn.full{width:100%;justify-content:center}
+
+.sidebar{display:flex;flex-direction:column;overflow:hidden;background:var(--bg-1);min-width:0}
+.sidebar-head{padding:18px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.head-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.sidebar-head h3{font-size:13px;font-weight:600}
+.sidebar-head p{font-size:11.5px;color:var(--text-3)}
+.sidebar-body{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px}
+.sidebar-body::-webkit-scrollbar{width:6px}
+.sidebar-body::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+.sidebar-foot{padding:12px;border-top:1px solid var(--border);flex-shrink:0}
+
+.scene-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r-md);cursor:pointer;transition:all .15s var(--ease);border:1px solid transparent;position:relative}
+.scene-card:hover{background:var(--bg-3)}
+.scene-card.active{background:linear-gradient(90deg,rgba(59,130,246,.14),rgba(59,130,246,.05));border-color:rgba(59,130,246,.4)}
+.scene-card.active::before{content:'';position:absolute;left:-1px;top:20%;bottom:20%;width:3px;border-radius:0 3px 3px 0;background:var(--accent);box-shadow:0 0 12px rgba(59,130,246,.7)}
+.drag-handle{color:var(--text-4);cursor:grab;flex-shrink:0;padding:0 2px}
+.drag-handle svg{width:12px;height:12px}
+.scene-thumb{position:relative;width:56px;height:40px;border-radius:var(--r-sm);overflow:hidden;flex-shrink:0;background:#000;border:1px solid var(--border)}
+.scene-thumb img{width:100%;height:100%;object-fit:cover}
+.thumb-num{position:absolute;top:3px;left:4px;font-size:9px;font-weight:700;font-family:'Courier New',monospace;color:#fff;background:rgba(0,0,0,.65);padding:1px 5px;border-radius:3px;backdrop-filter:blur(4px)}
+.thumb-start{position:absolute;bottom:3px;right:3px;font-size:10px;color:var(--bronze);background:rgba(0,0,0,.7);padding:1px 5px;border-radius:3px}
+.scene-info{flex:1;min-width:0}
+.scene-info strong{display:block;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scene-meta{display:block;font-size:10.5px;color:var(--text-3);margin-top:2px}
+
+.canvas{display:flex;flex-direction:column;overflow:hidden;background:var(--bg-1)}
+.canvas-toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.canvas-spacer{flex:1}
+.canvas-hint{font-size:11.5px;color:var(--warning);font-weight:600;display:none}
+.canvas-hint.on{display:block}
+
+.canvas-stage{flex:1;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 40%,#1a1e26 0%,#0a0c10 80%);cursor:default}
+.canvas-stage.placing{cursor:crosshair}
+.canvas-stage.placing .hotspot{pointer-events:none}
+
+.canvas-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text-3);font-size:13px}
+.canvas-empty svg{width:48px;height:48px;opacity:.35;color:var(--accent)}
+.canvas-image{position:absolute;inset:0;background-size:cover;background-position:center;transition:opacity .3s;pointer-events:none}
+.canvas-image::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 100%,rgba(0,0,0,.5),transparent 70%)}
+
+.hotspot{position:absolute;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:grab;user-select:none;transform:translate(-50%,-50%)}
+.hotspot:active{cursor:grabbing}
+.hotspot.dragging{z-index:100}
+.hotspot-circle{width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,rgba(59,130,246,.95),rgba(37,99,235,.9));border:2.5px solid rgba(255,255,255,.95);box-shadow:0 4px 24px rgba(59,130,246,.65),0 0 0 6px rgba(59,130,246,.2);display:grid;place-items:center;transition:all .15s}
+.hotspot-circle svg{width:20px;height:20px;pointer-events:none}
+.hotspot.info .hotspot-circle{background:linear-gradient(135deg,rgba(160,120,40,.95),rgba(160,120,40,.85));box-shadow:0 4px 24px rgba(160,120,40,.55),0 0 0 6px rgba(160,120,40,.18)}
+.hotspot.video .hotspot-circle{background:linear-gradient(135deg,rgba(239,68,68,.95),rgba(220,38,38,.9));box-shadow:0 4px 24px rgba(239,68,68,.6),0 0 0 6px rgba(239,68,68,.2)}
+.hotspot.model3d .hotspot-circle{background:linear-gradient(135deg,rgba(168,85,247,.95),rgba(147,51,234,.9));box-shadow:0 4px 24px rgba(168,85,247,.6),0 0 0 6px rgba(168,85,247,.2)}
+.hotspot.selected .hotspot-circle{box-shadow:0 0 0 3px #c9a227,0 6px 32px rgba(201,162,39,.65)}
+.hotspot:hover .hotspot-circle{transform:scale(1.08)}
+.hotspot.dragging .hotspot-circle{box-shadow:0 0 0 4px #c9a227,0 8px 40px rgba(201,162,39,.8);transform:scale(1.12)}
+.hotspot-label{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);font-size:11px;font-weight:600;color:#fff;background:rgba(10,12,16,.9);padding:4px 10px;border-radius:var(--r-full);white-space:nowrap;border:1px solid var(--border-strong);pointer-events:none}
+
+.canvas-hud{position:absolute;bottom:16px;left:16px;right:16px;display:flex;align-items:center;gap:14px;padding:12px 18px;background:rgba(10,12,16,.85);border:1px solid var(--border-strong);border-radius:var(--r-md);backdrop-filter:blur(16px);box-shadow:var(--shadow-lg);pointer-events:none;z-index:5}
+.hud-badge{font-size:10.5px;font-family:'Courier New',monospace;font-weight:700;padding:4px 10px;background:var(--accent-soft);color:var(--accent-hover);border-radius:var(--r-full);border:1px solid rgba(59,130,246,.3);letter-spacing:.05em}
+.canvas-hud strong{font-size:14px;font-weight:600;color:#fff}
+.hud-sub{font-size:12px;color:var(--text-3);margin-left:auto}
+.hud-coords{font-size:11px;font-family:'Courier New',monospace;color:var(--accent-hover);background:rgba(59,130,246,.12);padding:3px 8px;border-radius:var(--r-sm);border:1px solid rgba(59,130,246,.3);display:none}
+.hud-coords.on{display:inline-block}
+
+.tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
+.tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 8px;font-size:12px;font-weight:500;color:var(--text-3);border-bottom:2px solid transparent;transition:all .15s var(--ease);position:relative}
+.tab svg{width:14px;height:14px}
+.tab:hover{color:var(--text-2)}
+.tab.active{color:var(--text-1);border-bottom-color:var(--accent)}
+.tab-badge{font-size:10px;font-weight:700;padding:1px 6px;background:var(--accent);color:#fff;border-radius:var(--r-full);margin-left:2px}
+
+.inspector-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:18px}
+.inspector-body::-webkit-scrollbar{width:6px}
+.inspector-body::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+
+.panel{display:flex;flex-direction:column;gap:12px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.panel-eyebrow{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--text-4)}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12px;font-weight:500;color:var(--text-2)}
+.field input[type=text],.field input[type=number],.field input[type=url],.field textarea,.field select{width:100%;padding:9px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text-1);font-size:13px;outline:none;transition:all .15s var(--ease)}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);background:rgba(59,130,246,.06);box-shadow:0 0 0 3px rgba(59,130,246,.14)}
+.field textarea{resize:vertical;min-height:70px;font-family:inherit;line-height:1.5}
+.field select option{background:var(--bg-2)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:11px;color:var(--text-4);line-height:1.5;margin-top:2px}
+.hint.warn{color:var(--warning)}
+
+.image-picker{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r-md);overflow:hidden;border:1.5px dashed var(--border-strong);background:var(--bg-3);cursor:pointer;transition:all .2s var(--ease)}
+.image-picker:hover{border-color:var(--accent);background:rgba(59,130,246,.05)}
+.image-picker img{width:100%;height:100%;object-fit:cover;transition:transform .4s var(--ease)}
+.image-picker:hover img{transform:scale(1.03)}
+.image-picker-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:linear-gradient(180deg,rgba(0,0,0,.4),rgba(0,0,0,.75));color:#fff;opacity:0;transition:opacity .2s;font-size:12.5px;font-weight:500}
+.image-picker:hover .image-picker-overlay{opacity:1}
+.image-picker-overlay svg{width:24px;height:24px}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0}
+.toggle-row label{font-size:12.5px;font-weight:500;color:var(--text-2);cursor:pointer}
+.toggle-row .hint{margin-top:2px;font-size:11px}
+.switch{position:relative;width:42px;height:24px;border-radius:var(--r-full);background:var(--bg-3);border:1px solid var(--border-strong);transition:all .25s var(--ease);flex-shrink:0;cursor:pointer}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:all .25s var(--ease);box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.switch.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.2)}
+.switch.on::after{left:calc(100% - 20px)}
+
+.hotspot-list{display:flex;flex-direction:column;gap:6px}
+.hotspot-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg-3);border:1px solid var(--border);border-radius:var(--r-md);cursor:pointer;transition:all .15s var(--ease)}
+.hotspot-item:hover{background:var(--surface-hover);border-color:var(--border-strong)}
+.hotspot-item.selected{background:linear-gradient(90deg,rgba(59,130,246,.14),rgba(59,130,246,.04));border-color:rgba(59,130,246,.45)}
+.hotspot-icon{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.hotspot-icon.navigation{background:rgba(59,130,246,.2);color:var(--accent-hover)}
+.hotspot-icon.info{background:rgba(160,120,40,.2);color:#e0b95c}
+.hotspot-icon.video{background:var(--video-soft);color:#fca5a5}
+.hotspot-icon.model3d{background:var(--model-soft);color:#d8b4fe}
+.hotspot-icon svg{width:14px;height:14px}
+.hotspot-info{flex:1;min-width:0}
+.hotspot-info strong{display:block;font-size:12.5px;font-weight:500;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hotspot-info span{display:block;font-size:10.5px;color:var(--text-3);margin-top:1px}
+.hotspot-delete{width:26px;height:26px;border-radius:var(--r-sm);display:grid;place-items:center;color:var(--text-4);transition:all .15s var(--ease)}
+.hotspot-delete:hover{background:rgba(239,68,68,.18);color:#fca5a5}
+.hotspot-delete svg{width:13px;height:13px}
+
+.empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 16px;text-align:center;color:var(--text-3);font-size:12.5px}
+.empty svg{width:40px;height:40px;opacity:.35;color:var(--accent)}
+.danger-zone{padding-top:16px;border-top:1px solid var(--border)}
+.divider-v{height:1px;background:var(--border);margin:4px 0}
+
+/* ═══ MODAL ═══ */
+.modal-backdrop{position:fixed;inset:0;background:rgba(5,7,10,.75);backdrop-filter:blur(8px);z-index:200;display:none;place-items:center;padding:20px;animation:fade-in .2s ease}
+.modal-backdrop.open{display:grid}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg-2);border:1px solid var(--border-strong);border-radius:var(--r-lg);max-width:720px;width:100%;box-shadow:var(--shadow-lg);overflow:hidden;animation:modal-in .3s var(--ease)}
+@keyframes modal-in{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-head{padding:20px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.modal-eyebrow{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:4px}
+.modal-head h3{font-size:16px;font-weight:600}
+.modal-body{padding:22px}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.type-card{padding:20px 16px;border-radius:var(--r-md);border:1.5px solid var(--border);background:var(--bg-3);transition:all .2s var(--ease);text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.type-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.type-card.nav:hover{border-color:rgba(59,130,246,.5);background:rgba(59,130,246,.06)}
+.type-card.info:hover{border-color:rgba(160,120,40,.5);background:rgba(160,120,40,.06)}
+.type-card.video:hover{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.06)}
+.type-card.model3d:hover{border-color:rgba(168,85,247,.5);background:rgba(168,85,247,.06)}
+.type-icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;margin-bottom:4px}
+.type-icon.nav{background:linear-gradient(135deg,rgba(59,130,246,.25),rgba(37,99,235,.15));color:var(--accent-hover);border:1px solid rgba(59,130,246,.3)}
+.type-icon.info{background:linear-gradient(135deg,rgba(160,120,40,.25),rgba(160,120,40,.1));color:#e0b95c;border:1px solid rgba(160,120,40,.3)}
+.type-icon.video{background:linear-gradient(135deg,rgba(239,68,68,.25),rgba(239,68,68,.1));color:#fca5a5;border:1px solid rgba(239,68,68,.3)}
+.type-icon.model3d{background:linear-gradient(135deg,rgba(168,85,247,.25),rgba(168,85,247,.1));color:#d8b4fe;border:1px solid rgba(168,85,247,.3)}
+.type-icon svg{width:22px;height:22px}
+.type-card strong{font-size:14px;font-weight:600}
+.type-card span{font-size:11.5px;color:var(--text-3);line-height:1.4}
+</style>
 </head>
-
 <body>
 
-    <div class="admin">
+<div class="studio" id="studio">
+  <header class="topbar" id="topbar-mount"></header>
+  <aside class="sidebar sidebar-left" id="sidebar-left-mount"></aside>
+  <div class="resizer resizer-left" data-resizer="left"></div>
+  <main class="canvas" id="canvas-mount"></main>
+  <div class="resizer resizer-right" data-resizer="right"></div>
+  <aside class="sidebar sidebar-right" id="sidebar-right-mount"></aside>
+</div>
 
-        <!-- ═══ TOPBAR ═══ -->
-        <header class="topbar">
-            <div class="tb-logo">
-                <div class="tb-logo-mark">C</div>
-                <div class="tb-logo-text">
-                    <strong>Admin</strong>
-                    <span>Cổ Thành</span>
-                </div>
-            </div>
+<div id="modal-mount"></div>
 
-            <div class="tb-breadcrumb">
-                <span>Tour 360°</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="m9 18 6-6-6-6" />
-                </svg>
-                <strong id="breadcrumbTour">Trảng Bay</strong>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="m9 18 6-6-6-6" />
-                </svg>
-                <span id="breadcrumbScene">Điểm Hợp Lưu</span>
-            </div>
+<script>
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+var escapeAttr = escapeHtml;
 
-            <div class="tb-spacer"></div>
+// ═══════════════════════════════════════════════════════
+// STORE
+// ═══════════════════════════════════════════════════════
+var store = {
+  scenes: [
+    {
+      id: 'scene-c1', title: 'Sân Điêu Khắc Bên Sông',
+      desc: 'Không gian trưng bày điêu khắc đá ngoài trời bên bờ sông Vân.',
+      image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600&q=75',
+      enterTime: 0, enterEffect: 'fade', startScene: true,
+      hotspots: [
+        { id: 'h1', type: 'navigation', label: 'Đi đến Vườn Tượng', target: 'scene-c2', yaw: 1.24, pitch: 0.08 },
+        { id: 'h-vid', type: 'video', label: 'Video giới thiệu', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', yaw: -1.5, pitch: 0.15 },
+        { id: 'h-3d', type: 'model3d', label: 'Tác phẩm "Sóng"', modelImage: 'https://images.unsplash.com/photo-1554188248-986adbb73be4?w=1200&q=80', content: 'Tác phẩm điêu khắc đá granite lấy cảm hứng từ những con sóng trên sông Vân. Được chế tác thủ công bởi nghệ nhân Ninh Vân trong 6 tháng.', yaw: 2.87, pitch: 0.12 }
+      ]
+    },
+    {
+      id: 'scene-c2', title: 'Vườn Tượng',
+      desc: 'Khu vườn trưng bày các tác phẩm điêu khắc đá độc đáo.',
+      image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1600&q=75',
+      enterTime: 1.5, enterEffect: 'zoom', startScene: false,
+      hotspots: [
+        { id: 'h2', type: 'info', label: 'Tác phẩm "Sóng"', content: 'Điêu khắc đá granite...', yaw: 2.87, pitch: 0.12 }
+      ]
+    },
+    {
+      id: 'scene-c3', title: 'Lối Dạo Nghệ Thuật',
+      desc: 'Lối đi dạo ven sông với các tác phẩm hai bên.',
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=75',
+      enterTime: 0, enterEffect: 'slide', startScene: false, hotspots: []
+    },
+    {
+      id: 'scene-c4', title: 'Cổng Sông Vân Art Space',
+      desc: 'Cổng chính dẫn vào khu art space.',
+      image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=75',
+      enterTime: 0, enterEffect: 'fade', startScene: false, hotspots: []
+    }
+  ],
 
-            <div class="save-indicator" id="saveIndicator">
-                <span class="dot"></span>
-                <span id="saveText">Đã lưu</span>
-            </div>
+  activeSceneId: null, activeHotspotId: null, activeTab: 'scene',
+  isDirty: false, placing: false,
+  _listeners: new Set(),
 
-            <div class="tb-actions">
-                <button class="tb-btn" id="undoBtn" title="Hoàn tác (Ctrl+Z)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M3 7v6h6" />
-                        <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
-                    </svg>
-                </button>
-                <button class="tb-btn" id="redoBtn" title="Làm lại (Ctrl+Y)">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M21 7v6h-6" />
-                        <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13" />
-                    </svg>
-                </button>
-                <button class="tb-btn" id="previewBtn" title="Xem trước như người dùng">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                        <circle cx="12" cy="12" r="3" />
-                    </svg>
-                    <span>Xem trước</span>
-                </button>
-                <button class="tb-btn primary" id="saveBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                        <path d="M17 21v-8H7v8" />
-                        <path d="M7 3v5h8" />
-                    </svg>
-                    <span>Lưu</span>
-                </button>
-            </div>
-        </header>
+  subscribe: function(fn) { this._listeners.add(fn); return () => this._listeners.delete(fn); },
+  notify: function(event) {
+    event = event || 'any';
+    this._listeners.forEach(function(fn) { fn(event); });
+  },
+  init: function() {
+    if (!this.activeSceneId && this.scenes.length > 0) {
+      var start = this.scenes.find(function(s) { return s.startScene; }) || this.scenes[0];
+      this.activeSceneId = start.id;
+    }
+    this.notify('init');
+  },
+  get activeScene() { return this.scenes.find(function(s) { return s.id === store.activeSceneId; }) || null; },
+  get activeHotspot() {
+    if (!this.activeScene || !this.activeHotspotId) return null;
+    return this.activeScene.hotspots.find(function(h) { return h.id === store.activeHotspotId; }) || null;
+  },
+  selectScene: function(id) {
+    if (this.activeSceneId === id) return;
+    this.activeSceneId = id; this.activeHotspotId = null; this.placing = false;
+    this.notify('activeScene');
+  },
+  selectHotspot: function(id) {
+    this.activeHotspotId = this.activeHotspotId === id ? null : id;
+    this.notify('activeHotspot');
+  },
+  setActiveTab: function(tab) { this.activeTab = tab; this.notify('tab'); },
+  setPlacing: function(val) { this.placing = val; this.notify('placing'); },
+  updateScene: function(field, value) {
+    var scene = this.activeScene; if (!scene) return;
+    scene[field] = value; this.isDirty = true; this.notify('sceneUpdated');
+  },
+  changeImage: function(file) {
+    var scene = this.activeScene; if (!scene || !file) return;
+    scene.image = URL.createObjectURL(file); this.isDirty = true; this.notify('sceneUpdated');
+  },
+  addScene: function() {
+    var id = 'scene-' + Date.now();
+    this.scenes.push({
+      id: id, title: 'Cảnh mới', desc: '',
+      image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1600&q=75',
+      enterTime: 0, enterEffect: 'fade', startScene: false, hotspots: []
+    });
+    this.activeSceneId = id; this.activeHotspotId = null; this.placing = false;
+    this.isDirty = true; this.notify('scenesList');
+  },
+  deleteScene: function(id) {
+    if (this.scenes.length <= 1) return false;
+    this.scenes = this.scenes.filter(function(s) { return s.id !== id; });
+    if (this.activeSceneId === id) { this.activeSceneId = this.scenes[0].id; this.activeHotspotId = null; }
+    this.isDirty = true; this.notify('scenesList');
+    return true;
+  },
+  setStartScene: function(id) {
+    this.scenes.forEach(function(s) { s.startScene = s.id === id; });
+    this.isDirty = true; this.notify('scenesList');
+  },
+  addHotspotAt: function(type, yaw, pitch) {
+    var scene = this.activeScene; if (!scene) return;
+    var id = 'h-' + Date.now();
+    var base = { id: id, yaw: yaw, pitch: pitch };
+    var newHotspot;
+    if (type === 'navigation') {
+      var other = this.scenes.find(function(s) { return s.id !== scene.id; });
+      newHotspot = Object.assign({}, base, { type: 'navigation', label: 'Đi đến cảnh khác', target: other ? other.id : '' });
+    } else if (type === 'video') {
+      newHotspot = Object.assign({}, base, { type: 'video', label: 'Video', url: '' });
+    } else if (type === 'model3d') {
+      newHotspot = Object.assign({}, base, { type: 'model3d', label: 'Mô hình 3D', modelImage: '', content: '' });
+    } else {
+      newHotspot = Object.assign({}, base, { type: 'info', label: 'Thông tin', content: '' });
+    }
+    scene.hotspots.push(newHotspot);
+    this.activeHotspotId = id;
+    this.isDirty = true; this.notify('hotspots');
+  },
+  updateHotspot: function(field, value) {
+    var hs = this.activeHotspot; if (!hs) return;
+    hs[field] = value; this.isDirty = true; this.notify('hotspots');
+  },
+  deleteHotspot: function(id) {
+    var scene = this.activeScene; if (!scene) return;
+    scene.hotspots = scene.hotspots.filter(function(h) { return h.id !== id; });
+    if (this.activeHotspotId === id) this.activeHotspotId = null;
+    this.isDirty = true; this.notify('hotspots');
+  },
+  save: function() { this.isDirty = false; this.notify('saved'); }
+};
 
-        <!-- ═══ SIDEBAR LEFT — SCENE LIST ═══ -->
-        <aside class="sidebar-left">
-            <div class="side-head">
-                <div class="side-head-row">
-                    <h3>Danh sách cảnh</h3>
-                    <button class="side-add" id="addSceneBtn" title="Thêm cảnh mới">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                            stroke-linecap="round">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </button>
-                </div>
-                <p id="sceneCount">16 cảnh · Kéo để sắp xếp</p>
-            </div>
+// ═══════════════════════════════════════════════════════
+// HEADER
+// ═══════════════════════════════════════════════════════
+function renderHeader(mount) {
+  mount.innerHTML = ''
+    + '<div class="brand"><div class="brand-mark">SV</div><div class="brand-text"><strong>Sông Vân Studio</strong><span>Tour 360° · Sông Vân Art Space</span></div></div>'
+    + '<nav class="breadcrumb">'
+    +   '<span>Tour 360°</span>'
+    +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>'
+    +   '<span>Sông Vân Art Space</span>'
+    +   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>'
+    +   '<strong id="crumb-scene">—</strong>'
+    + '</nav>'
+    + '<div class="spacer"></div>'
+    + '<div class="save-status" id="save-status"><span class="dot"></span><span id="save-text">Đã lưu</span></div>'
+    + '<div class="topbar-actions">'
+    +   '<button class="btn-icon" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg></button>'
+    +   '<button class="btn-icon" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 15-6.7L21 13"/></svg></button>'
+    +   '<div class="divider"></div>'
+    +   '<button class="btn btn-primary" id="save-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span>Lưu</span></button>'
+    + '</div>';
 
-            <div class="scene-list" id="sceneList">
-                <!-- Render bằng JS -->
-            </div>
-        </aside>
+  var crumb = mount.querySelector('#crumb-scene');
+  var saveStatus = mount.querySelector('#save-status');
+  var saveText = mount.querySelector('#save-text');
 
-        <!-- ═══ CENTER — PREVIEW ═══ -->
-        <main class="preview">
-            <div class="preview-toolbar">
-                <div class="pt-tabs">
-                    <button class="pt-tab active" data-mode="edit">Chỉnh sửa</button>
-                    <button class="pt-tab" data-mode="drag">Xoay ảnh</button>
-                </div>
+  mount.querySelector('#save-btn').addEventListener('click', function() {
+    saveStatus.classList.add('saving'); saveText.textContent = 'Đang lưu...';
+    setTimeout(function() { store.save(); saveStatus.classList.remove('saving'); saveText.textContent = 'Đã lưu'; }, 600);
+  });
 
-                <div class="pt-spacer"></div>
+  store.subscribe(function(event) {
+    if (event === 'activeScene' || event === 'init' || event === 'scenesList') {
+      var scene = store.activeScene; crumb.textContent = scene ? scene.title : '—';
+    }
+    if (event === 'sceneUpdated' || event === 'hotspots') saveText.textContent = 'Có thay đổi';
+    if (event === 'saved') saveText.textContent = 'Đã lưu';
+  });
+}
 
-                <div class="pt-zoom">
-                    <button id="zoomOut" title="Thu nhỏ">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M5 12h14" />
-                        </svg>
-                    </button>
-                    <span class="pt-zoom-label" id="zoomLabel">100%</span>
-                    <button id="zoomIn" title="Phóng to">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </button>
-                </div>
+// ═══════════════════════════════════════════════════════
+// SIDEBAR LEFT
+// ═══════════════════════════════════════════════════════
+function renderSidebarLeft(mount) {
+  mount.innerHTML = ''
+    + '<div class="sidebar-head"><div class="head-row"><h3>Danh sách ảnh</h3>'
+    +   '<button class="btn-icon-sm accent" id="add-scene"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button>'
+    + '</div><p id="scene-count">0 ảnh</p></div>'
+    + '<div class="sidebar-body" id="scene-list"></div>'
+    + '<div class="sidebar-foot"><button class="btn btn-ghost full" id="add-scene-2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Thêm ảnh mới</button></div>';
 
-                <button class="tb-btn" id="placeHotspotBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <path d="M12 5v14M5 12h14" />
-                    </svg>
-                    <span>Đặt hotspot</span>
-                </button>
-            </div>
+  var listEl = mount.querySelector('#scene-list');
+  var countEl = mount.querySelector('#scene-count');
 
-            <div class="preview-canvas" id="previewCanvas">
-                <div class="preview-bg" id="previewBg"
-                    style="background-image:url('https://picsum.photos/id/1015/2400/1200')"></div>
-                <div class="preview-vignette"></div>
+  function renderList() {
+    countEl.textContent = store.scenes.length + ' ảnh';
+    var html = '';
+    store.scenes.forEach(function(s, i) {
+      var num = String(i + 1).padStart(2, '0');
+      var active = s.id === store.activeSceneId ? 'active' : '';
+      var start = s.startScene ? '<div class="thumb-start">★</div>' : '';
+      var meta = s.hotspots.length + ' hotspot' + (s.startScene ? ' · Bắt đầu' : '');
+      html += '<div class="scene-card ' + active + '" data-id="' + s.id + '">'
+        + '<span class="drag-handle"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg></span>'
+        + '<div class="scene-thumb"><img src="' + s.image + '" alt=""><div class="thumb-num">' + num + '</div>' + start + '</div>'
+        + '<div class="scene-info"><strong>' + escapeHtml(s.title) + '</strong><span class="scene-meta">' + meta + '</span></div>'
+        + '</div>';
+    });
+    listEl.innerHTML = html;
+    listEl.querySelectorAll('.scene-card').forEach(function(card) {
+      card.addEventListener('click', function() { store.selectScene(card.dataset.id); });
+    });
+  }
 
-                <div class="place-hint" id="placeHint">
-                    Click lên ảnh để đặt hotspot · ESC để hủy
-                </div>
+  mount.querySelector('#add-scene').addEventListener('click', function() { store.addScene(); });
+  mount.querySelector('#add-scene-2').addEventListener('click', function() { store.addScene(); });
+  store.subscribe(function(event) {
+    if (event === 'init' || event === 'scenesList' || event === 'activeScene') renderList();
+  });
+  renderList();
+}
 
-                <!-- Hotspots sẽ render bằng JS -->
+// ═══════════════════════════════════════════════════════
+// CANVAS
+// ═══════════════════════════════════════════════════════
+function renderCanvas(mount) {
+  mount.innerHTML = ''
+    + '<div class="canvas-toolbar">'
+    +   '<button class="btn btn-accent" id="btn-add-hs">'
+    +     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+    +     '<span id="btn-add-hs-text">Đặt hotspot</span>'
+    +   '</button>'
+    +   '<div class="canvas-spacer"></div>'
+    +   '<span class="canvas-hint" id="canvas-hint">💡 Click vào ảnh để đặt hotspot · ESC để hủy</span>'
+    + '</div>'
+    + '<div class="canvas-stage" id="stage"></div>';
 
-                <div class="preview-info">
-                    <span class="preview-info-badge">CẢNH <span id="infoIdx">7</span>/16</span>
-                    <span class="preview-info-title" id="infoTitle">Điểm Hợp Lưu</span>
-                    <span class="preview-info-coord" id="infoCoord">x: 50% · y: 42%</span>
-                </div>
-            </div>
-        </main>
+  var stage = mount.querySelector('#stage');
+  var btn = mount.querySelector('#btn-add-hs');
+  var btnText = mount.querySelector('#btn-add-hs-text');
+  var hint = mount.querySelector('#canvas-hint');
 
-        <!-- ═══ SIDEBAR RIGHT — INSPECTOR ═══ -->
-        <aside class="inspector">
-            <div class="insp-tabs">
-                <button class="insp-tab active" data-tab="scene">Cảnh</button>
-                <button class="insp-tab" data-tab="hotspots">Hotspots</button>
-                <button class="insp-tab" data-tab="settings">Cài đặt</button>
-            </div>
+  btn.addEventListener('click', function() {
+    if (!store.activeScene) { alert('Chọn một ảnh trước.'); return; }
+    store.setPlacing(!store.placing);
+  });
 
-            <div class="insp-body" id="inspBody">
-                <!-- Render bằng JS theo tab -->
-            </div>
-        </aside>
+  stage.addEventListener('click', function(e) {
+    if (!store.placing) return;
+    if (e.target.closest('.hotspot')) return;
+    var scene = store.activeScene; if (!scene) return;
+    var rect = stage.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / rect.width;
+    var y = (e.clientY - rect.top) / rect.height;
+    var yaw = Math.max(-Math.PI, Math.min(Math.PI, (x - 0.5) * Math.PI * 2));
+    var pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, (0.5 - y) * Math.PI));
+    store.setPlacing(false);
+    openHotspotModal(yaw, pitch);
+  });
 
-    </div>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && store.placing) store.setPlacing(false);
+  });
 
-    <!-- ═══ TOAST ═══ -->
-    <div class="toast-wrap" id="toastWrap"></div>
+  function hsToPercent(h) {
+    return { left: 50 + (h.yaw / Math.PI) * 50, top: 50 - (h.pitch / Math.PI) * 100 };
+  }
 
-    <!-- ═══ MODAL: Chọn loại hotspot ═══ -->
-    <div class="modal-backdrop" id="hotspotModal">
-        <div class="modal">
-            <div class="modal-head">
-                <h3>Chọn loại hotspot</h3>
-                <button class="modal-close" data-close-modal>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-                        stroke-linecap="round">
-                        <path d="M18 6 6 18" />
-                        <path d="m6 6 12 12" />
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="type-grid">
-                    <div class="type-card" data-type="nav">
-                        <div class="type-card-icon nav">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 4 L12 18" />
-                                <path d="M6 11 L12 5 L18 11" />
-                            </svg>
-                        </div>
-                        <strong>Di chuyển</strong>
-                        <span>Dẫn đến cảnh khác</span>
-                    </div>
-                    <div class="type-card" data-type="info">
-                        <div class="type-card-icon info">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
-                                stroke-linecap="round">
-                                <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none" />
-                                <path d="M12 11 L12 18" />
-                            </svg>
-                        </div>
-                        <strong>Thông tin</strong>
-                        <span>Hiện panel thông tin</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-foot">
-                <button class="tb-btn" data-close-modal>Hủy</button>
-            </div>
-        </div>
-    </div>
+  function hotspotIcon(type) {
+    if (type === 'navigation') return '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round"><path d="M12 4v12M6 10l6-6 6 6"/></svg>';
+    if (type === 'info') return '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="7" r="1.8" fill="white" stroke="none"/><path d="M12 11v7"/></svg>';
+    if (type === 'video') return '<svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>';
+    if (type === 'model3d') return '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg>';
+    return '';
+  }
 
-    <script>
-        /* ═══════════════════════════════════════════════════════════
-           DATA — Trong thực tế load từ API
-           ═══════════════════════════════════════════════════════════ */
-        const state = {
-            tourName: 'Trảng Bay',
-            scenes: [
-                { id: 's1', name: 'Đỉnh Nhìn Ra Thung Lũng', img: 'https://picsum.photos/id/1015/2400/1200', thumb: 'https://picsum.photos/id/1015/200/120', desc: 'Tầm nhìn toàn cảnh thung lũng', hotspots: [] },
-                { id: 's2', name: 'Rìa Rừng Thưa', img: 'https://picsum.photos/id/1016/2400/1200', thumb: 'https://picsum.photos/id/1016/200/120', desc: 'Vùng đệm giữa rừng và trảng', hotspots: [] },
-                { id: 's3', name: 'Lối Mòn Giữa Trảng', img: 'https://picsum.photos/id/1018/2400/1200', thumb: 'https://picsum.photos/id/1018/200/120', desc: 'Lối đi xuyên qua đồng cỏ', hotspots: [] },
-                { id: 's4', name: 'Bãi Cỏ Thoáng Đãng', img: 'https://picsum.photos/id/1019/2400/1200', thumb: 'https://picsum.photos/id/1019/200/120', desc: 'Bãi cỏ rộng, thoáng đãng', hotspots: [] },
-                { id: 's5', name: 'Góc Nhìn Phía Núi', img: 'https://picsum.photos/id/1021/2400/1200', thumb: 'https://picsum.photos/id/1021/200/120', desc: 'Hướng nhìn về dãy núi', hotspots: [] },
-                { id: 's6', name: 'Vùng Cây Bụi Thấp', img: 'https://picsum.photos/id/1022/2400/1200', thumb: 'https://picsum.photos/id/1022/200/120', desc: 'Thảm thực vật thấp', hotspots: [] },
-                {
-                    id: 's7', name: 'Điểm Hợp Lưu', img: 'https://picsum.photos/id/1015/2400/1200', thumb: 'https://picsum.photos/id/1015/200/120', desc: 'Nơi ba hướng đi gặp nhau',
-                    hotspots: [
-                        { id: 'h1', type: 'nav', x: 30, y: 42, label: 'Điểm Hợp Lưu', target: 's7' },
-                        { id: 'h2', type: 'nav', x: 68, y: 58, label: 'Cổng Vào Trảng Bay', target: 's8' },
-                        { id: 'h3', type: 'info', x: 48, y: 70, label: 'Thông tin', target: null }
-                    ]
-                },
-                { id: 's8', name: 'Cổng Vào Trảng Bay 1', img: 'https://picsum.photos/id/1036/2400/1200', thumb: 'https://picsum.photos/id/1036/200/120', desc: 'Cổng vào khu vực Trảng Bay 1', hotspots: [] },
-                { id: 's9', name: 'Đồng Trảng Rộng', img: 'https://picsum.photos/id/1039/2400/1200', thumb: 'https://picsum.photos/id/1039/200/120', desc: 'Đồng trảng rộng lớn', hotspots: [] },
-                { id: 's10', name: 'Góc Phía Đông Trảng', img: 'https://picsum.photos/id/1040/2400/1200', thumb: 'https://picsum.photos/id/1040/200/120', desc: 'Góc nhìn về phía Đông', hotspots: [] },
-                { id: 's11', name: 'Trung Tâm Trảng Bay 1', img: 'https://picsum.photos/id/1043/2400/1200', thumb: 'https://picsum.photos/id/1043/200/120', desc: 'Trung tâm Trảng Bay 1', hotspots: [] },
-                { id: 's12', name: 'Biên Giới Hai Trảng', img: 'https://picsum.photos/id/1044/2400/1200', thumb: 'https://picsum.photos/id/1044/200/120', desc: 'Ranh giới giữa 2 trảng', hotspots: [] },
-                { id: 's13', name: 'Cổng Vào Trảng Bay 2', img: 'https://picsum.photos/id/1048/2400/1200', thumb: 'https://picsum.photos/id/1048/200/120', desc: 'Cổng vào khu vực Trảng Bay 2', hotspots: [] },
-                { id: 's14', name: 'Vùng Cỏ Lau Cao', img: 'https://picsum.photos/id/1050/2400/1200', thumb: 'https://picsum.photos/id/1050/200/120', desc: 'Vùng cỏ lau cao', hotspots: [] },
-                { id: 's15', name: 'Bờ Rừng Phía Tây', img: 'https://picsum.photos/id/1055/2400/1200', thumb: 'https://picsum.photos/id/1055/200/120', desc: 'Bờ rừng phía Tây', hotspots: [] },
-                { id: 's16', name: 'Cuối Trảng Bay 2', img: 'https://picsum.photos/id/1062/2400/1200', thumb: 'https://picsum.photos/id/1062/200/120', desc: 'Cuối Trảng Bay 2', hotspots: [] }
-            ],
-            settings: {
-                startSceneId: 's7',
-                mode: 'free', // 'free' | 'guided'
-                guidedDuration: 8,
-                autoRotate: false,
-                showMinimap: true
-            }
-        };
+  function renderStage() {
+    var scene = store.activeScene;
+    if (!scene) {
+      stage.innerHTML = '<div class="canvas-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6M15 9l-6 6"/></svg><p>Chọn một ảnh ở thanh bên trái để bắt đầu</p></div>';
+      return;
+    }
 
-        let currentSceneIdx = 6; // Điểm Hợp Lưu
-        let selectedHotspotId = null;
-        let currentTab = 'scene';
-        let isPlacingHotspot = false;
-        let pendingHotspotPos = null;
-        let isDirty = false;
-        let previewMode = false;
-        let zoom = 100;
-        let dragState = { active: false, startX: 0, bgX: 0 };
+    var idx = store.scenes.findIndex(function(s) { return s.id === scene.id; });
+    var hsHtml = '';
+    scene.hotspots.forEach(function(h) {
+      var pos = hsToPercent(h);
+      var selected = h.id === store.activeHotspotId ? 'selected' : '';
+      hsHtml += '<div class="hotspot ' + h.type + ' ' + selected + '" data-id="' + h.id + '" style="left:' + pos.left + '%;top:' + pos.top + '%">'
+        + '<div class="hotspot-circle">' + hotspotIcon(h.type) + '</div>'
+        + '<span class="hotspot-label">' + escapeHtml(h.label) + '</span>'
+        + '</div>';
+    });
 
-        /* ═══════════════════════════════════════════════════════════
-           RENDER SCENE LIST
-           ═══════════════════════════════════════════════════════════ */
-        function renderSceneList() {
-            const list = document.getElementById('sceneList');
-            list.innerHTML = '';
+    stage.innerHTML = '<div class="canvas-image" style="background-image:url(\'' + scene.image + '\')"></div>'
+      + hsHtml
+      + '<div class="canvas-hud">'
+      +   '<span class="hud-badge">ẢNH ' + (idx + 1) + '/' + store.scenes.length + '</span>'
+      +   '<strong>' + escapeHtml(scene.title) + '</strong>'
+      +   '<span class="hud-coords" id="hud-coords"></span>'
+      +   '<span class="hud-sub">' + scene.hotspots.length + ' hotspot</span>'
+      + '</div>';
 
-            state.scenes.forEach((scene, idx) => {
-                const item = document.createElement('div');
-                item.className = 'scene-item' + (idx === currentSceneIdx ? ' active' : '');
-                item.dataset.idx = idx;
-                item.draggable = true;
+    bindHotspots();
+  }
 
-                const isStart = scene.id === state.settings.startSceneId;
+  function bindHotspots() {
+    var coordsEl = document.getElementById('hud-coords');
 
-                item.innerHTML = `
-      <span class="scene-drag">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
-          <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
-          <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
-        </svg>
-      </span>
-      <img class="scene-thumb-sm" src="${scene.thumb}" alt="">
-      <div class="scene-info">
-        <strong>${scene.name}</strong>
-        <span>${scene.hotspots.length} hotspot${isStart ? ' · ★ Bắt đầu' : ''}</span>
-      </div>
-      ${isStart ? '<span class="scene-badge">Start</span>' : ''}
-    `;
+    stage.querySelectorAll('.hotspot').forEach(function(el) {
+      el.addEventListener('mousedown', function(e) {
+        if (store.placing) return;
+        if (e.button !== 0) return;
+        e.preventDefault(); e.stopPropagation();
 
-                item.addEventListener('click', (e) => {
-                    if (e.target.closest('.scene-drag')) return;
-                    goToScene(idx);
-                });
+        var id = el.dataset.id;
+        var scene = store.activeScene; if (!scene) return;
+        if (store.activeHotspotId !== id) { store.activeHotspotId = id; store.notify('activeHotspot'); }
 
-                // Drag & drop
-                item.addEventListener('dragstart', (e) => {
-                    item.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', idx);
-                });
-                item.addEventListener('dragend', () => item.classList.remove('dragging'));
-                item.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    item.classList.add('drag-over');
-                });
-                item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
-                item.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    item.classList.remove('drag-over');
-                    const from = parseInt(e.dataTransfer.getData('text/plain'));
-                    const to = idx;
-                    if (from !== to) reorderScenes(from, to);
-                });
+        var rect = stage.getBoundingClientRect();
+        var startX = e.clientX, startY = e.clientY;
+        var hs = scene.hotspots.find(function(h) { return h.id === id; });
+        if (!hs) return;
+        var startYaw = hs.yaw, startPitch = hs.pitch;
 
-                list.appendChild(item);
-            });
+        el.classList.add('dragging');
+        document.body.style.cursor = 'grabbing';
+        document.body.style.userSelect = 'none';
+        if (coordsEl) coordsEl.classList.add('on');
 
-            document.getElementById('sceneCount').textContent =
-                `${state.scenes.length} cảnh · Kéo để sắp xếp`;
+        function onMove(ev) {
+          var dx = ev.clientX - startX, dy = ev.clientY - startY;
+          var dYaw = (dx / rect.width) * Math.PI * 2;
+          var dPitch = -(dy / rect.height) * Math.PI;
+          var newYaw = Math.max(-Math.PI, Math.min(Math.PI, startYaw + dYaw));
+          var newPitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, startPitch + dPitch));
+          var pos = hsToPercent({ yaw: newYaw, pitch: newPitch });
+          el.style.left = pos.left + '%'; el.style.top = pos.top + '%';
+          el.dataset.tmpYaw = newYaw; el.dataset.tmpPitch = newPitch;
+          if (coordsEl) coordsEl.textContent = 'yaw ' + newYaw.toFixed(2) + ' · pitch ' + newPitch.toFixed(2);
         }
 
-        function reorderScenes(from, to) {
-            const [moved] = state.scenes.splice(from, 1);
-            state.scenes.splice(to, 0, moved);
-            if (from === currentSceneIdx) currentSceneIdx = to;
-            else if (from < currentSceneIdx && to >= currentSceneIdx) currentSceneIdx--;
-            else if (from > currentSceneIdx && to <= currentSceneIdx) currentSceneIdx++;
-
-            markDirty();
-            renderSceneList();
-            toast('Đã sắp xếp lại danh sách cảnh');
+        function onUp() {
+          el.classList.remove('dragging');
+          document.body.style.cursor = ''; document.body.style.userSelect = '';
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+          if (el.dataset.tmpYaw !== undefined) {
+            hs.yaw = parseFloat(el.dataset.tmpYaw); hs.pitch = parseFloat(el.dataset.tmpPitch);
+            delete el.dataset.tmpYaw; delete el.dataset.tmpPitch;
+            store.isDirty = true; store.notify('hotspots');
+          }
+          if (coordsEl) coordsEl.classList.remove('on');
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           GO TO SCENE
-           ═══════════════════════════════════════════════════════════ */
-        function goToScene(idx) {
-            if (idx < 0 || idx >= state.scenes.length) return;
-            currentSceneIdx = idx;
-            const scene = state.scenes[idx];
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      });
 
-            const bg = document.getElementById('previewBg');
-            bg.style.opacity = '0';
-            setTimeout(() => {
-                bg.style.backgroundImage = `url('${scene.img}')`;
-                bg.style.opacity = '1';
-            }, 200);
+      el.addEventListener('click', function(e) {
+        if (store.placing) return;
+        e.stopPropagation();
+        store.selectHotspot(el.dataset.id);
+        store.setActiveTab('hotspots');
+      });
+    });
+  }
 
-            selectedHotspotId = null;
-            document.getElementById('breadcrumbScene').textContent = scene.name;
-            document.getElementById('infoIdx').textContent = idx + 1;
-            document.getElementById('infoTitle').textContent = scene.name;
+  store.subscribe(function(event) {
+    if (event === 'placing') {
+      stage.classList.toggle('placing', store.placing);
+      btn.classList.toggle('btn-placing', store.placing);
+      btnText.textContent = store.placing ? 'Đang đặt... (ESC)' : 'Đặt hotspot';
+      hint.classList.toggle('on', store.placing);
+    }
+    if (['init','activeScene','sceneUpdated','hotspots','activeHotspot','scenesList'].indexOf(event) !== -1) {
+      if (stage.querySelector('.hotspot.dragging')) return;
+      renderStage();
+    }
+  });
 
-            renderSceneList();
-            renderPreviewHotspots();
-            renderInspector();
-        }
+  renderStage();
+}
+</script>
+<script>
+// ═══════════════════════════════════════════════════════
+// SIDEBAR RIGHT — Tab Hotspot giờ có 4 loại form
+// ═══════════════════════════════════════════════════════
+function renderSidebarRight(mount) {
+  mount.innerHTML = ''
+    + '<div class="tabs">'
+    +   '<button class="tab" data-tab="scene"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6M15 9l-6 6"/></svg>Cảnh</button>'
+    +   '<button class="tab" data-tab="hotspots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>Hotspot <span class="tab-badge" id="hs-badge">0</span></button>'
+    + '</div>'
+    + '<div class="inspector-body" id="inspector-body"></div>';
 
-        /* ═══════════════════════════════════════════════════════════
-           RENDER PREVIEW HOTSPOTS
-           ═══════════════════════════════════════════════════════════ */
-        function renderPreviewHotspots() {
-            const canvas = document.getElementById('previewCanvas');
-            canvas.querySelectorAll('.edit-hotspot').forEach(el => el.remove());
+  var tabs = mount.querySelectorAll('.tab');
+  var body = mount.querySelector('#inspector-body');
+  var badge = mount.querySelector('#hs-badge');
 
-            const scene = state.scenes[currentSceneIdx];
-            scene.hotspots.forEach(hs => {
-                const el = document.createElement('div');
-                el.className = `edit-hotspot ${hs.type}` + (hs.id === selectedHotspotId ? ' selected' : '');
-                el.style.left = hs.x + '%';
-                el.style.top = hs.y + '%';
-                el.dataset.id = hs.id;
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() { store.setActiveTab(tab.dataset.tab); });
+  });
 
-                const icon = hs.type === 'nav'
-                    ? `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-           <path d="M12 4 L12 18"/><path d="M6 11 L12 5 L18 11"/>
-         </svg>`
-                    : `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round">
-           <circle cx="12" cy="7" r="1.8" fill="white" stroke="none"/>
-           <path d="M12 11 L12 18"/>
-         </svg>`;
+  function setTabUI() {
+    tabs.forEach(function(t) { t.classList.toggle('active', t.dataset.tab === store.activeTab); });
+  }
 
-                el.innerHTML = `
-      <div class="hs-circle">${icon}</div>
-      <span class="hs-label">${hs.label}</span>
-    `;
+  function hotspotIconSvg(type) {
+    if (type === 'navigation') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 4v14M6 11l6-6 6 6"/></svg>';
+    if (type === 'info') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none"/><path d="M12 11v7"/></svg>';
+    if (type === 'video') return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    if (type === 'model3d') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg>';
+    return '';
+  }
 
-                // Click để chọn
-                el.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    selectedHotspotId = hs.id;
-                    renderPreviewHotspots();
-                    renderInspector();
-                });
+  function hotspotTypeLabel(type) {
+    if (type === 'navigation') return 'Di chuyển';
+    if (type === 'info') return 'Thông tin';
+    if (type === 'video') return 'Video';
+    if (type === 'model3d') return 'Mô hình 3D';
+    return type;
+  }
 
-                // Drag để di chuyển
-                setupHotspotDrag(el, hs);
+  function renderSceneTab(scene) {
+    return ''
+      + '<section class="panel">'
+      +   '<header class="panel-head"><span class="panel-eyebrow">Thông tin ảnh</span></header>'
+      +   '<div class="field"><label>Tên ảnh</label><input type="text" id="f-title" value="' + escapeAttr(scene.title) + '"></div>'
+      +   '<div class="field"><label>Mô tả ngắn</label><textarea id="f-desc" rows="3">' + escapeHtml(scene.desc) + '</textarea></div>'
+      + '</section>'
+      + '<section class="panel">'
+      +   '<header class="panel-head"><span class="panel-eyebrow">Ảnh panorama</span></header>'
+      +   '<div class="image-picker" id="img-picker">'
+      +     '<img src="' + scene.image + '" alt="">'
+      +     '<div class="image-picker-overlay">'
+      +       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'
+      +       '<span>Nhấn để đổi ảnh</span>'
+      +     '</div>'
+      +   '</div>'
+      +   '<input type="file" id="img-file" accept="image/*" style="display:none">'
+      +   '<p class="hint">💡 Ảnh panorama nên có tỷ lệ 2:1.</p>'
+      + '</section>'
+      + '<section class="panel">'
+      +   '<header class="panel-head"><span class="panel-eyebrow">Hiệu ứng khi vào</span></header>'
+      +   '<div class="field-row">'
+      +     '<div class="field"><label>Thời gian (giây)</label><input type="number" id="f-time" value="' + scene.enterTime + '" min="0" max="10" step="0.5"></div>'
+      +     '<div class="field"><label>Hiệu ứng</label><select id="f-effect">'
+      +       '<option value="fade" ' + (scene.enterEffect === 'fade' ? 'selected' : '') + '>Mờ dần</option>'
+      +       '<option value="zoom" ' + (scene.enterEffect === 'zoom' ? 'selected' : '') + '>Phóng to</option>'
+      +       '<option value="slide" ' + (scene.enterEffect === 'slide' ? 'selected' : '') + '>Trượt ngang</option>'
+      +     '</select></div>'
+      +   '</div>'
+      + '</section>'
+      + '<section class="panel">'
+      +   '<header class="panel-head"><span class="panel-eyebrow">Vị trí trong tour</span></header>'
+      +   '<div class="toggle-row">'
+      +     '<div><label>Đặt làm ảnh bắt đầu</label><p class="hint">Ảnh hiển thị đầu tiên khi mở tour</p></div>'
+      +     '<div class="switch ' + (scene.startScene ? 'on' : '') + '" id="sw-start"></div>'
+      +   '</div>'
+      + '</section>'
+      + '<section class="panel danger-zone">'
+      +   '<button class="btn btn-danger full" id="btn-delete-scene"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Xóa ảnh này</button>'
+      + '</section>';
+  }
 
-                canvas.appendChild(el);
-            });
-        }
+  function renderHotspotsTab(scene) {
+    var hs = scene.hotspots;
+    var active = store.activeHotspot;
 
-        function setupHotspotDrag(el, hs) {
-            let dragging = false;
-            let startX, startY, startLeft, startTop;
+    var listHtml = '';
+    if (hs.length === 0) {
+      listHtml = '<div class="empty">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>'
+        + '<p>Chưa có hotspot nào</p>'
+        + '<button class="btn btn-accent" id="add-hs-empty">Đặt hotspot trên ảnh</button>'
+        + '</div>';
+    } else {
+      listHtml = '<div class="hotspot-list">';
+      hs.forEach(function(h) {
+        var sel = h.id === store.activeHotspotId ? 'selected' : '';
+        listHtml += '<div class="hotspot-item ' + sel + '" data-id="' + h.id + '">'
+          + '<div class="hotspot-icon ' + h.type + '">' + hotspotIconSvg(h.type) + '</div>'
+          + '<div class="hotspot-info"><strong>' + escapeHtml(h.label) + '</strong><span>' + hotspotTypeLabel(h.type) + ' · yaw ' + h.yaw.toFixed(2) + '</span></div>'
+          + '<button class="hotspot-delete" data-delete="' + h.id + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+          + '</div>';
+      });
+      listHtml += '</div>';
+    }
 
-            el.addEventListener('mousedown', (e) => {
-                if (isPlacingHotspot) return;
-                e.preventDefault();
-                dragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = hs.x;
-                startTop = hs.y;
-                document.body.style.userSelect = 'none';
-            });
+    var editHtml = '';
+    if (active) {
+      editHtml = '<div class="divider-v"></div>'
+        + '<section class="panel">'
+        +   '<header class="panel-head"><span class="panel-eyebrow">Chỉnh sửa hotspot · ' + hotspotTypeLabel(active.type) + '</span></header>'
+        +   '<div class="field"><label>Nhãn hiển thị</label><input type="text" id="hs-label" value="' + escapeAttr(active.label) + '"></div>';
 
-            document.addEventListener('mousemove', (e) => {
-                if (!dragging) return;
-                const rect = document.getElementById('previewCanvas').getBoundingClientRect();
-                const dx = ((e.clientX - startX) / rect.width) * 100;
-                const dy = ((e.clientY - startY) / rect.height) * 100;
-                hs.x = Math.max(0, Math.min(100, startLeft + dx));
-                hs.y = Math.max(0, Math.min(100, startTop + dy));
-                el.style.left = hs.x + '%';
-                el.style.top = hs.y + '%';
-                document.getElementById('infoCoord').textContent = `x: ${hs.x.toFixed(0)}% · y: ${hs.y.toFixed(0)}%`;
-            });
-
-            document.addEventListener('mouseup', () => {
-                if (dragging) {
-                    dragging = false;
-                    document.body.style.userSelect = '';
-                    markDirty();
-                }
-            });
-        }
-
-        /* ═══════════════════════════════════════════════════════════
-           INSPECTOR — RIGHT PANEL
-           ═══════════════════════════════════════════════════════════ */
-        function renderInspector() {
-            const body = document.getElementById('inspBody');
-            if (currentTab === 'scene') renderSceneTab(body);
-            else if (currentTab === 'hotspots') renderHotspotsTab(body);
-            else renderSettingsTab(body);
-        }
-
-        function renderSceneTab(body) {
-            const scene = state.scenes[currentSceneIdx];
-            body.innerHTML = `
-    <div class="insp-section">
-      <div class="insp-section-title">Thông tin cảnh</div>
-      <div class="field">
-        <label>Tên cảnh</label>
-        <input type="text" id="fieldName" value="${scene.name}">
-      </div>
-      <div class="field">
-        <label>Mô tả ngắn</label>
-        <textarea id="fieldDesc">${scene.desc}</textarea>
-      </div>
-    </div>
-
-    <div class="insp-section">
-      <div class="insp-section-title">Ảnh panorama</div>
-      <input type="file" id="realFileInput" accept="image/*" style="display:none">
-      <div class="img-picker" id="imgPicker">
-        <img src="${scene.img}" alt="" id="pickerImgPreview">
-        <div class="img-picker-overlay">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          <span>Đổi ảnh (Tải lên)</span>
-        </div>
-      </div>
-      <div class="field" style="margin-top:6px">
-        <label>URL ảnh panorama</label>
-        <input type="text" id="fieldImgUrl" value="${scene.img}">
-      </div>
-      <div class="hint-text">💡 Nhấn vào khung để chọn file từ máy tính hoặc dán URL ảnh trực tiếp.</div>
-    </div>
-
-    <div class="insp-section">
-      <div class="insp-section-title">Vị trí trong tour</div>
-      <div class="field-row">
-        <div class="field">
-          <label>Thứ tự</label>
-          <input type="number" id="fieldOrder" value="${currentSceneIdx + 1}" min="1" max="${state.scenes.length}">
-        </div>
-        <div class="field">
-          <label>ID</label>
-          <input type="text" value="${scene.id}" readonly style="opacity:0.5">
-        </div>
-      </div>
-      <div class="toggle-row">
-        <label for="isStartToggle">Đặt làm cảnh bắt đầu</label>
-        <div class="toggle ${state.settings.startSceneId === scene.id ? 'on' : ''}" id="isStartToggle"></div>
-      </div>
-    </div>
-
-    <div class="insp-section">
-      <button class="btn-block danger" id="deleteSceneBtn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-        </svg>
-        Xóa cảnh này
-      </button>
-    </div>
-  `;
-
-            // Bind events
-            document.getElementById('fieldName').addEventListener('input', (e) => {
-                scene.name = e.target.value;
-                document.getElementById('breadcrumbScene').textContent = scene.name;
-                document.getElementById('infoTitle').textContent = scene.name;
-                renderSceneList();
-                markDirty();
-            });
-            document.getElementById('fieldDesc').addEventListener('input', (e) => {
-                scene.desc = e.target.value;
-                markDirty();
-            });
-            document.getElementById('fieldImgUrl').addEventListener('change', (e) => {
-                const url = e.target.value.trim();
-                if (url) {
-                    scene.img = url;
-                    scene.thumb = url;
-                    document.getElementById('previewBg').style.backgroundImage = `url('${url}')`;
-                    renderSceneList();
-                    markDirty();
-                    toast('Đã đổi URL ảnh panorama', 'success');
-                }
-            });
-            document.getElementById('fieldOrder').addEventListener('change', (e) => {
-                const newOrder = Math.max(0, Math.min(state.scenes.length - 1, parseInt(e.target.value) - 1));
-                if (newOrder !== currentSceneIdx) {
-                    reorderScenes(currentSceneIdx, newOrder);
-                }
-            });
-            document.getElementById('isStartToggle').addEventListener('click', function () {
-                if (state.settings.startSceneId === scene.id) {
-                    this.classList.remove('on');
-                    state.settings.startSceneId = null;
-                } else {
-                    state.settings.startSceneId = scene.id;
-                    this.classList.add('on');
-                }
-                renderSceneList();
-                markDirty();
-            });
-            document.getElementById('deleteSceneBtn').addEventListener('click', () => {
-                if (state.scenes.length <= 1) { toast('Không thể xóa cảnh cuối cùng'); return; }
-                if (!confirm('Xóa cảnh "' + scene.name + '"?')) return;
-                state.scenes.splice(currentSceneIdx, 1);
-                currentSceneIdx = Math.max(0, currentSceneIdx - 1);
-                markDirty();
-                renderSceneList();
-                goToScene(currentSceneIdx);
-                toast('Đã xóa cảnh', 'success');
-            });
-            const fileInput = document.getElementById('realFileInput');
-            document.getElementById('imgPicker').addEventListener('click', () => {
-                fileInput.click();
-            });
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files && e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (evt) => {
-                        const dataUrl = evt.target.result;
-                        scene.img = dataUrl;
-                        scene.thumb = dataUrl;
-                        document.getElementById('pickerImgPreview').src = dataUrl;
-                        document.getElementById('previewBg').style.backgroundImage = `url('${dataUrl}')`;
-                        renderSceneList();
-                        markDirty();
-                        toast('Đã cập nhật ảnh mới!', 'success');
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-
-        function renderHotspotsTab(body) {
-            const scene = state.scenes[currentSceneIdx];
-
-            let listHtml = '';
-            if (scene.hotspots.length === 0) {
-                listHtml = `
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/>
-        </svg>
-        Chưa có hotspot nào.<br>Nhấn "Đặt hotspot" để bắt đầu.
-      </div>
-    `;
-            } else {
-                listHtml = scene.hotspots.map(hs => {
-                    const icon = hs.type === 'nav'
-                        ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-             <path d="M12 4 L12 18"/><path d="M6 11 L12 5 L18 11"/>
-           </svg>`
-                        : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-             <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none"/>
-             <path d="M12 11 L12 18"/>
-           </svg>`;
-                    return `
-        <div class="hotspot-row ${hs.id === selectedHotspotId ? 'selected' : ''}" data-id="${hs.id}">
-          <div class="hotspot-row-icon ${hs.type}">${icon}</div>
-          <span class="hotspot-row-name">${hs.label}</span>
-          <button class="hotspot-row-delete" data-delete="${hs.id}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-            </svg>
-          </button>
-        </div>
-      `;
-                }).join('');
-            }
-
-            const selected = scene.hotspots.find(h => h.id === selectedHotspotId);
-
-            body.innerHTML = `
-    <div class="insp-section">
-      <div class="insp-section-title">
-        <span>Hotspots trong cảnh (${scene.hotspots.length})</span>
-      </div>
-      <div class="hotspot-list">${listHtml}</div>
-      <button class="btn-block primary" id="quickAddHotspot">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <path d="M12 5v14M5 12h14"/>
-        </svg>
-        Thêm hotspot
-      </button>
-    </div>
-
-    ${selected ? `
-    <div class="insp-section">
-      <div class="insp-section-title">Chỉnh sửa hotspot</div>
-      <div class="field">
-        <label>Nhãn hiển thị</label>
-        <input type="text" id="hsLabel" value="${selected.label}">
-      </div>
-      ${selected.type === 'nav' ? `
-      <div class="field">
-        <label>Cảnh đích</label>
-        <select id="hsTarget">
-          <option value="">— Chọn cảnh —</option>
-          ${state.scenes.map(s => `
-            <option value="${s.id}" ${s.id === selected.target ? 'selected' : ''}>${s.name}</option>
-          `).join('')}
-        </select>
-      </div>
-      ` : `
-      <div class="field">
-        <label>Nội dung thông tin</label>
-        <textarea id="hsContent" placeholder="Mô tả chi tiết địa điểm...">${selected.content || ''}</textarea>
-      </div>
-      `}
-      <div class="field-row">
-        <div class="field">
-          <label>Vị trí X (%)</label>
-          <input type="number" id="hsX" value="${selected.x.toFixed(0)}" min="0" max="100">
-        </div>
-        <div class="field">
-          <label>Vị trí Y (%)</label>
-          <input type="number" id="hsY" value="${selected.y.toFixed(0)}" min="0" max="100">
-        </div>
-      </div>
-      <div class="hint-text">💡 Kéo trực tiếp hotspot trên ảnh để di chuyển nhanh.</div>
-    </div>
-    ` : ''}
-  `;
-
-            // Events
-            body.querySelectorAll('.hotspot-row').forEach(row => {
-                row.addEventListener('click', (e) => {
-                    if (e.target.closest('[data-delete]')) return;
-                    selectedHotspotId = row.dataset.id;
-                    renderPreviewHotspots();
-                    renderInspector();
-                });
-            });
-            body.querySelectorAll('[data-delete]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = btn.dataset.delete;
-                    scene.hotspots = scene.hotspots.filter(h => h.id !== id);
-                    if (selectedHotspotId === id) selectedHotspotId = null;
-                    markDirty();
-                    renderSceneList();
-                    renderPreviewHotspots();
-                    renderInspector();
-                    toast('Đã xóa hotspot');
-                });
-            });
-            document.getElementById('quickAddHotspot')?.addEventListener('click', () => {
-                startPlacingHotspot();
-            });
-
-            if (selected) {
-                document.getElementById('hsLabel').addEventListener('input', (e) => {
-                    selected.label = e.target.value;
-                    renderPreviewHotspots();
-                    renderHotspotsTab(body);
-                    markDirty();
-                });
-                document.getElementById('hsTarget')?.addEventListener('change', (e) => {
-                    selected.target = e.target.value;
-                    markDirty();
-                });
-                document.getElementById('hsContent')?.addEventListener('input', (e) => {
-                    selected.content = e.target.value;
-                    markDirty();
-                });
-                document.getElementById('hsX').addEventListener('change', (e) => {
-                    selected.x = Math.max(0, Math.min(100, parseFloat(e.target.value)));
-                    renderPreviewHotspots();
-                    markDirty();
-                });
-                document.getElementById('hsY').addEventListener('change', (e) => {
-                    selected.y = Math.max(0, Math.min(100, parseFloat(e.target.value)));
-                    renderPreviewHotspots();
-                    markDirty();
-                });
-            }
-        }
-
-        function renderSettingsTab(body) {
-            body.innerHTML = `
-    <div class="insp-section">
-      <div class="insp-section-title">Chế độ tour</div>
-      <div class="field">
-        <label>Kiểu trải nghiệm</label>
-        <select id="setMode">
-          <option value="free" ${state.settings.mode === 'free' ? 'selected' : ''}>Tự do khám phá</option>
-          <option value="guided" ${state.settings.mode === 'guided' ? 'selected' : ''}>Có hướng dẫn (tự chuyển cảnh)</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Thời gian mỗi cảnh (giây)</label>
-        <input type="number" id="setDuration" value="${state.settings.guidedDuration}" min="3" max="60">
-      </div>
-      <div class="hint-text">Ở chế độ có hướng dẫn, tour tự động chuyển sang cảnh tiếp theo sau thời gian này.</div>
-    </div>
-
-    <div class="insp-section">
-      <div class="insp-section-title">Cảnh bắt đầu</div>
-      <div class="field">
-        <select id="setStart">
-          ${state.scenes.map(s => `
-            <option value="${s.id}" ${s.id === state.settings.startSceneId ? 'selected' : ''}>${s.name}</option>
-          `).join('')}
-        </select>
-      </div>
-    </div>
-
-    <div class="insp-section">
-      <div class="insp-section-title">Tùy chọn hiển thị</div>
-      <div class="toggle-row">
-        <label>Tự động xoay ảnh</label>
-        <div class="toggle ${state.settings.autoRotate ? 'on' : ''}" id="setAutoRotate"></div>
-      </div>
-      <div class="toggle-row">
-        <label>Hiện bản đồ nhỏ</label>
-        <div class="toggle ${state.settings.showMinimap ? 'on' : ''}" id="setMinimap"></div>
-      </div>
-    </div>
-  `;
-
-            document.getElementById('setMode').addEventListener('change', (e) => {
-                state.settings.mode = e.target.value;
-                markDirty();
-            });
-            document.getElementById('setDuration').addEventListener('input', (e) => {
-                state.settings.guidedDuration = parseInt(e.target.value);
-                markDirty();
-            });
-            document.getElementById('setStart').addEventListener('change', (e) => {
-                state.settings.startSceneId = e.target.value;
-                renderSceneList();
-                markDirty();
-            });
-            document.getElementById('setAutoRotate').addEventListener('click', function () {
-                this.classList.toggle('on');
-                state.settings.autoRotate = this.classList.contains('on');
-                markDirty();
-            });
-            document.getElementById('setMinimap').addEventListener('click', function () {
-                this.classList.toggle('on');
-                state.settings.showMinimap = this.classList.contains('on');
-                markDirty();
-            });
-        }
-
-        /* ═══════════════════════════════════════════════════════════
-           PLACE HOTSPOT FLOW
-           ═══════════════════════════════════════════════════════════ */
-        function startPlacingHotspot() {
-            isPlacingHotspot = true;
-            document.getElementById('placeHint').classList.add('active');
-            document.getElementById('previewCanvas').style.cursor = 'crosshair';
-            toast('Click lên ảnh để đặt hotspot');
-        }
-
-        function cancelPlacing() {
-            isPlacingHotspot = false;
-            document.getElementById('placeHint').classList.remove('active');
-            document.getElementById('previewCanvas').style.cursor = '';
-        }
-
-        document.getElementById('placeHotspotBtn').addEventListener('click', () => {
-            if (isPlacingHotspot) cancelPlacing();
-            else startPlacingHotspot();
+      // Form riêng theo từng loại
+      if (active.type === 'navigation') {
+        var opts = '';
+        store.scenes.forEach(function(s) {
+          if (s.id !== scene.id) opts += '<option value="' + s.id + '" ' + (s.id === active.target ? 'selected' : '') + '>' + escapeHtml(s.title) + '</option>';
         });
+        editHtml += '<div class="field"><label>Ảnh đích</label><select id="hs-target">' + opts + '</select></div>';
+      } else if (active.type === 'info') {
+        editHtml += '<div class="field"><label>Nội dung</label><textarea id="hs-content" rows="4">' + escapeHtml(active.content || '') + '</textarea></div>';
+      } else if (active.type === 'video') {
+        editHtml += '<div class="field"><label>URL Video</label><input type="url" id="hs-url" placeholder="https://youtube.com/watch?v=... hoặc /video.mp4" value="' + escapeAttr(active.url || '') + '"></div>'
+          + '<p class="hint">💡 Hỗ trợ: YouTube, Vimeo, file MP4 trực tiếp.</p>'
+          + (active.url ? '<div class="field"><label>Xem trước</label><div style="aspect-ratio:16/9;background:#000;border-radius:6px;overflow:hidden;">' + videoPreviewHtml(active.url) + '</div></div>' : '');
+      } else if (active.type === 'model3d') {
+        editHtml += '<div class="field"><label>Ảnh 3D / Ảnh 360° của vật thể</label>'
+          +   '<div class="image-picker" id="model-picker">'
+          +     (active.modelImage ? '<img src="' + active.modelImage + '" alt="">' : '<div style="width:100%;height:100%;display:grid;place-items:center;color:var(--text-3);font-size:12px;">Chưa có ảnh</div>')
+          +     '<div class="image-picker-overlay">'
+          +       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg>'
+          +       '<span>Nhấn để tải ảnh</span>'
+          +     '</div>'
+          +   '</div>'
+          +   '<input type="file" id="model-file" accept="image/*" style="display:none">'
+          + '</div>'
+          + '<div class="field"><label>Mô tả chi tiết</label><textarea id="hs-content" rows="5" placeholder="Mô tả về tác phẩm, chất liệu, kích thước...">' + escapeHtml(active.content || '') + '</textarea></div>'
+          + '<p class="hint">💡 Ảnh 3D có thể là ảnh chụp 360° của vật thể, hoặc ảnh render 3D. Sẽ hiển thị kèm mô tả khi người xem click.</p>';
+      }
 
-        document.getElementById('previewCanvas').addEventListener('click', (e) => {
-            if (!isPlacingHotspot) return;
-            if (e.target.closest('.edit-hotspot')) return;
+      editHtml += '<div class="field-row">'
+        + '<div class="field"><label>Yaw (rad)</label><input type="number" id="hs-yaw" value="' + active.yaw.toFixed(2) + '" step="0.05"></div>'
+        + '<div class="field"><label>Pitch (rad)</label><input type="number" id="hs-pitch" value="' + active.pitch.toFixed(2) + '" step="0.05"></div>'
+        + '</div>'
+        + '<p class="hint warn">💡 Kéo trực tiếp hotspot trên ảnh để đổi vị trí.</p>'
+        + '</section>';
+    }
 
-            const rect = e.currentTarget.getBoundingClientRect();
-            pendingHotspotPos = {
-                x: ((e.clientX - rect.left) / rect.width) * 100,
-                y: ((e.clientY - rect.top) / rect.height) * 100
-            };
-            cancelPlacing();
-            openHotspotModal();
-        });
+    return '<section class="panel">'
+      +   '<header class="panel-head"><span class="panel-eyebrow">Hotspot trong ảnh (' + hs.length + ')</span>'
+      +     '<button class="btn-icon-sm accent" id="add-hs" title="Đặt hotspot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button>'
+      +   '</header>'
+      +   listHtml
+      + '</section>' + editHtml;
+  }
 
-        /* Modal chọn loại hotspot */
-        const hotspotModal = document.getElementById('hotspotModal');
-        function openHotspotModal() {
-            hotspotModal.classList.add('open');
+  function videoPreviewHtml(url) {
+    if (!url) return '';
+    var yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([\w-]+)/);
+    if (yt) return '<iframe src="https://www.youtube.com/embed/' + yt[1] + '" style="width:100%;height:100%;border:0;" allowfullscreen></iframe>';
+    var vm = url.match(/vimeo\.com\/(\d+)/);
+    if (vm) return '<iframe src="https://player.vimeo.com/video/' + vm[1] + '" style="width:100%;height:100%;border:0;" allowfullscreen></iframe>';
+    return '<video src="' + url + '" controls style="width:100%;height:100%;"></video>';
+  }
+
+  function bindSceneTab() {
+    var scene = store.activeScene; if (!scene) return;
+    var fTitle = document.getElementById('f-title');
+    var fDesc = document.getElementById('f-desc');
+    var fTime = document.getElementById('f-time');
+    var fEffect = document.getElementById('f-effect');
+
+    if (fTitle) fTitle.addEventListener('input', function(e) { store.updateScene('title', e.target.value); });
+    if (fDesc) fDesc.addEventListener('input', function(e) { store.updateScene('desc', e.target.value); });
+    if (fTime) fTime.addEventListener('input', function(e) { store.updateScene('enterTime', parseFloat(e.target.value) || 0); });
+    if (fEffect) fEffect.addEventListener('change', function(e) { store.updateScene('enterEffect', e.target.value); });
+
+    var picker = document.getElementById('img-picker');
+    var fileInput = document.getElementById('img-file');
+    if (picker && fileInput) {
+      picker.addEventListener('click', function() { fileInput.click(); });
+      fileInput.addEventListener('change', function(e) {
+        var file = e.target.files && e.target.files[0];
+        if (file) store.changeImage(file);
+        e.target.value = '';
+      });
+    }
+    var swStart = document.getElementById('sw-start');
+    if (swStart) swStart.addEventListener('click', function() { store.setStartScene(scene.id); });
+
+    var btnDel = document.getElementById('btn-delete-scene');
+    if (btnDel) btnDel.addEventListener('click', function() {
+      if (store.scenes.length <= 1) { alert('Không thể xóa ảnh cuối cùng.'); return; }
+      if (confirm('Xóa ảnh "' + scene.title + '"?')) store.deleteScene(scene.id);
+    });
+  }
+
+  function bindHotspotsTab() {
+    var addBtn = document.getElementById('add-hs');
+    var addEmpty = document.getElementById('add-hs-empty');
+    if (addBtn) addBtn.addEventListener('click', function() { store.setPlacing(true); });
+    if (addEmpty) addEmpty.addEventListener('click', function() { store.setPlacing(true); });
+
+    document.querySelectorAll('.hotspot-item').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        if (e.target.closest('.hotspot-delete')) return;
+        store.selectHotspot(item.dataset.id);
+      });
+    });
+    document.querySelectorAll('.hotspot-delete').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        store.deleteHotspot(btn.dataset.delete);
+      });
+    });
+
+    var active = store.activeHotspot;
+    if (!active) return;
+
+    var map = {
+      'hs-label': 'label', 'hs-target': 'target', 'hs-content': 'content',
+      'hs-url': 'url', 'hs-yaw': 'yaw', 'hs-pitch': 'pitch'
+    };
+    Object.keys(map).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var field = map[id];
+      var evt = (el.tagName === 'SELECT') ? 'change' : 'input';
+      el.addEventListener(evt, function(e) {
+        var v = e.target.value;
+        if (field === 'yaw' || field === 'pitch') v = parseFloat(v) || 0;
+        store.updateHotspot(field, v);
+      });
+    });
+
+    // Model3D: upload ảnh
+    var modelPicker = document.getElementById('model-picker');
+    var modelFile = document.getElementById('model-file');
+    if (modelPicker && modelFile) {
+      modelPicker.addEventListener('click', function() { modelFile.click(); });
+      modelFile.addEventListener('change', function(e) {
+        var file = e.target.files && e.target.files[0];
+        if (file) {
+          var url = URL.createObjectURL(file);
+          store.updateHotspot('modelImage', url);
         }
-        function closeHotspotModal() {
-            hotspotModal.classList.remove('open');
-            pendingHotspotPos = null;
-        }
-        document.querySelectorAll('[data-close-modal]').forEach(el => {
-            el.addEventListener('click', closeHotspotModal);
-        });
-        hotspotModal.addEventListener('click', (e) => {
-            if (e.target === hotspotModal) closeHotspotModal();
-        });
-        document.querySelectorAll('.type-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const type = card.dataset.type;
-                createHotspot(type);
-                closeHotspotModal();
-            });
-        });
+        e.target.value = '';
+      });
+    }
+  }
 
-        function createHotspot(type) {
-            if (!pendingHotspotPos) return;
-            const scene = state.scenes[currentSceneIdx];
-            const id = 'h' + Date.now();
-            const newHs = {
-                id,
-                type,
-                x: pendingHotspotPos.x,
-                y: pendingHotspotPos.y,
-                label: type === 'nav' ? 'Cảnh mới' : 'Thông tin',
-                target: null,
-                content: ''
-            };
-            scene.hotspots.push(newHs);
-            selectedHotspotId = id;
-            currentTab = 'hotspots';
-            document.querySelectorAll('.insp-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'hotspots'));
-            markDirty();
-            renderSceneList();
-            renderPreviewHotspots();
-            renderInspector();
-            toast('Đã thêm hotspot', 'success');
-        }
+  function renderBody() {
+    var scene = store.activeScene;
+    if (!scene) {
+      body.innerHTML = '<div class="empty">'
+        + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6M15 9l-6 6"/></svg>'
+        + '<p>Chọn một ảnh để chỉnh sửa</p></div>';
+      return;
+    }
+    if (store.activeTab === 'scene') {
+      body.innerHTML = renderSceneTab(scene);
+      bindSceneTab();
+    } else {
+      body.innerHTML = renderHotspotsTab(scene);
+      bindHotspotsTab();
+    }
+  }
 
-        /* ═══════════════════════════════════════════════════════════
-           TOGGLE PREVIEW MODE
-           ═══════════════════════════════════════════════════════════ */
-        function togglePreviewMode() {
-            previewMode = !previewMode;
-            document.body.classList.toggle('preview-mode', previewMode);
-            document.getElementById('previewBtn').innerHTML = previewMode
-                ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-         <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-       </svg>
-       <span>Chỉnh sửa</span>`
-                : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
-       </svg>
-       <span>Xem trước</span>`;
-            if (previewMode) {
-                toast('Đang ở chế độ xem trước — như người dùng thấy', 'success');
-                if (state.settings.mode === 'guided') startGuidedMode();
-            } else {
-                stopGuidedMode();
-            }
-        }
-        let guidedTimer = null;
-        function startGuidedMode() {
-            stopGuidedMode();
-            guidedTimer = setInterval(() => {
-                const next = (currentSceneIdx + 1) % state.scenes.length;
-                goToScene(next);
-            }, state.settings.guidedDuration * 1000);
-        }
-        function stopGuidedMode() {
-            if (guidedTimer) clearInterval(guidedTimer);
-            guidedTimer = null;
-        }
-        document.getElementById('previewBtn').addEventListener('click', togglePreviewMode);
+  store.subscribe(function(event) {
+    if (event === 'tab') setTabUI();
+    if (['init','activeScene','sceneUpdated','hotspots','activeHotspot','tab','scenesList'].indexOf(event) !== -1) {
+      var s = store.activeScene;
+      badge.textContent = s ? s.hotspots.length : 0;
+      renderBody();
+    }
+  });
+  setTabUI();
+  renderBody();
+}
 
-        /* ═══════════════════════════════════════════════════════════
-           ZOOM
-           ═══════════════════════════════════════════════════════════ */
-        function applyZoom() {
-            const bg = document.getElementById('previewBg');
-            bg.style.transform = `scale(${zoom / 100})`;
-            document.getElementById('zoomLabel').textContent = zoom + '%';
-        }
-        document.getElementById('zoomIn').addEventListener('click', () => {
-            zoom = Math.min(200, zoom + 10);
-            applyZoom();
-        });
-        document.getElementById('zoomOut').addEventListener('click', () => {
-            zoom = Math.max(50, zoom - 10);
-            applyZoom();
-        });
+// ═══════════════════════════════════════════════════════
+// MODAL — 4 loại hotspot
+// ═══════════════════════════════════════════════════════
+var _modalEl = null;
+var _pendingCoords = null;
 
-        /* ═══════════════════════════════════════════════════════════
-           DRAG TO ROTATE (preview mode "drag")
-           ═══════════════════════════════════════════════════════════ */
-        document.querySelectorAll('.pt-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.pt-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                const mode = tab.dataset.mode;
-                document.getElementById('previewCanvas').classList.toggle('mode-drag', mode === 'drag');
-            });
-        });
+function renderModal(mount) {
+  mount.innerHTML = ''
+    + '<div class="modal-backdrop" id="modal">'
+    +   '<div class="modal">'
+    +     '<div class="modal-head">'
+    +       '<div><span class="modal-eyebrow">Bước 2 / 2</span><h3>Chọn loại hotspot</h3></div>'
+    +       '<button class="btn-icon-sm" id="modal-close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg></button>'
+    +     '</div>'
+    +     '<div class="modal-body">'
+    +       '<div class="type-grid">'
+    +         '<button class="type-card nav" data-type="navigation">'
+    +           '<div class="type-icon nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 4v14M6 11l6-6 6 6"/></svg></div>'
+    +           '<strong>Di chuyển</strong><span>Dẫn đến cảnh panorama khác</span>'
+    +         '</button>'
+    +         '<button class="type-card info" data-type="info">'
+    +           '<div class="type-icon info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none"/><path d="M12 11v7"/></svg></div>'
+    +           '<strong>Thông tin</strong><span>Panel văn bản đơn giản</span>'
+    +         '</button>'
+    +         '<button class="type-card video" data-type="video">'
+    +           '<div class="type-icon video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>'
+    +           '<strong>Video</strong><span>Nhúng YouTube / Vimeo / MP4</span>'
+    +         '</button>'
+    +         '<button class="type-card model3d" data-type="model3d">'
+    +           '<div class="type-icon model3d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg></div>'
+    +           '<strong>Mô hình 3D</strong><span>Ảnh 3D + mô tả tác phẩm</span>'
+    +         '</button>'
+    +       '</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
 
-        const previewCanvas = document.getElementById('previewCanvas');
-        const previewBg = document.getElementById('previewBg');
+  _modalEl = mount.querySelector('#modal');
+  _modalEl.addEventListener('click', function(e) { if (e.target === _modalEl) closeModal(); });
+  mount.querySelector('#modal-close').addEventListener('click', function() { closeModal(); });
 
-        previewCanvas.addEventListener('mousedown', (e) => {
-            if (isPlacingHotspot) return;
-            if (!previewCanvas.classList.contains('mode-drag')) return;
-            if (e.target.closest('.edit-hotspot')) return;
-            dragState.active = true;
-            dragState.startX = e.clientX;
-            const match = previewBg.style.backgroundPosition.match(/([\d.]+)%/);
-            dragState.bgX = match ? parseFloat(match[1]) : 50;
-            previewBg.style.transition = 'none';
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (!dragState.active) return;
-            const dx = e.clientX - dragState.startX;
-            const newX = dragState.bgX + dx * 0.15;
-            previewBg.style.backgroundPosition = `${newX}% center`;
-            document.getElementById('infoCoord').textContent = `xoay: ${newX.toFixed(0)}%`;
-        });
-        document.addEventListener('mouseup', () => {
-            if (dragState.active) {
-                dragState.active = false;
-                previewBg.style.transition = 'opacity 0.4s var(--ease)';
-            }
-        });
+  mount.querySelectorAll('.type-card').forEach(function(card) {
+    card.addEventListener('click', function() {
+      var coords = _pendingCoords || { yaw: 0, pitch: 0 };
+      store.addHotspotAt(card.dataset.type, coords.yaw, coords.pitch);
+      store.setActiveTab('hotspots');
+      closeModal();
+    });
+  });
 
-        /* ═══════════════════════════════════════════════════════════
-           INSPECTOR TABS
-           ═══════════════════════════════════════════════════════════ */
-        document.querySelectorAll('.insp-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.insp-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentTab = tab.dataset.tab;
-                renderInspector();
-            });
-        });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+}
 
-        /* ═══════════════════════════════════════════════════════════
-           SAVE / DIRTY STATE & UNDO/REDO HISTORY
-           ═══════════════════════════════════════════════════════════ */
-        let historyStack = [JSON.parse(JSON.stringify(state))];
-        let historyIndex = 0;
-        let isHistoryAction = false;
+function openHotspotModal(yaw, pitch) {
+  if (!store.activeScene) { alert('Chọn một ảnh trước.'); return; }
+  _pendingCoords = (typeof yaw === 'number') ? { yaw: yaw, pitch: pitch } : null;
+  if (_modalEl) _modalEl.classList.add('open');
+}
+function closeModal() { if (_modalEl) _modalEl.classList.remove('open'); }
 
-        function pushHistory() {
-            if (isHistoryAction) return;
-            const snap = JSON.stringify(state);
-            if (snap === JSON.stringify(historyStack[historyIndex])) return;
-            historyStack = historyStack.slice(0, historyIndex + 1);
-            historyStack.push(JSON.parse(snap));
-            historyIndex = historyStack.length - 1;
-        }
+// ═══════════════════════════════════════════════════════
+// RESIZER
+// ═══════════════════════════════════════════════════════
+function initResizers() {
+  var MIN = 200, MAX = 520;
+  var studio = document.getElementById('studio');
+  var savedLeft  = parseInt(localStorage.getItem('sv-sidebar-left')  || '320', 10);
+  var savedRight = parseInt(localStorage.getItem('sv-sidebar-right') || '360', 10);
+  applyWidths(savedLeft, savedRight);
 
-        function markDirty() {
-            isDirty = true;
-            pushHistory();
-            const ind = document.getElementById('saveIndicator');
-            ind.classList.remove('saving');
-            ind.classList.add('dirty');
-            document.getElementById('saveText').textContent = 'Có thay đổi chưa lưu';
-        }
+  document.querySelectorAll('.resizer').forEach(function(r) {
+    r.addEventListener('mousedown', function(e) { startDrag(e, r); });
+  });
 
-        function markSaved() {
-            isDirty = false;
-            const ind = document.getElementById('saveIndicator');
-            ind.classList.remove('dirty', 'saving');
-            document.getElementById('saveText').textContent = 'Đã lưu';
-        }
+  function applyWidths(l, r) { studio.style.gridTemplateColumns = l + 'px 5px 1fr 5px ' + r + 'px'; }
 
-        function undo() {
-            if (historyIndex > 0) {
-                isHistoryAction = true;
-                historyIndex--;
-                const prev = JSON.parse(JSON.stringify(historyStack[historyIndex]));
-                Object.assign(state, prev);
-                currentSceneIdx = Math.min(currentSceneIdx, state.scenes.length - 1);
-                isDirty = true;
-                renderSceneList();
-                goToScene(currentSceneIdx);
-                isHistoryAction = false;
-                toast('Đã hoàn tác (Undo)', 'success');
-            } else {
-                toast('Không còn thao tác nào để hoàn tác');
-            }
-        }
+  function startDrag(e, resizer) {
+    e.preventDefault();
+    resizer.classList.add('dragging');
+    document.body.style.cursor = 'col-resize'; document.body.style.userSelect = 'none';
+    var side = resizer.dataset.resizer;
+    var startX = e.clientX;
+    var c = getComputedStyle(studio).gridTemplateColumns.split(' ');
+    var startLeft = parseInt(c[0], 10), startRight = parseInt(c[4], 10);
 
-        function redo() {
-            if (historyIndex < historyStack.length - 1) {
-                isHistoryAction = true;
-                historyIndex++;
-                const next = JSON.parse(JSON.stringify(historyStack[historyIndex]));
-                Object.assign(state, next);
-                currentSceneIdx = Math.min(currentSceneIdx, state.scenes.length - 1);
-                isDirty = true;
-                renderSceneList();
-                goToScene(currentSceneIdx);
-                isHistoryAction = false;
-                toast('Đã làm lại (Redo)', 'success');
-            } else {
-                toast('Không còn thao tác nào để làm lại');
-            }
-        }
+    function onMove(ev) {
+      var dx = ev.clientX - startX;
+      var nl = startLeft, nr = startRight;
+      if (side === 'left') nl = clamp(startLeft + dx, MIN, MAX);
+      else nr = clamp(startRight - dx, MIN, MAX);
+      applyWidths(nl, nr);
+    }
+    function onUp() {
+      resizer.classList.remove('dragging');
+      document.body.style.cursor = ''; document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      var c2 = getComputedStyle(studio).gridTemplateColumns.split(' ');
+      localStorage.setItem('sv-sidebar-left',  parseInt(c2[0], 10));
+      localStorage.setItem('sv-sidebar-right', parseInt(c2[4], 10));
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+}
 
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            if (!isDirty) { toast('Không có thay đổi nào'); return; }
-            const ind = document.getElementById('saveIndicator');
-            ind.classList.add('saving');
-            document.getElementById('saveText').textContent = 'Đang lưu...';
-            setTimeout(() => {
-                markSaved();
-                toast('Đã lưu thay đổi', 'success');
-            }, 700);
-        });
-        document.getElementById('undoBtn').addEventListener('click', undo);
-        document.getElementById('redoBtn').addEventListener('click', redo);
-
-        /* ═══════════════════════════════════════════════════════════
-           ADD SCENE
-           ═══════════════════════════════════════════════════════════ */
-        document.getElementById('addSceneBtn').addEventListener('click', () => {
-            const newScene = {
-                id: 's' + Date.now(),
-                name: 'Cảnh mới',
-                img: 'https://picsum.photos/id/1036/2400/1200',
-                thumb: 'https://picsum.photos/id/1036/200/120',
-                desc: 'Mô tả cảnh mới',
-                hotspots: []
-            };
-            state.scenes.push(newScene);
-            currentSceneIdx = state.scenes.length - 1;
-            markDirty();
-            renderSceneList();
-            goToScene(currentSceneIdx);
-            toast('Đã thêm cảnh mới', 'success');
-        });
-
-        /* ═══════════════════════════════════════════════════════════
-           TOAST
-           ═══════════════════════════════════════════════════════════ */
-        function toast(msg, type = '') {
-            const wrap = document.getElementById('toastWrap');
-            const el = document.createElement('div');
-            el.className = 'toast ' + type;
-            el.innerHTML = type === 'success'
-                ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>${msg}`
-                : msg;
-            wrap.appendChild(el);
-            setTimeout(() => {
-                el.style.transition = 'opacity 0.3s, transform 0.3s';
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(8px)';
-                setTimeout(() => el.remove(), 320);
-            }, 2200);
-        }
-
-        /* ═══════════════════════════════════════════════════════════
-           KEYBOARD SHORTCUTS
-           ═══════════════════════════════════════════════════════════ */
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-            if (e.key === 'Escape') {
-                if (hotspotModal.classList.contains('open')) closeHotspotModal();
-                else if (isPlacingHotspot) cancelPlacing();
-                else if (selectedHotspotId) {
-                    selectedHotspotId = null;
-                    renderPreviewHotspots();
-                    renderInspector();
-                }
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                document.getElementById('saveBtn').click();
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-                e.preventDefault();
-                if (e.shiftKey) redo();
-                else undo();
-            }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
-                e.preventDefault();
-                redo();
-            }
-            if (e.key === 'ArrowDown' && e.altKey) {
-                e.preventDefault();
-                goToScene(Math.min(state.scenes.length - 1, currentSceneIdx + 1));
-            }
-            if (e.key === 'ArrowUp' && e.altKey) {
-                e.preventDefault();
-                goToScene(Math.max(0, currentSceneIdx - 1));
-            }
-        });
-
-        /* ═══════════════════════════════════════════════════════════
-           INIT
-           ═══════════════════════════════════════════════════════════ */
-        renderSceneList();
-        renderPreviewHotspots();
-        renderInspector();
-    </script>
+// ═══════════════════════════════════════════════════════
+// APP
+// ═══════════════════════════════════════════════════════
+(function() {
+  renderHeader(document.getElementById('topbar-mount'));
+  renderSidebarLeft(document.getElementById('sidebar-left-mount'));
+  renderCanvas(document.getElementById('canvas-mount'));
+  renderSidebarRight(document.getElementById('sidebar-right-mount'));
+  renderModal(document.getElementById('modal-mount'));
+  initResizers();
+  store.init();
+})();
+</script>
 
 </body>
-
 </html>

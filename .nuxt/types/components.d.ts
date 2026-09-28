@@ -32,9 +32,7 @@ interface _GlobalComponents {
   UiTooltip: typeof import("../../components/ui/Tooltip.vue")['default']
   HotspotPanel: typeof import("../../components/experience/HotspotPanel.vue")['default']
   SceneList: typeof import("../../components/experience/SceneList.vue")['default']
-  ThreeViewer360: typeof import("../../components/experience/ThreeViewer360.vue")['default']
   TourSidebar: typeof import("../../components/experience/TourSidebar.vue")['default']
-  Viewer360: typeof import("../../components/experience/Viewer360.vue")['default']
   SceneGraph: typeof import("../../components/editor/SceneGraph.vue")['default']
   SceneGraphNode: typeof import("../../components/editor/SceneGraphNode.vue")['default']
   TourCard: typeof import("../../components/catalog/TourCard.vue")['default']
@@ -85,9 +83,7 @@ interface _GlobalComponents {
   LazyUiTooltip: LazyComponent<typeof import("../../components/ui/Tooltip.vue")['default']>
   LazyHotspotPanel: LazyComponent<typeof import("../../components/experience/HotspotPanel.vue")['default']>
   LazySceneList: LazyComponent<typeof import("../../components/experience/SceneList.vue")['default']>
-  LazyThreeViewer360: LazyComponent<typeof import("../../components/experience/ThreeViewer360.vue")['default']>
   LazyTourSidebar: LazyComponent<typeof import("../../components/experience/TourSidebar.vue")['default']>
-  LazyViewer360: LazyComponent<typeof import("../../components/experience/Viewer360.vue")['default']>
   LazySceneGraph: LazyComponent<typeof import("../../components/editor/SceneGraph.vue")['default']>
   LazySceneGraphNode: LazyComponent<typeof import("../../components/editor/SceneGraphNode.vue")['default']>
   LazyTourCard: LazyComponent<typeof import("../../components/catalog/TourCard.vue")['default']>

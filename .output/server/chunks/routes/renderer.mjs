@@ -1,5 +1,5 @@
 globalThis.__timing__.logStart('Load chunks/routes//renderer');import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'vue-bundle-renderer/runtime';
-import { j as joinRelativeURL, u as useRuntimeConfig, e as encodePath, b as defineRenderHandler, f as getQuery, c as createError, h as getRouteRules, i as getResponseStatusText, k as getResponseStatus, l as useNitroApp } from '../nitro/nitro.mjs';
+import { j as joinRelativeURL, u as useRuntimeConfig, e as encodePath, f as defineRenderHandler, h as getQuery, c as createError, i as getRouteRules, k as getResponseStatusText, l as getResponseStatus, m as useNitroApp } from '../nitro/nitro.mjs';
 import { renderToString } from 'vue/server-renderer';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'unhead/server';
 import { stringify, uneval } from 'devalue';
@@ -76,7 +76,7 @@ function createHead(options = {}) {
 
 const NUXT_RUNTIME_PAYLOAD_EXTRACTION = false;
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Khu du lịch sinh thái Trảng Bay — Trải nghiệm thiên nhiên hoang sơ qua panorama 360°, đặt vé online và khám phá sự kiện."}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"preconnect","href":"https://fonts.gstatic.com","crossorigin":""},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap"}],"style":[],"script":[],"noscript":[],"title":"Trảng Bay — Khu Du Lịch Sinh Thái"};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"},{"name":"description","content":"Khám phá Sông Vân Art Space tại Ninh Bình qua tour panorama 360° — nơi điêu khắc đá đương đại đối thoại với làng nghề Ninh Vân."}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"preconnect","href":"https://fonts.gstatic.com","crossorigin":""},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,500&display=swap"}],"style":[],"script":[],"noscript":[],"title":"Sông Vân Art Space — Không gian nghệ thuật tại Ninh Bình"};
 
 const appRootTag = "div";
 
@@ -457,5 +457,5 @@ const renderer = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: handler
 }, Symbol.toStringTag, { value: 'Module' }));
 
-export { baseURL as b, headSymbol as h, renderer as r, useHead as u };;globalThis.__timing__.logEnd('Load chunks/routes//renderer');
+export { baseURL as b, headSymbol as h, publicAssetsURL as p, renderer as r, useHead as u };;globalThis.__timing__.logEnd('Load chunks/routes//renderer');
 //# sourceMappingURL=renderer.mjs.map

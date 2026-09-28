@@ -1,45 +1,45 @@
 <script setup lang="ts">
 /**
- * pages/tickets.vue — Đặt vé tham quan khu du lịch Trảng Bay
+ * pages/tickets.vue — Đăng ký tham quan Sông Vân Art Space
  */
 definePageMeta({ layout: 'default' });
 useHead({
-  title: 'Đặt Vé — Trảng Bay',
-  meta: [{ name: 'description', content: 'Đặt vé tham quan khu du lịch sinh thái Trảng Bay trực tuyến. Nhận QR ngay lập tức.' }],
+  title: 'Đăng Ký Tham Quan — Sông Vân Art Space',
+  meta: [{ name: 'description', content: 'Gửi yêu cầu tham quan Sông Vân Art Space tại Ninh Bình.' }],
 });
 
 const ticketTypes = [
   {
     id: 'normal',
-    label: 'Vé Thường',
-    price: 150000,
-    desc: 'Người lớn (trên 12 tuổi)',
-    includes: ['Tham quan toàn khu', 'Bản đồ tham quan', 'Wifi khu vực trung tâm'],
+    label: 'Khách Cá Nhân',
+    price: 0,
+    desc: 'Đăng ký lịch tham quan không gian',
+    includes: ['Tham quan không gian trưng bày', 'Khám phá tour 360°', 'Xác nhận lịch trước khi đến'],
     badge: '',
   },
   {
     id: 'child',
-    label: 'Vé Trẻ Em',
-    price: 75000,
-    desc: 'Trẻ em 4–12 tuổi',
-    includes: ['Tham quan toàn khu', 'Bản đồ tham quan', 'Khu vui chơi trẻ em'],
+    label: 'Học Sinh · Sinh Viên',
+    price: 0,
+    desc: 'Nhóm học tập và nghiên cứu nghệ thuật',
+    includes: ['Tham quan không gian', 'Tìm hiểu điêu khắc đá', 'Liên hệ xác nhận chương trình'],
     badge: '',
   },
   {
     id: 'family',
-    label: 'Vé Gia Đình',
-    price: 400000,
-    desc: '2 người lớn + 2 trẻ em',
-    includes: ['Tham quan toàn khu', 'Picnic set miễn phí', 'Ưu tiên đặt chỗ sự kiện', 'Giảm 20% dịch vụ ăn uống'],
-    badge: 'Phổ biến',
+    label: 'Gia Đình',
+    price: 0,
+    desc: 'Nhóm gia đình muốn khám phá nghệ thuật',
+    includes: ['Tham quan tự do', 'Tour 360° trước chuyến đi', 'Xác nhận lịch trước khi đến'],
+    badge: 'Gợi ý',
   },
   {
     id: 'group',
-    label: 'Vé Nhóm',
-    price: 120000,
-    desc: 'Từ 10 người (tính/người)',
-    includes: ['Tham quan toàn khu', 'Hướng dẫn viên riêng', 'Xe đưa đón nội bộ'],
-    badge: 'Tiết kiệm',
+    label: 'Đoàn · Tổ Chức',
+    price: 0,
+    desc: 'Đoàn từ 10 người hoặc đối tác nghệ thuật',
+    includes: ['Đề xuất lịch riêng', 'Trao đổi nhu cầu đón đoàn', 'Liên hệ để xác nhận'],
+    badge: 'Liên hệ',
   },
 ];
 
@@ -67,10 +67,10 @@ function handleSubmit() {
   <div class="container section">
 
     <div class="section-head center">
-      <div class="section-eyebrow">Vé tham quan</div>
-      <h1 class="section-title">Đặt vé online</h1>
+      <div class="section-eyebrow">Tham quan</div>
+      <h1 class="section-title">Đăng ký lịch tham quan</h1>
       <p class="section-sub">
-        Chọn loại vé, ngày tham quan và điền thông tin. Nhận mã QR xác nhận qua SMS ngay lập tức.
+        Chọn hình thức tham quan và gửi thông tin. Không gian sẽ liên hệ xác nhận lịch phù hợp trước khi bạn đến.
       </p>
     </div>
 
@@ -78,10 +78,10 @@ function handleSubmit() {
     <div v-if="submitted"
       class="max-w-md mx-auto rounded-2xl border border-green-500/30 bg-green-500/10 p-10 text-center">
       <div class="text-5xl mb-4">🎉</div>
-      <h2 class="text-xl font-bold text-[--ui-color-text-primary]">Đặt vé thành công!</h2>
-      <p class="mt-2 text-sm text-[--ui-color-text-muted]">Mã QR đã được gửi đến <strong>{{ visitorPhone }}</strong>. Vui lòng xuất trình khi vào cổng.</p>
+      <h2 class="text-xl font-bold text-[--ui-color-text-primary]">Đã nhận đăng ký!</h2>
+      <p class="mt-2 text-sm text-[--ui-color-text-muted]">Yêu cầu của bạn đã được ghi nhận. Sông Vân Art Space sẽ liên hệ số <strong>{{ visitorPhone }}</strong> để xác nhận lịch.</p>
       <div class="mt-6 p-4 rounded-xl bg-[--ui-color-bg-muted] font-mono text-2xl tracking-widest text-center text-[--ui-color-brand]">
-        TB{{ Math.random().toString(36).slice(2, 8).toUpperCase() }}
+        SV{{ Math.random().toString(36).slice(2, 8).toUpperCase() }}
       </div>
       <button type="button" class="mt-6 text-sm text-[--ui-color-brand] hover:underline" @click="submitted = false">Đặt thêm vé</button>
     </div>
@@ -90,7 +90,7 @@ function handleSubmit() {
 
       <!-- Ticket picker -->
       <div class="lg:col-span-2 space-y-4">
-        <h2 class="font-bold text-[--ui-color-text-primary] mb-4">Chọn loại vé</h2>
+        <h2 class="font-bold text-[--ui-color-text-primary] mb-4">Chọn hình thức tham quan</h2>
         <label v-for="t in ticketTypes" :key="t.id"
           :class="['relative flex cursor-pointer gap-4 rounded-2xl border-2 p-5 transition',
             selected === t.id
@@ -121,7 +121,7 @@ function handleSubmit() {
 
       <!-- Order form -->
       <div class="rounded-2xl border border-[--ui-color-border] bg-[--ui-color-surface] p-6 h-fit sticky top-20">
-        <h2 class="font-bold text-[--ui-color-text-primary] mb-5">Thông tin đặt vé</h2>
+        <h2 class="font-bold text-[--ui-color-text-primary] mb-5">Thông tin đăng ký</h2>
         <form class="space-y-4" @submit.prevent="handleSubmit">
           <div>
             <label class="text-xs font-semibold text-[--ui-color-text-secondary] block mb-1">Ngày tham quan *</label>
@@ -165,7 +165,7 @@ function handleSubmit() {
 
           <button type="submit"
             class="w-full rounded-xl bg-gradient-to-r from-[#1a4a2e] to-[#2d7a4f] py-3 text-sm font-bold text-white shadow-md transition hover:opacity-90 active:scale-[0.98]">
-            Đặt vé — {{ formatPrice(totalPrice) }}
+            Gửi yêu cầu tham quan
           </button>
           <p class="text-center text-xs text-[--ui-color-text-muted]">🔒 Thanh toán an toàn · Hoàn tiền 100% nếu hủy trước 24h</p>
         </form>

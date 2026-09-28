@@ -1,13 +1,13 @@
 <script setup lang="ts">
 /**
- * pages/tours.vue — Danh sách tour 360° của khu Trảng Bay
+ * pages/tours.vue — Danh sách tour 360° của Sông Vân Art Space
  */
 import type { TourEntry } from '~/types/tour';
 
 definePageMeta({ layout: 'default' });
 useHead({
-  title: 'Tour 360° — Trảng Bay',
-  meta: [{ name: 'description', content: 'Khám phá các tour panorama 360° tại khu du lịch sinh thái Trảng Bay.' }],
+  title: 'Tour 360° — Sông Vân Art Space',
+  meta: [{ name: 'description', content: 'Khám phá không gian điêu khắc đá đương đại Sông Vân tại Ninh Bình qua panorama 360°.' }],
 });
 
 const { data, pending } = await useFetch<{ items: TourEntry[] }>('/api/tours');
@@ -22,7 +22,7 @@ const tours = computed<TourEntry[]>(() => data.value?.items ?? []);
       <div class="section-eyebrow">Khám phá</div>
       <h1 class="section-title">Tour 360° Ảo</h1>
       <p class="section-sub">
-        Trải nghiệm toàn cảnh khu du lịch Trảng Bay qua ảnh panorama 360° độ phân giải cao. Di chuyển tự do, khám phá từng điểm nhìn.
+        Dạo bước qua Sông Vân Art Space bằng ảnh panorama 360°. Khám phá sân tượng, xưởng đá và những khoảng trưng bày giữa làng nghề Ninh Vân.
       </p>
     </div>
 
@@ -81,7 +81,7 @@ const tours = computed<TourEntry[]>(() => data.value?.items ?? []);
               <h3 class="font-bold text-[--ui-color-text-primary] leading-tight truncate">{{ tour.title }}</h3>
               <p class="mt-0.5 text-xs text-[--ui-color-text-muted] flex items-center gap-1">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                {{ tour.location || 'Trảng Bay' }}
+                {{ tour.location || 'Nam Hoa Lư, Ninh Bình' }}
               </p>
             </div>
           </div>

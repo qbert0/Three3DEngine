@@ -3,22 +3,67 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Pinia store for the viewer runtime state.
  * Tracks active tour, active scene, navigation history, and loading state.
- *
- * Docs: "stores/ — Pinia store tách runtime/editor"
- *       "Không đưa instance WebGL, AST lớn hoặc file ảnh vào reactive store"
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import { defineStore } from 'pinia';
 import type { TourConfig, TourScene } from '~/types/tour';
-import {
-  createNavigationState,
-  navigateTo as navTo,
-  navigateBack as navBack,
-  canGoBack as canGoBackFn,
-  isInGuestTour as isInGuestTourFn,
-  type NavigationState,
-} from '~/core/runtime/navigation';
-import { resolveScene, resolveInitialScene } from '~/core/runtime/resolver';
+
+// ── Inline navigation state (previously in core/runtime/navigation.ts) ────────
+
+interface SceneRef { tourId: string; sceneId: string }
+
+interface NavigationState {
+  entryTourId: string;
+  current: SceneRef;
+  history: SceneRef[];
+}
+
+function createNavigationState(tourId: string, sceneId: string): NavigationState {
+  return { entryTourId: tourId, current: { tourId, sceneId }, history: [] };
+}
+
+function navTo(state: NavigationState, dest: SceneRef): NavigationState {
+  return {
+    ...state,
+    current: dest,
+    history: state.history.length < 50
+      ? [...state.history, state.current]
+      : [...state.history.slice(1), state.current],
+  };
+}
+
+function navBack(state: NavigationState): NavigationState {
+  if (!state.history.length) return state;
+  const prev = state.history[state.history.length - 1]!;
+  return { ...state, current: prev, history: state.history.slice(0, -1) };
+}
+
+function canGoBackFn(state: NavigationState): boolean {
+  return state.history.length > 0;
+}
+
+function isInGuestTourFn(state: NavigationState): boolean {
+  return state.current.tourId !== state.entryTourId;
+}
+
+// ── Inline scene resolvers (previously in core/runtime/resolver.ts) ───────────
+
+function resolveScene(tour: TourConfig, sceneId: string): TourScene | undefined {
+  return tour.scenes.find((s) => s.id === sceneId);
+}
+
+function resolveInitialScene(tour: TourConfig, preferredId?: string): TourScene {
+  if (preferredId) {
+    const found = tour.scenes.find((s) => s.id === preferredId);
+    if (found) return found;
+  }
+  const initial = tour.initialSceneId
+    ? tour.scenes.find((s) => s.id === tour.initialSceneId)
+    : undefined;
+  return initial ?? tour.scenes[0]!;
+}
+
+// ── Store ─────────────────────────────────────────────────────────────────────
 
 export const useRuntimeStore = defineStore('runtime', () => {
   // ── State ─────────────────────────────────────────────────────────────────
@@ -35,13 +80,10 @@ export const useRuntimeStore = defineStore('runtime', () => {
 
   const activeScene = computed<TourScene | undefined>(() => {
     if (!tour.value || !navState.value) return undefined;
-    // Active scene may be in a different tour (cross-tour) — in that case
-    // we only have its ID; the viewer component is responsible for loading
-    // the guest tour. For same-tour scenes, resolve directly.
     if (navState.value.current.tourId === tour.value.slug) {
       return resolveScene(tour.value, navState.value.current.sceneId);
     }
-    return undefined; // viewer must load guest tour
+    return undefined;
   });
 
   const activeSceneId  = computed(() => navState.value?.current.sceneId ?? '');
@@ -52,15 +94,11 @@ export const useRuntimeStore = defineStore('runtime', () => {
   const scenes         = computed<TourScene[]>(() => tour.value?.scenes ?? []);
   const sceneIndex     = computed(() => {
     if (!navState.value || !tour.value) return 0;
-    return tour.value.scenes.findIndex(s => s.id === activeSceneId.value) + 1;
+    return tour.value.scenes.findIndex((s) => s.id === activeSceneId.value) + 1;
   });
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  /**
-   * Load a tour and initialize navigation to its entry scene.
-   * Does NOT touch WebGL — just sets the data.
-   */
   async function loadTour(tourId: string, preferredSceneId?: string): Promise<void> {
     if (loading.value) return;
     loading.value = true;
@@ -81,7 +119,6 @@ export const useRuntimeStore = defineStore('runtime', () => {
     }
   }
 
-  /** Navigate to a scene within the current or another tour. */
   function navigateTo(sceneId: string, tourId?: string): void {
     if (!navState.value) return;
     navState.value = navTo(navState.value, {
@@ -90,13 +127,11 @@ export const useRuntimeStore = defineStore('runtime', () => {
     });
   }
 
-  /** Go back one step in history. */
   function goBack(): void {
     if (!navState.value) return;
     navState.value = navBack(navState.value);
   }
 
-  /** Reset all state (e.g. when leaving the viewer). */
   function reset(): void {
     tour.value     = null;
     navState.value = null;
@@ -105,7 +140,7 @@ export const useRuntimeStore = defineStore('runtime', () => {
   }
 
   return {
-    // State (read-only from outside via computed)
+    // State
     tour, loading, error, navState,
     // Computed
     activeScene, activeSceneId, activeTourId, entryTourId,
