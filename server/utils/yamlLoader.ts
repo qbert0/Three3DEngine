@@ -1,14 +1,15 @@
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import type { TourConfig, TourEntry } from '../../types/tour';
-import { trangBayTour } from '../data/tours/trang-bay';
+import trangBayGenerated from '../data/tours/trang-bay.generated.json';
 import { parseYaml, dumpYaml } from '../content/parser';
 import { compileTour } from '../content/compiler';
 import { resolveMediaUrls } from '../content/resolver';
 
-// In-memory backend data source — compiled natively into Nitro server on Vercel
+// Generated from the canonical YAML by predev/prebuild. This makes the exact
+// same marker coordinates available when Vercel cannot read process.cwd()/tours.
 const staticTours: Record<string, TourConfig> = {
-  'trang-bay': trangBayTour,
+  'trang-bay': trangBayGenerated as TourConfig,
 };
 
 const TOURS_DIR = resolve(process.cwd(), 'tours');

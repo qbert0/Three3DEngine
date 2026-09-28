@@ -4,398 +4,460 @@ import * as yaml from 'js-yaml';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
-const trangBayTour = {
-  slug: "trang-bay",
-  title: "Tour 360\xB0 S\xF4ng V\xE2n Art Space",
-  location: "Nam Hoa L\u01B0, Ninh B\xECnh",
-  summary: "Kh\xE1m ph\xE1 S\xF4ng V\xE2n Art Space gi\u1EEFa l\xE0ng ngh\u1EC1 \u0111\xE1 Ninh V\xE2n qua tr\u1EA3i nghi\u1EC7m panorama 360\xB0.",
-  duration: "T\u1EF1 do",
-  theme: "nature",
-  initialSceneId: "scene-c7",
-  plugins: ["navigation", "info"],
-  scenes: [
-    {
-      id: "scene-c1",
-      title: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
-      subtitle: "To\xE0n c\u1EA3nh khu v\u1EF1c trung t\xE2m, \u0111i\u1EC3m kh\u1EDFi \u0111\u1EA7u c\u1EE7a h\xE0nh tr\xECnh.",
-      panorama: "/images/1788771876123.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789271284325",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 3.952,
-          pitch: -0.178,
-          targetScene: "scene-c2"
-        }
-      ]
-    },
-    {
-      id: "scene-c2",
-      title: "R\xECa R\u1EEBng Th\u01B0a",
-      subtitle: "Ranh gi\u1EDBi gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng c\u1ECF, \xE1nh s\xE1ng l\u1ECDc qua t\xE1n l\xE1.",
-      panorama: "/images/1788771876132.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789273532238",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 5.624,
-          pitch: -0.134,
-          targetScene: "scene-c4"
-        },
-        {
-          id: "marker-navigation-1789273566997",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 2.384,
-          pitch: -0.154,
-          targetScene: "scene-c1"
-        },
-        {
-          id: "marker-navigation-1789273577503",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 1.453,
-          pitch: -0.178,
-          targetScene: "scene-tb1-5"
-        }
-      ]
-    },
-    {
-      id: "scene-c3",
-      title: "L\u1ED1i M\xF2n Gi\u1EEFa Tr\u1EA3ng",
-      subtitle: "Con \u0111\u01B0\u1EDDng nh\u1ECF xuy\xEAn qua th\u1EA3m th\u1EF1c v\u1EADt, d\u1EA5u ch\xE2n ng\u01B0\u1EDDi \u0111i tr\u01B0\u1EDBc.",
-      panorama: "/images/1788771876143.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "c3-next",
-          plugin: "navigation",
-          label: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
-          yaw: 0,
-          pitch: -0.35,
-          targetScene: "scene-c4"
-        },
-        {
-          id: "marker-navigation-1789273324054",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 1.961,
-          pitch: -0.054,
-          targetScene: "scene-tb2-3"
-        }
-      ]
-    },
-    {
-      id: "scene-c4",
-      title: "B\xE3i C\u1ECF Tho\xE1ng \u0110\xE3ng",
-      subtitle: "Kh\xF4ng gian m\u1EDF r\u1ED9ng, t\u1EA7m nh\xECn 360\xB0 kh\xF4ng b\u1ECB che khu\u1EA5t.",
-      panorama: "/images/1788771876162.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "c4-next",
-          plugin: "navigation",
-          label: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
-          yaw: 0,
-          pitch: -0.35,
-          targetScene: "scene-c5"
-        },
-        {
-          id: "marker-navigation-1789271121754",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 2.796,
-          pitch: -0.093,
-          targetScene: "scene-c2"
-        },
-        {
-          id: "marker-navigation-1789271195387",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 1.562,
-          pitch: -0.078,
-          targetScene: "scene-c3"
-        }
-      ]
-    },
-    {
-      id: "scene-c5",
-      title: "G\xF3c Nh\xECn Ph\xEDa N\xFAi",
-      subtitle: "D\xE3y n\xFAi xa ph\xEDa ch\xE2n tr\u1EDDi, m\xE2y tr\xF4i nh\u1EB9 tr\xEAn \u0111\u1EC9nh.",
-      panorama: "/images/1788771876173.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "c5-next",
-          plugin: "navigation",
-          label: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
-          yaw: 0,
-          pitch: -0.35,
-          targetScene: "scene-c7"
-        },
-        {
-          id: "marker-navigation-1789273292044",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 2.069,
-          pitch: -0.189,
-          targetScene: "scene-c4"
-        }
-      ]
-    },
-    {
-      id: "scene-c6",
-      title: "V\xF9ng C\xE2y B\u1EE5i Th\u1EA5p",
-      subtitle: "Th\u1EA3m c\xE2y b\u1EE5i d\xE0y \u0111\u1EB7c, n\u01A1i chuy\u1EC3n ti\u1EBFp gi\u1EEFa r\u1EEBng v\xE0 tr\u1EA3ng.",
-      panorama: "/images/1788771876183.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: []
-    },
-    {
-      id: "scene-c7",
-      title: "\u0110i\u1EC3m H\u1EE3p L\u01B0u",
-      subtitle: "N\u01A1i ba h\u01B0\u1EDBng \u0111i g\u1EB7p nhau \u2013 c\u1EEDa ng\xF5 v\xE0o khu Tr\u1EA3ng Bay.",
-      panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-      thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789273190758",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 0.536,
-          pitch: -0.257,
-          targetScene: "scene-c5"
-        },
-        {
-          id: "marker-info-1789274132769",
-          plugin: "info",
-          label: "Th\xF4ng tin",
-          yaw: 0.955,
-          pitch: 0.016,
-          content: "Khu du l\u1ECBch \u0111\u1ED3ng v\u0103n. (\u0110ang trong th\u1EDDi gian tu s\u1EEDa)"
-        }
-      ]
-    },
-    {
-      id: "scene-tb1-1",
-      title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 1",
-      subtitle: "B\u1EAFt \u0111\u1EA7u h\xE0nh tr\xECnh t\u1EA1i c\u1EEDa ng\xF5 c\u1EE7a Tr\u1EA3ng Bay 1.",
-      panorama: "/images/trbay1/1788771876074.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789273970389",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 4.077,
-          pitch: -0.252,
-          targetScene: "scene-tb1-2"
-        }
-      ]
-    },
-    {
-      id: "scene-tb1-2",
-      title: "\u0110\u1ED3ng Tr\u1EA3ng R\u1ED9ng",
-      subtitle: "M\u1EB7t tr\u1EA3ng ph\u1EB3ng r\u1ED9ng, c\u1ECF xanh m\u01B0\u1EDBt tr\u1EA3i d\xE0i t\u1EDBi t\u1EADn ch\xE2n tr\u1EDDi.",
-      panorama: "/images/trbay1/1788771876090.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789270414069",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 1.495,
-          pitch: -0.242,
-          targetScene: "scene-tb1-1"
-        },
-        {
-          id: "marker-navigation-1789270462666",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 4.29,
-          pitch: -0.182,
-          targetScene: "scene-tb1-3"
-        }
-      ]
-    },
-    {
-      id: "scene-tb1-3",
-      title: "G\xF3c Ph\xEDa \u0110\xF4ng Tr\u1EA3ng",
-      subtitle: "H\u01B0\u1EDBng nh\xECn ph\xEDa \u0110\xF4ng, n\u01A1i n\u1EAFng s\xE1ng chi\u1EBFu r\xF5 t\u1EEBng c\u1ECDng c\u1ECF.",
-      panorama: "/images/trbay1/1788771876098.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789270498796",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 4.039,
-          pitch: -0.211,
-          targetScene: "scene-tb1-2"
-        },
-        {
-          id: "marker-navigation-1789271486659",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 5.916,
-          pitch: -0.276,
-          targetScene: "scene-tb1-4"
-        },
-        {
-          id: "marker-info-1789274077392",
-          plugin: "info",
-          label: "Th\xF4ng tin",
-          yaw: 0.911,
-          pitch: -0.151,
-          content: "L\xE0 m\u1ED9t c\xE1i g\xEC \u0111\xF3 m\xE0 d\xF9ng \u0111\u1EC3 \u0111\u1EF1ng \u0111\u1ED3 v\u1EADt"
-        }
-      ]
-    },
-    {
-      id: "scene-tb1-4",
-      title: "Trung T\xE2m Tr\u1EA3ng Bay 1",
-      subtitle: "\u0110i\u1EC3m gi\u1EEFa c\u1EE7a Tr\u1EA3ng Bay 1, to\xE0n c\u1EA3nh t\u1EE9 ph\xEDa kh\xF4ng b\u1ECB che.",
-      panorama: "/images/trbay1/1788771876106.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789271449611",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 2.752,
-          pitch: -0.386,
-          targetScene: "scene-tb1-3"
-        },
-        {
-          id: "marker-navigation-1789271561280",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 4.266,
-          pitch: -0.107,
-          targetScene: "scene-tb1-5"
-        }
-      ]
-    },
-    {
-      id: "scene-tb1-5",
-      title: "Bi\xEAn Gi\u1EDBi Hai Tr\u1EA3ng",
-      subtitle: "Ranh gi\u1EDBi t\u1EF1 nhi\xEAn gi\u1EEFa Tr\u1EA3ng Bay 1 v\xE0 Tr\u1EA3ng Bay 2.",
-      panorama: "/images/trbay1/1788771876114.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "tb1-5-next",
-          plugin: "navigation",
-          label: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
-          yaw: 1.57,
-          pitch: -0.3,
-          targetScene: "scene-c2"
-        },
-        {
-          id: "marker-navigation-1789273840125",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 3.511,
-          pitch: -0.072,
-          targetScene: "scene-tb1-4"
-        }
-      ]
-    },
-    {
-      id: "scene-tb2-1",
-      title: "C\u1ED5ng V\xE0o Tr\u1EA3ng Bay 2",
-      subtitle: "B\u1EAFt \u0111\u1EA7u kh\xE1m ph\xE1 khu v\u1EF1c Tr\u1EA3ng Bay 2, \u0111\u1ECBa h\xECnh l\u1EA1 h\u01A1n.",
-      panorama: "/images/trbay2/1788771876042.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: []
-    },
-    {
-      id: "scene-tb2-2",
-      title: "V\xF9ng C\u1ECF Lau Cao",
-      subtitle: "C\u1ECF lau cao v\xFAt che ph\u1EE7, t\u1EA1o h\xE0nh lang xanh t\u1EF1 nhi\xEAn.",
-      panorama: "/images/trbay2/1788771876050.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: []
-    },
-    {
-      id: "scene-tb2-3",
-      title: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
-      subtitle: "C\xE2y r\u1EEBng cao v\xFAt ph\xEDa T\xE2y, b\xF3ng m\xE1t che ph\u1EE7 m\u1EB7t tr\u1EA3ng.",
-      panorama: "/images/trbay2/1788771876058.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "marker-navigation-1789273467238",
-          plugin: "navigation",
-          label: "\u0110i\u1EC3m \u0111\u1EBFn m\u1EDBi",
-          yaw: 4.835,
-          pitch: -0.184,
-          targetScene: "scene-c3"
-        }
-      ]
-    },
-    {
-      id: "scene-tb2-4",
-      title: "Cu\u1ED1i Tr\u1EA3ng Bay 2",
-      subtitle: "\u0110i\u1EC3m k\u1EBFt th\xFAc h\xE0nh tr\xECnh \u2013 nh\xECn l\u1EA1i to\xE0n b\u1ED9 con \u0111\u01B0\u1EDDng \u0111\xE3 \u0111i.",
-      panorama: "/images/trbay2/1788771876067.jpg",
-      thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
-      initialYaw: 0,
-      initialPitch: -0.05,
-      markers: [
-        {
-          id: "tb2-4-prev",
-          plugin: "navigation",
-          label: "B\u1EDD R\u1EEBng Ph\xEDa T\xE2y",
-          yaw: 3.14,
-          pitch: -0.35,
-          targetScene: "scene-tb2-3"
-        },
-        {
-          id: "tb2-4-home",
-          plugin: "navigation",
-          label: "\u0110\u1EC9nh Nh\xECn Ra Thung L\u0169ng",
-          yaw: 1.57,
-          pitch: -0.3,
-          targetScene: "scene-c1"
-        }
-      ]
-    }
-  ]
+var slug = "trang-bay";
+var title = "Tour 360° Sông Vân Art Space";
+var location = "Nam Hoa Lư, Ninh Bình";
+var summary = "Khám phá Sông Vân Art Space giữa làng nghề đá Ninh Vân. Dạo qua không gian sống, xưởng sáng tác và những khoảng trưng bày điêu khắc đá đương đại bằng trải nghiệm panorama 360°.";
+var duration = "Tự do";
+var theme = "minimal";
+var initialSceneId = "scene-c7";
+var plugins = [
+	"navigation",
+	"info"
+];
+var scenes = [
+	{
+		id: "scene-c1",
+		title: "Xưởng đá",
+		subtitle: "Điểm nhìn mở đầu, nơi tác phẩm đá gặp ánh sáng và cảnh quan Sông Vân.",
+		panorama: "/images/1788771876123.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007426579",
+				label: "Cảnh mới",
+				yaw: -2.9193,
+				pitch: -0.3541,
+				plugin: "navigation",
+				targetScene: "scene-c2",
+				rotation: 0.05235987755982988,
+				rotZ: 0,
+				rotX: 0.890117918517108,
+				rotY: 0
+			}
+		]
+	},
+	{
+		id: "scene-c2",
+		title: "Vườn Tượng",
+		subtitle: "Khoảng trưng bày ngoài trời kết nối cây xanh, mặt nước và điêu khắc.",
+		panorama: "/images/1788771876132.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007374178",
+				label: "Khoảng trưng bày mở",
+				yaw: 2.3594,
+				pitch: -0.2871,
+				plugin: "navigation",
+				targetScene: "scene-c4",
+				rotX: 0.890117918517108
+			},
+			{
+				id: "h1790589811645",
+				label: "Xưởng đá",
+				yaw: -0.6684,
+				pitch: -0.1708,
+				plugin: "navigation",
+				targetScene: "scene-c1",
+				rotX: 0.8726646259971648
+			},
+			{
+				id: "h1790592598215",
+				label: "Cổng trừng bày 1",
+				yaw: 0.3657,
+				pitch: -0.3879,
+				plugin: "navigation",
+				targetScene: "scene-tb1-5",
+				rotX: 0.8726646259971648
+			}
+		]
+	},
+	{
+		id: "scene-c3",
+		title: "Sảnh tân gia",
+		subtitle: "Sân trước khu nhà tân gia",
+		panorama: "/images/1788771876143.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007786937",
+				label: "Không gian trừng bày mở",
+				yaw: -2.7305,
+				pitch: -0.3725,
+				plugin: "navigation",
+				targetScene: "scene-c4",
+				rotX: 0.8726646259971648,
+				rotZ: -0.6981317007977318,
+				rotY: 0.6457718232379019
+			},
+			{
+				id: "h1790007866785",
+				label: "Khu trưng bày 2",
+				yaw: 0.5523,
+				pitch: -0.2379,
+				plugin: "navigation",
+				targetScene: "scene-tb2-3",
+				rotX: 0.8726646259971648
+			},
+			{
+				id: "h1790587903930",
+				label: "Nhà tân gia",
+				yaw: -0.5243,
+				pitch: 0.4021,
+				plugin: "info",
+				content: "Khung sảnh chính của tân gia. "
+			}
+		]
+	},
+	{
+		id: "scene-c4",
+		title: "Khoảng Trưng Bày Mở",
+		subtitle: "Không gian ngoài trời với tầm nhìn rộng dành cho các tác phẩm điêu khắc.",
+		panorama: "/images/1788771876162.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "c4-next",
+				plugin: "navigation",
+				label: "Không Gian Bên Sông",
+				yaw: 1.9112,
+				pitch: -0.3851,
+				targetScene: "scene-c5",
+				rotX: 0.8726646259971648
+			},
+			{
+				id: "marker-navigation-1789271121754",
+				plugin: "navigation",
+				label: "Vườn tượng",
+				yaw: -0.928,
+				pitch: -0.2786,
+				targetScene: "scene-c2",
+				rotZ: 0.017453292519943295,
+				rotX: 0.8726646259971648
+			},
+			{
+				id: "marker-navigation-1789271195387",
+				plugin: "navigation",
+				label: "Sảnh tân gia",
+				yaw: -0.5325,
+				pitch: -0.2259,
+				targetScene: "scene-c3",
+				rotX: 0.890117918517108,
+				rotY: 0.03490658503988659,
+				rotZ: 0.20943951023931953
+			}
+		]
+	},
+	{
+		id: "scene-c5",
+		title: "Không Gian Bên Sông",
+		subtitle: "Nơi cảnh quan Ninh Bình trở thành một phần của trải nghiệm nghệ thuật.",
+		panorama: "/images/1788771876173.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "c5-next",
+				plugin: "navigation",
+				label: "Lỗi ra",
+				yaw: 1.467,
+				pitch: -0.2778,
+				targetScene: "scene-c4",
+				rotation: 0.5759586531581288,
+				rotZ: 0.715584993317675,
+				rotX: 0.8726646259971648,
+				rotY: -0.47123889803846897
+			},
+			{
+				id: "marker-navigation-1789273292044",
+				plugin: "navigation",
+				label: "Điểm đến mới",
+				yaw: -0.1823,
+				pitch: -0.3903,
+				targetScene: "scene-c4",
+				rotation: -0.9599310885968813,
+				rotX: 0.890117918517108,
+				rotZ: -1.2566370614359172,
+				rotY: 0.6457718232379019
+			}
+		]
+	},
+	{
+		id: "scene-c6",
+		title: "Vườn Đá",
+		subtitle: "Những hình khối đá hiện diện giữa cây xanh và nhịp sống thường nhật.",
+		panorama: "/images/1788771876183.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+		]
+	},
+	{
+		id: "scene-c7",
+		title: "Cổng Sông Vân Art Space",
+		subtitle: "Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.",
+		panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+		thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "marker-navigation-1789273190758",
+				plugin: "navigation",
+				label: "Lối vào",
+				yaw: -3.0244,
+				pitch: -0.4339,
+				targetScene: "scene-c5",
+				rotZ: -0.47123889803846897,
+				rotX: 0.8552113334772214,
+				rotY: 0
+			},
+			{
+				id: "marker-info-1789274132769",
+				plugin: "info",
+				label: "Cổng chính",
+				yaw: 2.627,
+				pitch: -0.0173,
+				content: "Sông Vân Art space…\nKhông gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của Lương Trịnh."
+			}
+		]
+	},
+	{
+		id: "scene-tb1-1",
+		title: "Lối Vào Xưởng Đá",
+		subtitle: "Bắt đầu hành trình tìm hiểu quá trình vật liệu đá trở thành tác phẩm.",
+		panorama: "/images/trbay1/1788771876074.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007757751",
+				label: "Cảnh mới",
+				yaw: -0.5348,
+				pitch: -0.3802,
+				plugin: "navigation",
+				targetScene: "scene-tb1-2",
+				rotX: 0.8726646259971648
+			}
+		]
+	},
+	{
+		id: "scene-tb1-2",
+		title: "Sân Tập Kết Đá",
+		subtitle: "Không gian lưu giữ vật liệu và những hình khối đang chờ được đánh thức.",
+		panorama: "/images/trbay1/1788771876090.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007718913",
+				label: "Góc chế tác",
+				yaw: -0.6099,
+				pitch: -0.3349,
+				plugin: "navigation",
+				targetScene: "scene-tb1-3",
+				rotX: 0.8726646259971648
+			},
+			{
+				id: "h1790593075340",
+				label: "Lối",
+				yaw: 2.3084,
+				pitch: -0.3378,
+				plugin: "navigation",
+				targetScene: "scene-tb1-1",
+				rotX: 0.8726646259971648
+			}
+		]
+	},
+	{
+		id: "scene-tb1-3",
+		title: "Góc Chế Tác",
+		subtitle: "Nơi có thể quan sát dấu vết lao động và kỹ thuật của làng nghề đá.",
+		panorama: "/images/trbay1/1788771876098.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007660078",
+				label: "Thông tin",
+				yaw: -2.3588,
+				pitch: -96e-4,
+				plugin: "info",
+				content: "Là một cái gì đó mà dùng để đựng đồ vật"
+			},
+			{
+				id: "h1790007689339",
+				label: "Trung tâm trừng bày 1",
+				yaw: 1.0567,
+				pitch: -0.4643,
+				plugin: "navigation",
+				targetScene: "scene-tb1-2",
+				rotX: 0.8726646259971648
+			},
+			{
+				id: "h1790592920728",
+				label: "Trung tâm xưởng",
+				yaw: -0.7255,
+				pitch: -0.5227,
+				plugin: "navigation",
+				targetScene: "scene-tb1-4",
+				rotX: 0.8726646259971648
+			}
+		]
+	},
+	{
+		id: "scene-tb1-4",
+		title: "Trung Tâm Xưởng",
+		subtitle: "Điểm nhìn bao quát khu vực sáng tác và hoàn thiện tác phẩm.",
+		panorama: "/images/trbay1/1788771876106.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007619346",
+				label: "Cảnh mới",
+				yaw: 1.1279,
+				pitch: -0.2731,
+				plugin: "navigation",
+				targetScene: "scene-tb1-5",
+				rotX: 0.8726646259971648,
+				rotZ: -0.12217304763960307
+			},
+			{
+				id: "h1790592823753",
+				label: "Chuyển cảnh",
+				yaw: 2.585,
+				pitch: -0.266,
+				plugin: "navigation",
+				targetScene: "scene-tb1-3",
+				rotX: 0.8726646259971648
+			}
+		]
+	},
+	{
+		id: "scene-tb1-5",
+		title: "Cổng trưng bày 1",
+		subtitle: "Khoảng nối giữa quá trình chế tác và không gian trưng bày hoàn chỉnh.",
+		panorama: "/images/trbay1/1788771876114.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007511095",
+				label: "Vườn tượng",
+				yaw: -1.3068,
+				pitch: -0.3872,
+				plugin: "navigation",
+				targetScene: "scene-c2",
+				rotX: 0.8726646259971648
+			},
+			{
+				id: "h1790592743906",
+				label: "Chuyển cảnh",
+				yaw: -3.11,
+				pitch: -0.171,
+				plugin: "navigation",
+				targetScene: "scene-tb1-4",
+				rotX: 0.8726646259971648
+			}
+		]
+	},
+	{
+		id: "scene-tb2-1",
+		title: "Lối Vào Khu Trưng Bày",
+		subtitle: "Cửa ngõ dẫn vào nhóm không gian trưng bày phía trong.",
+		panorama: "/images/trbay2/1788771876042.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+		]
+	},
+	{
+		id: "scene-tb2-2",
+		title: "Hành Lang Tác Phẩm",
+		subtitle: "Một nhịp chuyển chậm để quan sát hình khối, bề mặt và bóng đổ.",
+		panorama: "/images/trbay2/1788771876050.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+		]
+	},
+	{
+		id: "scene-tb2-3",
+		title: "Không gian trừng bày 2",
+		subtitle: "Góc thưởng lãm yên tĩnh, nơi ánh sáng làm thay đổi cảm nhận về đá.",
+		panorama: "/images/trbay2/1788771876058.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "h1790007893330",
+				label: "Cảnh mới",
+				yaw: 0.4139,
+				pitch: -0.4477,
+				plugin: "navigation",
+				targetScene: "scene-c3",
+				rotX: 0.890117918517108
+			}
+		]
+	},
+	{
+		id: "scene-tb2-4",
+		title: "Điểm Kết Hành Trình",
+		subtitle: "Điểm nhìn cuối để nhìn lại mối liên hệ giữa tác phẩm, làng nghề và cảnh quan.",
+		panorama: "/images/trbay2/1788771876067.jpg",
+		thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		markers: [
+			{
+				id: "tb2-4-prev",
+				plugin: "navigation",
+				label: "Khoảng Tĩnh",
+				yaw: 3.14,
+				pitch: -0.35,
+				targetScene: "scene-tb2-3"
+			},
+			{
+				id: "tb2-4-home",
+				plugin: "navigation",
+				label: "Sân Điêu Khắc Bên Sông",
+				yaw: 1.57,
+				pitch: -0.3,
+				targetScene: "scene-c1"
+			}
+		]
+	}
+];
+const trangBayGenerated = {
+	slug: slug,
+	title: title,
+	location: location,
+	summary: summary,
+	duration: duration,
+	theme: theme,
+	initialSceneId: initialSceneId,
+	plugins: plugins,
+	scenes: scenes
 };
 
 function parseYaml(raw) {
@@ -530,7 +592,7 @@ function compileTour(raw) {
 }
 
 const staticTours = {
-  "trang-bay": trangBayTour
+  "trang-bay": trangBayGenerated
 };
 const TOURS_DIR = resolve(process.cwd(), "tours");
 function loadTour(slug) {

@@ -3,8 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/sync-tour-data.mjs",
     "build": "nuxt build",
+    "predev": "node scripts/sync-tour-data.mjs",
     "dev": "nuxt dev --host 0.0.0.0",
+    "pregenerate": "node scripts/sync-tour-data.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview --host 0.0.0.0",
     "typecheck": "nuxt typecheck"
