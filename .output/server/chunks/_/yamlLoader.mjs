@@ -17,6 +17,87 @@ var plugins = [
 ];
 var scenes = [
 	{
+		id: "scene-c7",
+		title: "Cổng Sông Vân Art Space",
+		subtitle: "Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.",
+		panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+		thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		brightness: 1.3,
+		markers: [
+			{
+				id: "marker-navigation-1789273190758",
+				plugin: "navigation",
+				label: "Lối vào",
+				yaw: -3.0244,
+				pitch: -0.4339,
+				targetScene: "scene-c5",
+				rotZ: -0.47123889803846897,
+				rotX: 0.8552113334772214,
+				rotY: 0
+			},
+			{
+				id: "marker-info-1789274132769",
+				plugin: "panel",
+				label: "Cổng chính",
+				yaw: 2.627,
+				pitch: -0.0173,
+				contents: [
+					{
+						id: "marker-info-1789274132769-text",
+						type: "text",
+						content: "Sông Vân Art space…\nKhông gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của Lương Trịnh.",
+						presentation: "text-and-audio",
+						speech: {
+							lang: "vi-VN",
+							rate: 1,
+							pitch: 1,
+							src: "/uploads/audio/1790759242766-58jae6uqv0h.wav"
+						}
+					},
+					{
+						id: "block-1790753456844",
+						type: "image3d",
+						image: "",
+						caption: ""
+					},
+					{
+						id: "block-1790753465322",
+						type: "ai-chat",
+						context: ""
+					}
+				],
+				placement: "horizontal"
+			},
+			{
+				id: "h1790652579044",
+				plugin: "panel",
+				label: "Xem ảnh 3D",
+				yaw: -2.311,
+				pitch: -0.053,
+				contents: [
+					{
+						id: "h1790652579044-image",
+						type: "image3d",
+						image: "",
+						caption: ""
+					}
+				]
+			},
+			{
+				id: "h1790652586972",
+				label: "Xem video",
+				yaw: -2.89,
+				pitch: 0.231,
+				plugin: "video",
+				src: "https://www.youtube.com/watch?v=ujf9KANJC8U",
+				width: 720,
+				height: 405
+			}
+		]
+	},
+	{
 		id: "scene-c1",
 		title: "Xưởng đá",
 		subtitle: "Điểm nhìn mở đầu, nơi tác phẩm đá gặp ánh sáng và cảnh quan Sông Vân.",
@@ -24,6 +105,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007426579",
@@ -47,12 +129,13 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007374178",
 				label: "Khoảng trưng bày mở",
-				yaw: 2.3594,
-				pitch: -0.2871,
+				yaw: 2.3537,
+				pitch: -0.3399,
 				plugin: "navigation",
 				targetScene: "scene-c4",
 				rotX: 0.890117918517108
@@ -60,11 +143,13 @@ var scenes = [
 			{
 				id: "h1790589811645",
 				label: "Xưởng đá",
-				yaw: -0.6684,
-				pitch: -0.1708,
+				yaw: -0.7323,
+				pitch: -0.3948,
 				plugin: "navigation",
 				targetScene: "scene-c1",
-				rotX: 0.8726646259971648
+				rotX: 0.8726646259971648,
+				rotZ: 0,
+				rotY: 0
 			},
 			{
 				id: "h1790592598215",
@@ -85,6 +170,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007786937",
@@ -108,11 +194,17 @@ var scenes = [
 			},
 			{
 				id: "h1790587903930",
+				plugin: "panel",
 				label: "Nhà tân gia",
 				yaw: -0.5243,
 				pitch: 0.4021,
-				plugin: "info",
-				content: "Khung sảnh chính của tân gia. "
+				contents: [
+					{
+						id: "h1790587903930-text",
+						type: "text",
+						content: "Khung sảnh chính của tân gia. "
+					}
+				]
 			}
 		]
 	},
@@ -124,6 +216,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "c4-next",
@@ -165,6 +258,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "c5-next",
@@ -172,7 +266,7 @@ var scenes = [
 				label: "Lỗi ra",
 				yaw: 1.467,
 				pitch: -0.2778,
-				targetScene: "scene-c4",
+				targetScene: "scene-c7",
 				rotation: 0.5759586531581288,
 				rotZ: 0.715584993317675,
 				rotX: 0.8726646259971648,
@@ -200,37 +294,8 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
-		]
-	},
-	{
-		id: "scene-c7",
-		title: "Cổng Sông Vân Art Space",
-		subtitle: "Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.",
-		panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-		thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		markers: [
-			{
-				id: "marker-navigation-1789273190758",
-				plugin: "navigation",
-				label: "Lối vào",
-				yaw: -3.0244,
-				pitch: -0.4339,
-				targetScene: "scene-c5",
-				rotZ: -0.47123889803846897,
-				rotX: 0.8552113334772214,
-				rotY: 0
-			},
-			{
-				id: "marker-info-1789274132769",
-				plugin: "info",
-				label: "Cổng chính",
-				yaw: 2.627,
-				pitch: -0.0173,
-				content: "Sông Vân Art space…\nKhông gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của Lương Trịnh."
-			}
 		]
 	},
 	{
@@ -241,6 +306,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007757751",
@@ -261,6 +327,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007718913",
@@ -290,14 +357,21 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007660078",
+				plugin: "panel",
 				label: "Thông tin",
 				yaw: -2.3588,
 				pitch: -96e-4,
-				plugin: "info",
-				content: "Là một cái gì đó mà dùng để đựng đồ vật"
+				contents: [
+					{
+						id: "h1790007660078-text",
+						type: "text",
+						content: "Là một cái gì đó mà dùng để đựng đồ vật"
+					}
+				]
 			},
 			{
 				id: "h1790007689339",
@@ -316,6 +390,19 @@ var scenes = [
 				plugin: "navigation",
 				targetScene: "scene-tb1-4",
 				rotX: 0.8726646259971648
+			},
+			{
+				id: "h1790647902226",
+				label: "Video",
+				yaw: 2.79,
+				pitch: -0.0368,
+				plugin: "video",
+				src: "https://www.youtube.com/watch?v=StfAHz2UdBY",
+				width: 2560,
+				height: 1440,
+				rotY: -0.13962634015954636,
+				rotZ: 0,
+				rotX: 0.10471975511965977
 			}
 		]
 	},
@@ -327,6 +414,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007619346",
@@ -357,6 +445,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007511095",
@@ -386,6 +475,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 		]
 	},
@@ -397,6 +487,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 		]
 	},
@@ -408,6 +499,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007893330",
@@ -428,6 +520,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "tb2-4-prev",

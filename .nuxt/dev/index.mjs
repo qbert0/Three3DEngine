@@ -3,13 +3,12 @@ import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent
 import { Server } from 'node:http';
 import { resolve, dirname, join, extname } from 'node:path';
 import crypto$1 from 'node:crypto';
-import { parentPort, threadId, Worker, workerData } from 'node:worker_threads';
+import { parentPort, threadId } from 'node:worker_threads';
 import { escapeHtml } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@vue/shared/dist/shared.cjs.js';
 import viteNodeEntry_mjs from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
 import { viteNodeFetch } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
-import { promises, existsSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'node:fs';
+import { promises, mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync } from 'node:fs';
 import sharp from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/sharp/dist/index.mjs';
-import { fileURLToPath } from 'node:url';
 import * as yaml from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/js-yaml/dist/js-yaml.mjs';
 import Ajv from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ajv/dist/ajv.js';
 import addFormats from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ajv-formats/dist/index.js';
@@ -40,6 +39,7 @@ import { stringify, uneval } from 'file:///run/media/qbert/1C8099B8809998BA/code
 import { captureRawStackTrace, parseRawStackTrace } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/errx/dist/index.mjs';
 import { isVNode, isRef, toValue } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/vue/index.mjs';
 import _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/fix-stacktrace.mjs';
+import { fileURLToPath } from 'node:url';
 import { dirname as dirname$1, resolve as resolve$1 } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/pathe/dist/index.mjs';
 import { createHead as createHead$1, propsToString, renderSSRHead } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/unhead/dist/server.mjs';
 import { DeprecationsPlugin, PromisesPlugin, TemplateParamsPlugin, AliasSortingPlugin } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/unhead/dist/plugins.mjs';
@@ -2783,6 +2783,7 @@ async function getIslandContext(event) {
 	};
 }
 
+const _lazy_uLSXPe = () => Promise.resolve().then(function () { return audio_post$1; });
 const _lazy_xXCZDw = () => Promise.resolve().then(function () { return media_post$1; });
 const _lazy_PGQEaE = () => Promise.resolve().then(function () { return _slug__post$1; });
 const _lazy_VypIyW = () => Promise.resolve().then(function () { return markers_post$1; });
@@ -2796,6 +2797,7 @@ const _lazy_nNil0X = () => Promise.resolve().then(function () { return renderer;
 const handlers = [
   { route: '', handler: _qee9ua, lazy: false, middleware: true, method: undefined },
   { route: '', handler: _NurYPu, lazy: false, middleware: true, method: undefined },
+  { route: '/api/admin/audio', handler: _lazy_uLSXPe, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/media', handler: _lazy_xXCZDw, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/tours/:slug', handler: _lazy_PGQEaE, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/tours/:slug/scenes/:sceneId/markers', handler: _lazy_VypIyW, lazy: true, middleware: false, method: "post" },
@@ -2996,7 +2998,7 @@ const tasks = {
 };
 
 const __runningTasks__ = {};
-async function runTask$1(name, {
+async function runTask(name, {
   payload = {},
   context = {}
 } = {}) {
@@ -3069,7 +3071,7 @@ nitroApp.router.use(
       ...getQuery$1(event),
       ...await readBody(event).then((r) => r?.payload).catch(() => ({}))
     };
-    return await runTask$1(name, { payload });
+    return await runTask(name, { payload });
   })
 );
 function listen(useRandomPort = Boolean(
@@ -3158,47 +3160,49 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   default: styles
 }, Symbol.toStringTag, { value: 'Module' }));
 
-async function runTask(task) {
+const AUDIO_DIR = join(process.cwd(), "public", "uploads", "audio");
+const ALLOWED_EXTENSIONS$1 = /* @__PURE__ */ new Set([".wav", ".mp3", ".m4a", ".ogg", ".aac", ".flac"]);
+const MAX_FILE_SIZE$1 = 25 * 1024 * 1024;
+const audio_post = defineEventHandler(async (event) => {
   var _a;
-  if (!existsSync(task.inputPath)) {
-    return { ok: false, error: `File kh\xF4ng t\u1ED3n t\u1EA1i: ${task.inputPath}` };
+  const parts = await readMultipartFormData(event);
+  const part = parts == null ? void 0 : parts.find((item) => item.filename && item.data);
+  if (!(part == null ? void 0 : part.filename) || !part.data) {
+    throw createError({ statusCode: 400, statusMessage: "Kh\xF4ng c\xF3 file \xE2m thanh \u0111\u01B0\u1EE3c g\u1EEDi l\xEAn." });
   }
-  try {
-    if (task.op === "metadata") {
-      const meta = await sharp(task.inputPath).metadata();
-      return { ok: true, width: meta.width, height: meta.height, format: meta.format };
-    }
-    if (task.op === "thumbnail") {
-      await sharp(task.inputPath).resize(400, 225, { fit: "cover", position: "centre" }).webp({ quality: 82, effort: 4 }).toFile(task.outputPath);
-      return { ok: true, outputPath: task.outputPath };
-    }
-    if (task.op === "resize") {
-      await sharp(task.inputPath).resize(task.width, task.height, { fit: "inside", withoutEnlargement: true }).webp({ quality: 88, effort: 4 }).toFile(task.outputPath);
-      return { ok: true, outputPath: task.outputPath };
-    }
-    return { ok: false, error: `Unknown op: ${task.op}` };
-  } catch (e) {
-    return { ok: false, error: (_a = e == null ? void 0 : e.message) != null ? _a : String(e) };
+  const extension = extname(part.filename).toLowerCase();
+  const isAudioMime = ((_a = part.type) == null ? void 0 : _a.startsWith("audio/")) || part.type === "application/octet-stream";
+  if (!ALLOWED_EXTENSIONS$1.has(extension) || !isAudioMime) {
+    throw createError({ statusCode: 415, statusMessage: "Ch\u1EC9 h\u1ED7 tr\u1EE3 WAV, MP3, M4A, OGG, AAC ho\u1EB7c FLAC." });
   }
-}
-if (workerData && parentPort) {
-  runTask(workerData).then((result) => parentPort.postMessage(result)).catch((e) => parentPort.postMessage({ ok: false, error: String(e) }));
-}
-const __filename$1 = fileURLToPath(globalThis._importMeta_.url);
-function runInWorker(task) {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(__filename$1, { workerData: task });
-    worker.once("message", resolve);
-    worker.once("error", reject);
-    worker.once("exit", (code) => {
-      if (code !== 0) reject(new Error(`Worker exited with code ${code}`));
-    });
-  });
-}
+  if (part.data.byteLength > MAX_FILE_SIZE$1) {
+    throw createError({ statusCode: 413, statusMessage: "File \xE2m thanh kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 25 MB." });
+  }
+  mkdirSync(AUDIO_DIR, { recursive: true });
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}${extension}`;
+  writeFileSync(join(AUDIO_DIR, fileName), part.data);
+  return {
+    ok: true,
+    file: {
+      url: `/uploads/audio/${fileName}`,
+      name: part.filename,
+      size: part.data.byteLength,
+      mimeType: part.type
+    }
+  };
+});
+
+const audio_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: audio_post
+}, Symbol.toStringTag, { value: 'Module' }));
 
 const UPLOAD_DIR = join(process.cwd(), "public", "uploads");
 const THUMBNAIL_DIR = join(process.cwd(), "public", "thumbnails");
+const ALLOWED_EXTENSIONS = /* @__PURE__ */ new Set([".jpg", ".jpeg", ".png", ".webp"]);
+const MAX_FILE_SIZE = 60 * 1024 * 1024;
 const media_post = defineEventHandler(async (event) => {
+  var _a, _b;
   try {
     mkdirSync(UPLOAD_DIR, { recursive: true });
   } catch {
@@ -3214,20 +3218,32 @@ const media_post = defineEventHandler(async (event) => {
   const results = [];
   for (const part of body) {
     if (!part.data || !part.filename) continue;
-    const ext = extname(part.filename).toLowerCase() || ".jpg";
+    const ext = extname(part.filename).toLowerCase();
+    if (!ALLOWED_EXTENSIONS.has(ext)) {
+      throw createError({ statusCode: 415, statusMessage: "Ch\u1EC9 h\u1ED7 tr\u1EE3 \u1EA3nh JPG, PNG ho\u1EB7c WebP." });
+    }
+    if (part.data.byteLength > MAX_FILE_SIZE) {
+      throw createError({ statusCode: 413, statusMessage: "\u1EA2nh kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 60 MB." });
+    }
+    let meta;
+    try {
+      meta = await sharp(part.data, { failOn: "error" }).metadata();
+    } catch (error) {
+      throw createError({ statusCode: 422, statusMessage: `Kh\xF4ng th\u1EC3 \u0111\u1ECDc \u1EA3nh: ${(_a = error == null ? void 0 : error.message) != null ? _a : String(error)}` });
+    }
+    if (!meta.width || !meta.height) {
+      throw createError({ statusCode: 422, statusMessage: "\u1EA2nh kh\xF4ng c\xF3 k\xEDch th\u01B0\u1EDBc h\u1EE3p l\u1EC7." });
+    }
     const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const fileName = `${baseName}${ext}`;
     const thumbName = `${baseName}.webp`;
     const inputPath = join(UPLOAD_DIR, fileName);
     const thumbPath = join(THUMBNAIL_DIR, thumbName);
     writeFileSync(inputPath, part.data);
-    const meta = await runInWorker({ op: "metadata", inputPath });
-    if (!meta.ok) {
-      throw createError({ statusCode: 422, statusMessage: `Kh\xF4ng th\u1EC3 \u0111\u1ECDc \u1EA3nh: ${meta.error}` });
-    }
-    const thumb = await runInWorker({ op: "thumbnail", inputPath, outputPath: thumbPath });
-    if (!thumb.ok) {
-      throw createError({ statusCode: 500, statusMessage: `L\u1ED7i t\u1EA1o thumbnail: ${thumb.error}` });
+    try {
+      await sharp(part.data).resize(400, 225, { fit: "cover", position: "centre" }).webp({ quality: 82, effort: 4 }).toFile(thumbPath);
+    } catch (error) {
+      throw createError({ statusCode: 500, statusMessage: `L\u1ED7i t\u1EA1o thumbnail: ${(_b = error == null ? void 0 : error.message) != null ? _b : String(error)}` });
     }
     results.push({
       original: `/uploads/${fileName}`,
@@ -3257,6 +3273,87 @@ var plugins = [
 ];
 var scenes = [
 	{
+		id: "scene-c7",
+		title: "Cổng Sông Vân Art Space",
+		subtitle: "Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.",
+		panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+		thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
+		initialYaw: 0,
+		initialPitch: -0.05,
+		brightness: 1.3,
+		markers: [
+			{
+				id: "marker-navigation-1789273190758",
+				plugin: "navigation",
+				label: "Lối vào",
+				yaw: -3.0244,
+				pitch: -0.4339,
+				targetScene: "scene-c5",
+				rotZ: -0.47123889803846897,
+				rotX: 0.8552113334772214,
+				rotY: 0
+			},
+			{
+				id: "marker-info-1789274132769",
+				plugin: "panel",
+				label: "Cổng chính",
+				yaw: 2.627,
+				pitch: -0.0173,
+				contents: [
+					{
+						id: "marker-info-1789274132769-text",
+						type: "text",
+						content: "Sông Vân Art space…\nKhông gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của Lương Trịnh.",
+						presentation: "text-and-audio",
+						speech: {
+							lang: "vi-VN",
+							rate: 1,
+							pitch: 1,
+							src: "/uploads/audio/1790759242766-58jae6uqv0h.wav"
+						}
+					},
+					{
+						id: "block-1790753456844",
+						type: "image3d",
+						image: "",
+						caption: ""
+					},
+					{
+						id: "block-1790753465322",
+						type: "ai-chat",
+						context: ""
+					}
+				],
+				placement: "horizontal"
+			},
+			{
+				id: "h1790652579044",
+				plugin: "panel",
+				label: "Xem ảnh 3D",
+				yaw: -2.311,
+				pitch: -0.053,
+				contents: [
+					{
+						id: "h1790652579044-image",
+						type: "image3d",
+						image: "",
+						caption: ""
+					}
+				]
+			},
+			{
+				id: "h1790652586972",
+				label: "Xem video",
+				yaw: -2.89,
+				pitch: 0.231,
+				plugin: "video",
+				src: "https://www.youtube.com/watch?v=ujf9KANJC8U",
+				width: 720,
+				height: 405
+			}
+		]
+	},
+	{
 		id: "scene-c1",
 		title: "Xưởng đá",
 		subtitle: "Điểm nhìn mở đầu, nơi tác phẩm đá gặp ánh sáng và cảnh quan Sông Vân.",
@@ -3264,7 +3361,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007426579",
@@ -3288,13 +3385,13 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007374178",
 				label: "Khoảng trưng bày mở",
-				yaw: 2.3594,
-				pitch: -0.2871,
+				yaw: 2.3537,
+				pitch: -0.3399,
 				plugin: "navigation",
 				targetScene: "scene-c4",
 				rotX: 0.890117918517108
@@ -3302,11 +3399,13 @@ var scenes = [
 			{
 				id: "h1790589811645",
 				label: "Xưởng đá",
-				yaw: -0.6684,
-				pitch: -0.1708,
+				yaw: -0.7323,
+				pitch: -0.3948,
 				plugin: "navigation",
 				targetScene: "scene-c1",
-				rotX: 0.8726646259971648
+				rotX: 0.8726646259971648,
+				rotZ: 0,
+				rotY: 0
 			},
 			{
 				id: "h1790592598215",
@@ -3327,7 +3426,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007786937",
@@ -3351,11 +3450,17 @@ var scenes = [
 			},
 			{
 				id: "h1790587903930",
+				plugin: "panel",
 				label: "Nhà tân gia",
 				yaw: -0.5243,
 				pitch: 0.4021,
-				plugin: "info",
-				content: "Khung sảnh chính của tân gia. "
+				contents: [
+					{
+						id: "h1790587903930-text",
+						type: "text",
+						content: "Khung sảnh chính của tân gia. "
+					}
+				]
 			}
 		]
 	},
@@ -3367,7 +3472,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "c4-next",
@@ -3409,7 +3514,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "c5-next",
@@ -3417,7 +3522,7 @@ var scenes = [
 				label: "Lỗi ra",
 				yaw: 1.467,
 				pitch: -0.2778,
-				targetScene: "scene-c4",
+				targetScene: "scene-c7",
 				rotation: 0.5759586531581288,
 				rotZ: 0.715584993317675,
 				rotX: 0.8726646259971648,
@@ -3445,39 +3550,8 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
-		]
-	},
-	{
-		id: "scene-c7",
-		title: "Cổng Sông Vân Art Space",
-		subtitle: "Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.",
-		panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-		thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		brightness: 1.25,
-		markers: [
-			{
-				id: "marker-navigation-1789273190758",
-				plugin: "navigation",
-				label: "Lối vào",
-				yaw: -3.0244,
-				pitch: -0.4339,
-				targetScene: "scene-c5",
-				rotZ: -0.47123889803846897,
-				rotX: 0.8552113334772214,
-				rotY: 0
-			},
-			{
-				id: "marker-info-1789274132769",
-				plugin: "info",
-				label: "Cổng chính",
-				yaw: 2.627,
-				pitch: -0.0173,
-				content: "Sông Vân Art space…\nKhông gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của Lương Trịnh."
-			}
 		]
 	},
 	{
@@ -3488,7 +3562,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007757751",
@@ -3509,7 +3583,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007718913",
@@ -3539,15 +3613,21 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007660078",
+				plugin: "panel",
 				label: "Thông tin",
 				yaw: -2.3588,
 				pitch: -96e-4,
-				plugin: "info",
-				content: "Là một cái gì đó mà dùng để đựng đồ vật"
+				contents: [
+					{
+						id: "h1790007660078-text",
+						type: "text",
+						content: "Là một cái gì đó mà dùng để đựng đồ vật"
+					}
+				]
 			},
 			{
 				id: "h1790007689339",
@@ -3566,6 +3646,19 @@ var scenes = [
 				plugin: "navigation",
 				targetScene: "scene-tb1-4",
 				rotX: 0.8726646259971648
+			},
+			{
+				id: "h1790647902226",
+				label: "Video",
+				yaw: 2.79,
+				pitch: -0.0368,
+				plugin: "video",
+				src: "https://www.youtube.com/watch?v=StfAHz2UdBY",
+				width: 2560,
+				height: 1440,
+				rotY: -0.13962634015954636,
+				rotZ: 0,
+				rotX: 0.10471975511965977
 			}
 		]
 	},
@@ -3577,7 +3670,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007619346",
@@ -3608,7 +3701,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007511095",
@@ -3638,7 +3731,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 		]
 	},
@@ -3650,7 +3743,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 		]
 	},
@@ -3662,7 +3755,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "h1790007893330",
@@ -3683,7 +3776,7 @@ var scenes = [
 		thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
 		initialYaw: 0,
 		initialPitch: -0.05,
-		brightness: 1.25,
+		brightness: 1.3,
 		markers: [
 			{
 				id: "tb2-4-prev",

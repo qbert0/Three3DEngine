@@ -496,7 +496,7 @@ const _routes = [
         name: "tours-tourId",
         path: ":tourId()",
         meta: __nuxt_page_meta$9 || {},
-        component: () => import('./_tourId_-O5trug1u.mjs')
+        component: () => import('./_tourId_-DxY3aG26.mjs')
       }
     ]
   },
@@ -534,7 +534,7 @@ const _routes = [
     name: "experience-tourId",
     path: "/experience/:tourId()",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./_tourId_-Bt1-UHmJ.mjs'),
+    component: () => import('./_tourId_-BYWjBRUv.mjs'),
     children: [
       {
         name: "experience-tourId-ownerTourId-sceneId",
@@ -548,7 +548,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import('./_sceneId_-Dqq8_6YH.mjs')
+    component: () => import('./_sceneId_-WZhf4ILr.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {

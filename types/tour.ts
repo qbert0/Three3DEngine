@@ -2,8 +2,17 @@
 // Tour type system — supports plugin-based markers
 // ─────────────────────────────────────────────────────────────────────────────
 
+import type { MapConfig } from '~/core/three/map/IMapStrategy';
+
+export interface PlaneMarkerScale {
+  /** Horizontal scale multiplier, clamped by the engine to 0.1–10. */
+  scaleX?: number;
+  /** Vertical scale multiplier, clamped by the engine to 0.1–10. */
+  scaleY?: number;
+}
+
 /** Navigation marker — moves to another scene */
-export interface NavigationMarker {
+export interface NavigationMarker extends PlaneMarkerScale {
   id: string;
   plugin: 'navigation';
   label: string;
@@ -58,11 +67,38 @@ export interface AIChatMarker {
   context?: string; // extra context to give the AI about this location
 }
 
+export interface TextPanelBlock {
+  id: string;
+  type: 'text';
+  content: string;
+  /** Controls whether the source text, its generated narration, or both are shown. */
+  presentation?: 'text-only' | 'text-and-audio' | 'audio-only';
+  speech?: { src?: string; lang?: string; rate?: number; pitch?: number };
+}
+
+export interface AudioPanelBlock { id: string; type: 'audio'; src: string }
+export interface Image3DPanelBlock { id: string; type: 'image3d'; image: string; caption?: string }
+export interface AIChatPanelBlock { id: string; type: 'ai-chat'; context?: string }
+
+/** Content units rendered and managed by PanelMarker through BlockBase. */
+export type PanelBlock = TextPanelBlock | AudioPanelBlock | Image3DPanelBlock | AIChatPanelBlock;
+
+/** Composite panel marker — contents can be mixed and ordered freely. */
+export interface PanelMarkerData {
+  id: string;
+  plugin: 'panel';
+  label: string;
+  yaw: number;
+  pitch: number;
+  placement?: 'vertical' | 'horizontal';
+  contents: PanelBlock[];
+}
+
 /**
  * Video / Iframe marker — embeds an HTML element (YouTube, video, etc.)
  * directly inside the panorama at a specific yaw/pitch position.
  */
-export interface VideoMarker {
+export interface VideoMarker extends PlaneMarkerScale {
   id: string;
   plugin: 'video';
   label: string;
@@ -70,12 +106,18 @@ export interface VideoMarker {
   pitch: number;
   /** YouTube embed URL, video URL, or any iframe-compatible URL */
   src: string;
-  /** Display width in pixels (default 480) */
+  /** CSS3D panel width in pixels (default 640). */
   width?: number;
-  /** Display height in pixels (default 270 = 16:9 at 480px) */
+  /** CSS3D panel height in pixels (default 360). */
   height?: number;
-  /** Yaw rotation offset of the panel in radians (default 0) */
+  /** @deprecated Backward-compatible alias for the former horizontal rotation. */
   rotationYaw?: number;
+  /** Local X-axis tilt in radians, applied after the panel faces the camera. */
+  rotX?: number;
+  /** Local Y-axis swivel in radians, applied after the panel faces the camera. */
+  rotY?: number;
+  /** Local Z-axis roll in radians, applied after the panel faces the camera. */
+  rotZ?: number;
 }
 
 /** Object showcase — opens a manually supplied 3D/360 render image and description. */
@@ -90,8 +132,18 @@ export interface Model3DMarker {
   content?: string;
 }
 
+/** Map overlay marker — renders an interactive map panel in a corner. */
+export interface MapMarkerData {
+  id: string;
+  plugin: 'map';
+  label: string;
+  yaw: number;
+  pitch: number;
+  config: MapConfig;
+}
+
 /** Union of all marker types */
-export type TourMarker = NavigationMarker | InfoMarker | AudioMarker | AIChatMarker | VideoMarker | Model3DMarker;
+export type TourMarker = NavigationMarker | PanelMarkerData | InfoMarker | AudioMarker | AIChatMarker | VideoMarker | Model3DMarker | MapMarkerData;
 
 
 /** A single 360° scene within a tour */

@@ -6,7 +6,7 @@
  * Immersive 360° Viewer page — Three.js core engine via useViewerEngine bridge.
  * ──────────────────────────────────────────────────────────────────────────────
  */
-import type { TourConfig, TourScene, TourMarker } from '~/types/tour';
+import type { TourConfig, TourScene } from '~/types/tour';
 import { useRuntimeStore } from '~/stores/runtime';
 import { useToast } from '~/composables/useToast';
 import { useViewerEngine } from '~/composables/viewer/useViewerEngine';
@@ -56,15 +56,12 @@ onBeforeUnmount(() => store.reset());
 
 // ── Three.js Engine Bridge ────────────────────────────────────────────────────
 const canvasContainerRef = ref<HTMLElement | null>(null);
-const activeHotspot = ref<TourMarker | null>(null);
-
 const { isLoading: engineLoading, isTransitioning, errorMessage: engineError,
         currentScene: engineScene, initEngine, navigateTo,
         getDiagnostics, setQualityMode } = useViewerEngine({
   onNavigate: (sceneId) => handleNavigate(sceneId),
-  onHotspotClick: (marker) => { activeHotspot.value = marker; },
   autorotate: computed(() => tour.value?.autoRotate ?? false).value,
-  transition: 'fly-through',
+  transition: 'crossfade',
 });
 
 // Mount engine once canvas container is available
@@ -336,13 +333,6 @@ onBeforeUnmount(() => {
         :is-transitioning="isTransitioning"
         :error-message="engineError"
         :current-scene="engineScene"
-      />
-
-      <!-- Hotspot info panel -->
-      <ViewerHotspotPanel
-        :marker="activeHotspot"
-        @close="activeHotspot = null"
-        @audio-play="(src) => new Audio(src).play().catch(() => {})"
       />
 
       <!-- ═══ DEV TOOLS (only in development) ═══ -->

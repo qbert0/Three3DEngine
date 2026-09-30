@@ -51,7 +51,7 @@ export class CameraController {
 
   // Unsubscribe callbacks
   private disposers: Array<() => void> = [];
-  // When true, all pointer/wheel input is ignored (e.g. during hotspot drag)
+  // When true, all pointer/wheel input is ignored (e.g. during marker drag)
   private inputLocked = false;
 
   constructor(container: HTMLElement, domElement: HTMLElement, bus: EventBus, config: CameraConfig = {}) {
@@ -76,7 +76,7 @@ export class CameraController {
 
     this.bindPointerEvents();
 
-    // Lock/unlock camera input when hotspot drag starts/stops
+    // Lock/unlock camera input when marker drag starts/stops
     this.disposers.push(
       bus.on('interaction:lock',   () => { this.inputLocked = true; }),
       bus.on('interaction:unlock', () => { this.inputLocked = false; }),
@@ -177,6 +177,10 @@ export class CameraController {
 
     const onDown = (e: PointerEvent) => {
       if (this.inputLocked) return;
+      // Only capture camera drag from the WebGL canvas itself — don't
+      // steal pointer events destined for interactive CSS3D elements
+      // (video/iframe play buttons, controls, etc.).
+      if (e.target !== el) return;
       this.isPointerDown = true;
       this.pointerStartX = e.clientX;
       this.pointerStartY = e.clientY;

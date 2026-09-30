@@ -30,6 +30,9 @@ useHead({
 const totalMarkers = computed(() =>
   scenes.value.reduce((n, s) => n + (s.markers?.length ?? 0), 0),
 );
+
+// Closed by default. Only an explicit user click may change this state.
+const isSceneGridOpen = ref(false);
 </script>
 
 <template>
@@ -121,43 +124,63 @@ const totalMarkers = computed(() =>
 
       <!-- ── Scene preview grid ─────────────────────────────────────────────── -->
       <div class="mx-auto max-w-4xl px-6 py-10">
-        <h2 class="mb-5 text-lg font-bold text-[--ui-color-text-primary]">Các điểm trong tour</h2>
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <NuxtLink
-            v-for="(scene, i) in scenes"
-            :key="scene.id"
-            :to="`/experience/${tourId}?scene=${scene.id}`"
-            class="group block"
-          >
-            <UiCard variant="surface" padding="none" :hoverable="true" class="overflow-hidden">
-              <div class="relative overflow-hidden">
-                <img
-                  :src="scene.thumbnail"
-                  :alt="scene.title"
-                  class="h-36 w-full object-cover transition duration-300 group-hover:scale-105"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <UiBadge variant="default" size="sm"
-                  class="absolute left-2 top-2 !bg-black/50 !text-white !ring-white/10">
-                  {{ String(i + 1).padStart(2, '0') }}
-                </UiBadge>
-              </div>
-              <div class="p-3">
-                <p class="font-semibold text-sm text-[--ui-color-text-primary] group-hover:text-[--ui-color-brand] transition-colors">{{ scene.title }}</p>
-                <p class="mt-0.5 text-xs text-[--ui-color-text-muted]">{{ scene.subtitle }}</p>
-                <div class="mt-2 flex flex-wrap gap-1">
-                  <UiBadge v-if="scene.markers?.filter(m => m.plugin === 'navigation').length" variant="primary" size="sm">
-                    ↑ {{ scene.markers.filter(m => m.plugin === 'navigation').length }} nav
-                  </UiBadge>
-                  <UiBadge v-if="scene.markers?.filter(m => m.plugin === 'info').length" variant="warning" size="sm">
-                    ⓘ {{ scene.markers.filter(m => m.plugin === 'info').length }} info
+        <button
+          type="button"
+          class="scene-grid-toggle"
+          :aria-expanded="isSceneGridOpen"
+          aria-controls="scene-preview-grid"
+          @click="isSceneGridOpen = !isSceneGridOpen"
+        >
+          <span>
+            <strong>Các điểm trong tour</strong>
+            <small>{{ scenes.length }} điểm nhìn 360°</small>
+          </span>
+          <svg :class="{ open: isSceneGridOpen }" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+
+        <Transition name="scene-grid">
+          <div v-if="isSceneGridOpen" id="scene-preview-grid" class="grid grid-cols-1 gap-4 pt-5 sm:grid-cols-2 lg:grid-cols-3">
+            <NuxtLink
+              v-for="(scene, i) in scenes"
+              :key="scene.id"
+              :to="`/experience/${tourId}?scene=${scene.id}`"
+              class="group block"
+            >
+              <UiCard variant="surface" padding="none" :hoverable="true" class="overflow-hidden">
+                <div class="relative overflow-hidden">
+                  <img :src="scene.thumbnail" :alt="scene.title" class="h-36 w-full object-cover transition duration-300 group-hover:scale-105" />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <UiBadge variant="default" size="sm" class="absolute left-2 top-2 !bg-black/50 !text-white !ring-white/10">
+                    {{ String(i + 1).padStart(2, '0') }}
                   </UiBadge>
                 </div>
-              </div>
-            </UiCard>
-          </NuxtLink>
-        </div>
+                <div class="p-3">
+                  <p class="font-semibold text-sm text-[--ui-color-text-primary] group-hover:text-[--ui-color-brand] transition-colors">{{ scene.title }}</p>
+                  <p class="mt-0.5 text-xs text-[--ui-color-text-muted]">{{ scene.subtitle }}</p>
+                  <div class="mt-2 flex flex-wrap gap-1">
+                    <UiBadge v-if="scene.markers?.filter(m => m.plugin === 'navigation').length" variant="primary" size="sm">↑ {{ scene.markers.filter(m => m.plugin === 'navigation').length }} nav</UiBadge>
+                    <UiBadge v-if="scene.markers?.filter(m => m.plugin === 'info').length" variant="warning" size="sm">ⓘ {{ scene.markers.filter(m => m.plugin === 'info').length }} info</UiBadge>
+                  </div>
+                </div>
+              </UiCard>
+            </NuxtLink>
+          </div>
+        </Transition>
       </div>
     </template>
   </div>
 </template>
+
+<style scoped>
+.scene-grid-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 18px; border:1px solid var(--ui-color-border); border-radius:12px; background:var(--ui-color-surface); color:var(--ui-color-text-primary); text-align:left; transition:border-color .2s,background .2s; }
+.scene-grid-toggle:hover { border-color:var(--ui-color-brand); }
+.scene-grid-toggle span { display:flex; flex-direction:column; gap:3px; }
+.scene-grid-toggle strong { font-size:1rem; }
+.scene-grid-toggle small { color:var(--ui-color-text-muted); font-size:.75rem; font-weight:400; }
+.scene-grid-toggle svg { width:20px; height:20px; flex:none; color:var(--ui-color-text-muted); transition:transform .22s ease; }
+.scene-grid-toggle svg.open { transform:rotate(180deg); }
+.scene-grid-enter-active,.scene-grid-leave-active { transition:opacity .2s ease,transform .2s ease; }
+.scene-grid-enter-from,.scene-grid-leave-to { opacity:0; transform:translateY(-8px); }
+</style>

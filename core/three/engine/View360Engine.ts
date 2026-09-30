@@ -255,7 +255,9 @@ export class View360Engine {
     const startPitch = this.camera.getPitch();
     const baseFov = this.camera.getFov();
 
-    await this.pano.transition(scene.panorama, transition ?? 'fly-through', dir, (p) => {
+    const transitionStyle = transition ?? 'crossfade';
+    await this.pano.transition(scene.panorama, transitionStyle, dir, (p) => {
+      if (transitionStyle !== 'fly-through') return;
       // Cubic ease
       const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 
@@ -274,11 +276,16 @@ export class View360Engine {
       this.camera.camera.updateProjectionMatrix();
     });
 
-    // Reset camera position after transition
+    // Reset camera position after transition. Crossfade keeps the viewer's
+    // current direction so there is no camera jump when the new image appears.
     this.camera.camera.position.set(0, 0, 0);
     this.camera.camera.fov = baseFov;
     this.camera.camera.updateProjectionMatrix();
-    this.camera.setOrientation(destYaw, destPitch);
+    if (transitionStyle === 'fly-through') {
+      this.camera.setOrientation(destYaw, destPitch);
+    } else {
+      this.camera.setOrientation(startYaw, startPitch);
+    }
 
     this.currentScene = scene;
     this.isTransitioning = false;

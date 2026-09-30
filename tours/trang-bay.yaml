@@ -11,6 +11,74 @@ plugins:
   - navigation
   - info
 scenes:
+  - id: scene-c7
+    title: Cổng Sông Vân Art Space
+    subtitle: Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.
+    panorama: /images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
+    thumbnail: /thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
+    initialYaw: 0
+    initialPitch: -0.05
+    brightness: 1.3
+    markers:
+      - id: marker-navigation-1789273190758
+        plugin: navigation
+        label: Lối vào
+        yaw: -3.0244
+        pitch: -0.4339
+        targetScene: scene-c5
+        rotZ: -0.47123889803846897
+        rotX: 0.8552113334772214
+        rotY: 0
+      - id: marker-info-1789274132769
+        plugin: panel
+        label: Cổng chính
+        yaw: 2.627
+        pitch: -0.0173
+        contents:
+          - id: marker-info-1789274132769-text
+            type: text
+            content: >-
+              Sông Vân Art space…
+
+              Không gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là
+              nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên
+              ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một
+              không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự
+              hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân
+              Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng
+              không gian cho đá của Lương Trịnh.
+            presentation: text-and-audio
+            speech:
+              lang: vi-VN
+              rate: 1
+              pitch: 1
+              src: /uploads/audio/1790759242766-58jae6uqv0h.wav
+          - id: block-1790753456844
+            type: image3d
+            image: ''
+            caption: ''
+          - id: block-1790753465322
+            type: ai-chat
+            context: ''
+        placement: horizontal
+      - id: h1790652579044
+        plugin: panel
+        label: Xem ảnh 3D
+        yaw: -2.311
+        pitch: -0.053
+        contents:
+          - id: h1790652579044-image
+            type: image3d
+            image: ''
+            caption: ''
+      - id: h1790652586972
+        label: Xem video
+        yaw: -2.89
+        pitch: 0.231
+        plugin: video
+        src: https://www.youtube.com/watch?v=ujf9KANJC8U
+        width: 720
+        height: 405
   - id: scene-c1
     title: Xưởng đá
     subtitle: Điểm nhìn mở đầu, nơi tác phẩm đá gặp ánh sáng và cảnh quan Sông Vân.
@@ -41,18 +109,20 @@ scenes:
     markers:
       - id: h1790007374178
         label: Khoảng trưng bày mở
-        yaw: 2.3594
-        pitch: -0.2871
+        yaw: 2.3537
+        pitch: -0.3399
         plugin: navigation
         targetScene: scene-c4
         rotX: 0.890117918517108
       - id: h1790589811645
         label: Xưởng đá
-        yaw: -0.6684
-        pitch: -0.1708
+        yaw: -0.7323
+        pitch: -0.3948
         plugin: navigation
         targetScene: scene-c1
         rotX: 0.8726646259971648
+        rotZ: 0
+        rotY: 0
       - id: h1790592598215
         label: Cổng trừng bày 1
         yaw: 0.3657
@@ -86,11 +156,20 @@ scenes:
         targetScene: scene-tb2-3
         rotX: 0.8726646259971648
       - id: h1790587903930
+        plugin: panel
         label: Nhà tân gia
         yaw: -0.5243
         pitch: 0.4021
-        plugin: info
-        content: 'Khung sảnh chính của tân gia. '
+        contents:
+          - id: h1790587903930-text
+            type: text
+            content: 'Khung sảnh chính của tân gia. '
+      - id: h1790786542380
+        label: Chuyển cảnh
+        yaw: 0.963
+        pitch: -0.249
+        plugin: navigation
+        targetScene: s1790786479857
   - id: scene-c4
     title: Khoảng Trưng Bày Mở
     subtitle: Không gian ngoài trời với tầm nhìn rộng dành cho các tác phẩm điêu khắc.
@@ -138,7 +217,7 @@ scenes:
         label: Lỗi ra
         yaw: 1.467
         pitch: -0.2778
-        targetScene: scene-c4
+        targetScene: scene-c7
         rotation: 0.5759586531581288
         rotZ: 0.715584993317675
         rotX: 0.8726646259971648
@@ -162,39 +241,6 @@ scenes:
     initialPitch: -0.05
     brightness: 1.3
     markers: []
-  - id: scene-c7
-    title: Cổng Sông Vân Art Space
-    subtitle: Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.
-    panorama: /images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
-    thumbnail: /thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
-    initialYaw: 0
-    initialPitch: -0.05
-    brightness: 1.3
-    markers:
-      - id: marker-navigation-1789273190758
-        plugin: navigation
-        label: Lối vào
-        yaw: -3.0244
-        pitch: -0.4339
-        targetScene: scene-c5
-        rotZ: -0.47123889803846897
-        rotX: 0.8552113334772214
-        rotY: 0
-      - id: marker-info-1789274132769
-        plugin: info
-        label: Cổng chính
-        yaw: 2.627
-        pitch: -0.0173
-        content: >-
-          Sông Vân Art space…
-
-          Không gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi
-          khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với
-          đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian
-          trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một
-          điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển
-          lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của
-          Lương Trịnh.
   - id: scene-tb1-1
     title: Lối Vào Xưởng Đá
     subtitle: Bắt đầu hành trình tìm hiểu quá trình vật liệu đá trở thành tác phẩm.
@@ -244,11 +290,14 @@ scenes:
     brightness: 1.3
     markers:
       - id: h1790007660078
+        plugin: panel
         label: Thông tin
         yaw: -2.3588
         pitch: -0.0096
-        plugin: info
-        content: Là một cái gì đó mà dùng để đựng đồ vật
+        contents:
+          - id: h1790007660078-text
+            type: text
+            content: Là một cái gì đó mà dùng để đựng đồ vật
       - id: h1790007689339
         label: Trung tâm trừng bày 1
         yaw: 1.0567
@@ -263,6 +312,17 @@ scenes:
         plugin: navigation
         targetScene: scene-tb1-4
         rotX: 0.8726646259971648
+      - id: h1790647902226
+        label: Video
+        yaw: 2.79
+        pitch: -0.0368
+        plugin: video
+        src: https://www.youtube.com/watch?v=StfAHz2UdBY
+        width: 2560
+        height: 1440
+        rotY: -0.13962634015954636
+        rotZ: 0
+        rotX: 0.10471975511965977
   - id: scene-tb1-4
     title: Trung Tâm Xưởng
     subtitle: Điểm nhìn bao quát khu vực sáng tác và hoàn thiện tác phẩm.
@@ -365,3 +425,12 @@ scenes:
         yaw: 1.57
         pitch: -0.3
         targetScene: scene-c1
+  - id: s1790786479857
+    title: Cảnh mới
+    subtitle: Mô tả cảnh mới
+    panorama: /uploads/1790786504095-y04xqsn9269.jpg
+    thumbnail: /thumbnails/1790786504095-y04xqsn9269.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1.25
+    markers: []

@@ -12,7 +12,7 @@ import { ref, shallowRef, readonly, onBeforeUnmount } from 'vue';
 import type { Ref } from 'vue';
 import { View360Engine } from '~/core/three/engine/View360Engine';
 import type { EngineDiagnostics } from '~/core/three/engine/View360Engine';
-import { HotspotPlugin } from '~/core/three/plugins/HotspotPlugin';
+import { MarkerPlugin } from '~/core/three/plugins/MarkerPlugin';
 import { AutorotatePlugin } from '~/core/three/plugins/AutorotatePlugin';
 import type { TourScene, TourMarker, TourConfig } from '~/types/tour';
 import type { TransitionStyle } from '~/core/three/engine/PanoSphere';
@@ -23,10 +23,10 @@ export type QualityMode = 'performance' | 'balanced' | 'quality' | 'native';
 // ── Options ────────────────────────────────────────────────────
 
 export interface ViewerEngineOptions {
-  /** Called when user clicks a navigation hotspot */
+  /** Called when user clicks a navigation marker */
   onNavigate: (sceneId: string) => void;
-  /** Called when user clicks an info/audio/ai-chat hotspot */
-  onHotspotClick?: (marker: TourMarker) => void;
+  /** Called when user clicks a non-navigation marker */
+  onMarkerClick?: (marker: TourMarker) => void;
   /** Enable auto-rotate after idle */
   autorotate?: boolean;
   /** Transition style between scenes */
@@ -82,14 +82,13 @@ export function useViewerEngine(options: ViewerEngineOptions) {
         container,
         introDelay: options.introDelay ?? 0,
         pano: {
-          defaultTransition: options.transition ?? 'fly-through',
+          defaultTransition: options.transition ?? 'crossfade',
           transitionDuration: tour?.transitionDuration ?? 900,
         },
       });
 
       // ── Register plugins ──
-      const hotspot = new HotspotPlugin();
-      e.use(hotspot);
+      e.use(new MarkerPlugin());
       if (options.autorotate ?? tour?.autoRotate) {
         e.use(new AutorotatePlugin({ speed: 0.3 }));
       }
@@ -97,9 +96,9 @@ export function useViewerEngine(options: ViewerEngineOptions) {
       // ── Wire events to callbacks ──
       e.bus.on('navigate', ({ sceneId }) => options.onNavigate(sceneId));
 
-      e.bus.on('hotspot:click', ({ marker }) => {
+      e.bus.on('marker:click', ({ marker }) => {
         if (marker.plugin !== 'navigation') {
-          options.onHotspotClick?.(marker);
+          options.onMarkerClick?.(marker);
         }
       });
 

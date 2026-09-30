@@ -1,0 +1,8 @@
+globalThis.__timing__.logStart('Load chunks/build/_tourId_-styles.bdug0q4W');const _tourId__vue_vue_type_style_index_0_scoped_e3b8777c_lang = ".scene-grid-toggle[data-v-e3b8777c]{align-items:center;background:var(--ui-color-surface);border:1px solid var(--ui-color-border);border-radius:12px;color:var(--ui-color-text-primary);display:flex;gap:16px;justify-content:space-between;padding:16px 18px;text-align:left;transition:border-color .2s,background .2s;width:100%}.scene-grid-toggle[data-v-e3b8777c]:hover{border-color:var(--ui-color-brand)}.scene-grid-toggle span[data-v-e3b8777c]{display:flex;flex-direction:column;gap:3px}.scene-grid-toggle strong[data-v-e3b8777c]{font-size:1rem}.scene-grid-toggle small[data-v-e3b8777c]{color:var(--ui-color-text-muted);font-size:.75rem;font-weight:400}.scene-grid-toggle svg[data-v-e3b8777c]{color:var(--ui-color-text-muted);flex:none;height:20px;transition:transform .22s ease;width:20px}.scene-grid-toggle svg.open[data-v-e3b8777c]{transform:rotate(180deg)}.scene-grid-enter-active[data-v-e3b8777c],.scene-grid-leave-active[data-v-e3b8777c]{transition:opacity .2s ease,transform .2s ease}.scene-grid-enter-from[data-v-e3b8777c],.scene-grid-leave-to[data-v-e3b8777c]{opacity:0;transform:translateY(-8px)}";
+
+const _tourId_Styles_bdug0q4W = [
+  _tourId__vue_vue_type_style_index_0_scoped_e3b8777c_lang
+];
+
+export { _tourId_Styles_bdug0q4W as default };;globalThis.__timing__.logEnd('Load chunks/build/_tourId_-styles.bdug0q4W');
+//# sourceMappingURL=_tourId_-styles.bdug0q4W.mjs.map

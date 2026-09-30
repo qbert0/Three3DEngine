@@ -120,7 +120,7 @@ export class PanoSphere {
 
     this.radius = config.radius ?? 600;
     this.transitionDuration = config.transitionDuration ?? 900;
-    this.defaultTransition = config.defaultTransition ?? 'fly-through';
+    this.defaultTransition = config.defaultTransition ?? 'crossfade';
 
     const segsW = config.segments ?? 128;  // higher tessellation for fisheye
     const segsH = Math.round(segsW * 0.75);

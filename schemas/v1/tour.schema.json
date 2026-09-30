@@ -68,10 +68,13 @@
       "required": ["id", "plugin", "label", "yaw", "pitch"],
       "properties": {
         "id": { "type": "string" },
-        "plugin": { "type": "string", "enum": ["navigation", "info", "video", "model3d", "audio", "ai-chat"] },
+        "plugin": { "type": "string", "enum": ["navigation", "panel", "info", "video", "model3d", "audio", "ai-chat"] },
         "label": { "type": "string" },
         "yaw": { "type": "number" },
         "pitch": { "type": "number" },
+        "scaleX": { "type": "number", "minimum": 0.1, "maximum": 10, "description": "2D/3D marker horizontal scale" },
+        "scaleY": { "type": "number", "minimum": 0.1, "maximum": 10, "description": "2D/3D marker vertical scale" },
+        "scaleZ": { "type": "number", "minimum": 0.1, "maximum": 10, "description": "3D object marker depth scale" },
         "targetScene": {
           "type": "string",
           "description": "navigation markers only — target scene ID"
@@ -91,6 +94,38 @@
         "context": {
           "type": "string",
           "description": "ai-chat markers only — extra context for AI"
+        },
+        "placement": {
+          "type": "string",
+          "enum": ["vertical", "horizontal"],
+          "description": "panel marker placement relative to its world anchor"
+        },
+        "contents": {
+          "type": "array",
+          "description": "panel markers — ordered, composable content blocks",
+          "items": {
+            "type": "object",
+            "required": ["id", "type"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "type": "string", "enum": ["text", "audio", "image3d", "ai-chat"] },
+              "content": { "type": "string" },
+              "presentation": { "type": "string", "enum": ["text-only", "text-and-audio", "audio-only"] },
+              "speech": {
+                "type": "object",
+                "properties": {
+                  "src": { "type": "string" },
+                  "lang": { "type": "string" },
+                  "rate": { "type": "number", "minimum": 0.5, "maximum": 2 },
+                  "pitch": { "type": "number", "minimum": 0.5, "maximum": 2 }
+                }
+              },
+              "src": { "type": "string" },
+              "image": { "type": "string" },
+              "caption": { "type": "string" },
+              "context": { "type": "string" }
+            }
+          }
         }
       }
     }

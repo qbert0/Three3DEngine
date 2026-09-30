@@ -4,22 +4,22 @@
  *
  * Cung cấp:
  *   - Preview panorama trong canvas
- *   - Đọc yaw/pitch real-time từ camera (để đặt hotspot)
- *   - Thêm / Xoá hotspot (preview, chưa lưu vào DB)
+ *   - Đọc yaw/pitch real-time từ camera (để đặt marker)
+ *   - Thêm / Xoá marker (preview, chưa lưu vào DB)
  *   - Snapshot canvas
  * ─────────────────────────────────────────────────────────────────
  */
 
 import { ref, shallowRef, readonly, computed, onBeforeUnmount } from 'vue';
 import { View360Engine } from '~/core/three/engine/View360Engine';
-import { HotspotPlugin } from '~/core/three/plugins/HotspotPlugin';
+import { MarkerPlugin } from '~/core/three/plugins/MarkerPlugin';
 import type { TourScene, TourMarker } from '~/types/tour';
 
-// ── Hotspot placement state ─────────────────────────────────────
+// ── Marker placement state ──────────────────────────────────────
 
 export type PlacementMode = 'none' | 'navigation' | 'info' | 'video' | 'model3d' | 'audio' | 'ai-chat';
 
-export interface PendingHotspot {
+export interface PendingMarker {
   type: PlacementMode;
   yaw: number;
   pitch: number;
@@ -38,12 +38,14 @@ export function useDesignerEngine() {
   const cameraPitch = ref(0);
   const cameraFov = ref(75);
 
-  // Hotspot placement mode
+  // Marker placement mode
   const placementMode = ref<PlacementMode>('none');
   const isPlacing = computed(() => placementMode.value !== 'none');
 
   // Last marker that was moved via drag (admin page watches this)
   const lastMarkerMoved = ref<{ markerId: string; yaw: number; pitch: number } | null>(null);
+  // Marker selected directly on the panorama preview.
+  const lastMarkerClicked = ref<TourMarker | null>(null);
   const lastPlacement = ref<{ type: Exclude<PlacementMode, 'none'>; yaw: number; pitch: number } | null>(null);
 
   // Engine instance
@@ -74,8 +76,8 @@ export function useDesignerEngine() {
         },
       });
 
-      // Hotspot preview + drag-to-reposition (designer mode)
-      e.use(new HotspotPlugin({ pulseSpeed: 0, pulseAmplitude: 0, draggable: true }));
+      // Marker preview + drag-to-reposition (designer mode)
+      e.use(new MarkerPlugin({ pulseSpeed: 0, pulseAmplitude: 0, draggable: true }));
 
       // ── Wire camera pose to reactive refs ──
       const unsub1 = e.bus.on('camera:move', ({ yaw, pitch }) => {
@@ -92,17 +94,22 @@ export function useDesignerEngine() {
 
       unsubs.push(unsub1, unsub2, unsub3);
 
-      // ── Hotspot moved (drag-to-reposition) ─────────────────────────────────
-      const unsub4 = e.bus.on('hotspot:moved', ({ markerId, yaw, pitch }) => {
+      // ── Marker moved (drag-to-reposition) ──────────────────────────────────
+      const unsub4 = e.bus.on('marker:moved', ({ markerId, yaw, pitch }) => {
         lastMarkerMoved.value = { markerId, yaw, pitch };
       });
-      unsubs.push(unsub4);
+      const unsub5 = e.bus.on('marker:click', ({ marker }) => {
+        // Placement owns the next canvas click; do not select a marker while
+        // the designer is waiting for a new marker position.
+        if (placementMode.value === 'none') lastMarkerClicked.value = marker;
+      });
+      unsubs.push(unsub4, unsub5);
 
-      // ── Canvas click → place hotspot ──
+      // ── Canvas click → place marker ──
       const canvas = e['renderer'].domElement as HTMLCanvasElement;
       const onClick = (ev: MouseEvent) => {
         if (placementMode.value === 'none') return;
-        // Use current camera yaw/pitch at click as hotspot position
+        // Use current camera yaw/pitch at click as marker position
         // (the user looks at the spot they want, then clicks the button)
         // For more precision: raycast to sphere surface from mouse position
         handlePlacementClick(ev, canvas, e);
@@ -133,9 +140,9 @@ export function useDesignerEngine() {
     }
   }
 
-  // ── Hotspot Placement ──────────────────────────────────────────
+  // ── Marker Placement ───────────────────────────────────────────
 
-  /** Start placement mode — next canvas click places a hotspot of this type */
+  /** Start placement mode — next canvas click places a marker of this type */
   function startPlacement(type: PlacementMode): void {
     placementMode.value = type;
   }
@@ -177,18 +184,18 @@ export function useDesignerEngine() {
     });
   }
 
-  /** Get current camera yaw/pitch as a tuple (to manually set hotspot position) */
+  /** Get current camera yaw/pitch as a tuple (to manually set marker position) */
   function getCameraAim(): { yaw: number; pitch: number } {
     return { yaw: cameraYaw.value, pitch: cameraPitch.value };
   }
 
   // ── Marker sync ───────────────────────────────────────────────────
 
-  /** Force HotspotPlugin to re-render markers for current scene */
+  /** Force MarkerPlugin to re-render markers for current scene */
   function refreshMarkers(scene: TourScene): void {
-    const hp = engine.value?.getPlugin<HotspotPlugin>('hotspot');
-    if (!hp) return;
-    hp.onSceneReady?.(scene);
+    const markerPlugin = engine.value?.getPlugin<MarkerPlugin>('marker');
+    if (!markerPlugin) return;
+    markerPlugin.onSceneReady?.(scene);
   }
 
   /** Set camera FOV (for zoom slider). Clamped to [30, 120]. */
@@ -242,6 +249,7 @@ export function useDesignerEngine() {
     placementMode: readonly(placementMode),
     isPlacing,
     lastMarkerMoved: readonly(lastMarkerMoved),
+    lastMarkerClicked: readonly(lastMarkerClicked),
     lastPlacement: readonly(lastPlacement),
 
     // Actions

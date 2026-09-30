@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue';
 import { useDesignerEngine } from '~/composables/designer/useDesignerEngine';
-import type { TourConfig, TourScene, TourMarker, NavigationMarker, InfoMarker, VideoMarker, Model3DMarker } from '~/types/tour';
+import type { TourConfig, TourScene, TourMarker, NavigationMarker, InfoMarker, VideoMarker, Model3DMarker, PanelMarkerData, PanelBlock } from '~/types/tour';
 
 definePageMeta({ layout: false, ssr: false });
 
@@ -36,8 +36,46 @@ function pushHistorySnapshot() {
 
 function initTourState() {
   if (data.value?.item) {
-    tour.value = JSON.parse(JSON.stringify(data.value.item));
-    historyStack.value = [JSON.parse(JSON.stringify(data.value.item))];
+    const editableTour = JSON.parse(JSON.stringify(data.value.item)) as TourConfig;
+    editableTour.scenes.forEach((scene) => {
+      scene.markers = scene.markers.map((marker): TourMarker => {
+        if (marker.plugin === 'panel') {
+          const legacySpeechBlocks = (marker.contents as Array<PanelBlock | { id: string; type: 'text-to-speech'; content: string; lang?: string; rate?: number; pitch?: number }>);
+          marker.contents = legacySpeechBlocks.reduce<PanelBlock[]>((blocks, block) => {
+            if (block.type !== 'text-to-speech') {
+              blocks.push(block);
+              return blocks;
+            }
+            const previousText = [...blocks].reverse().find((item) => item.type === 'text' && item.content === block.content);
+            if (previousText?.type === 'text') {
+              previousText.presentation = 'text-and-audio';
+              previousText.speech = { lang: block.lang, rate: block.rate, pitch: block.pitch };
+            } else {
+              blocks.push({ id: block.id, type: 'text', content: block.content, presentation: 'audio-only', speech: { lang: block.lang, rate: block.rate, pitch: block.pitch } });
+            }
+            return blocks;
+          }, []);
+          return marker;
+        }
+        if (marker.plugin === 'info') {
+          return { id: marker.id, plugin: 'panel', label: marker.label, yaw: marker.yaw, pitch: marker.pitch, contents: [{ id: `${marker.id}-text`, type: 'text', content: marker.content }] };
+        }
+        if (marker.plugin === 'audio') {
+          return { id: marker.id, plugin: 'panel', label: marker.label, yaw: marker.yaw, pitch: marker.pitch, contents: [{ id: `${marker.id}-audio`, type: 'audio', src: marker.src }] };
+        }
+        if (marker.plugin === 'model3d') {
+          const contents: PanelBlock[] = [{ id: `${marker.id}-image`, type: 'image3d', image: marker.image, caption: '' }];
+          if (marker.content) contents.push({ id: `${marker.id}-text`, type: 'text', content: marker.content });
+          return { id: marker.id, plugin: 'panel', label: marker.label, yaw: marker.yaw, pitch: marker.pitch, contents };
+        }
+        if (marker.plugin === 'ai-chat') {
+          return { id: marker.id, plugin: 'panel', label: marker.label, yaw: marker.yaw, pitch: marker.pitch, contents: [{ id: `${marker.id}-ai`, type: 'ai-chat', context: marker.context }] };
+        }
+        return marker;
+      });
+    });
+    tour.value = editableTour;
+    historyStack.value = [JSON.parse(JSON.stringify(editableTour))];
     historyIndex.value = 0;
   }
 }
@@ -109,7 +147,10 @@ const selectedHotspot = computed<TourMarker | null>(() => {
 // Real Upload State
 const fileInput = ref<HTMLInputElement | null>(null);
 const modelImageInput = ref<HTMLInputElement | null>(null);
+const narrationInput = ref<HTMLInputElement | null>(null);
+const narrationTargetBlockId = ref<string | null>(null);
 const uploadingImage = ref(false);
+const uploadingNarration = ref(false);
 const panoramaPreviewFailed = ref(false);
 
 function triggerImageUpload() {
@@ -149,7 +190,8 @@ async function handleFileChange(event: Event) {
       showToast({ message: 'Tải ảnh panorama mới thành công!', variant: 'success' });
     }
   } catch (err: any) {
-    showToast({ message: err?.statusMessage ?? 'Lỗi khi upload ảnh', variant: 'error' });
+    const message = err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? 'Lỗi khi upload ảnh';
+    showToast({ message, variant: 'error' });
   } finally {
     uploadingImage.value = false;
     if (target) target.value = '';
@@ -176,6 +218,44 @@ async function handleModelImageChange(event: Event) {
     showToast({ message: err?.statusMessage ?? 'Không thể tải ảnh vật thể', variant: 'error' });
   } finally {
     uploadingImage.value = false;
+    target.value = '';
+  }
+}
+
+function triggerNarrationUpload(blockId: string) {
+  narrationTargetBlockId.value = blockId;
+  narrationInput.value?.click();
+}
+
+async function handleNarrationChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  const blockId = narrationTargetBlockId.value;
+  const marker = selectedHotspot.value?.plugin === 'panel' ? selectedHotspot.value as PanelMarkerData : null;
+  const block = marker?.contents.find((item) => item.id === blockId && item.type === 'text');
+  if (!file || !block || block.type !== 'text') {
+    target.value = '';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  uploadingNarration.value = true;
+  try {
+    const res = await $fetch<{ ok: boolean; file: { url: string } }>('/api/admin/audio', {
+      method: 'POST', body: formData,
+    });
+    if (res.ok && res.file?.url) {
+      block.speech = { ...(block.speech ?? {}), src: res.file.url };
+      syncMarkersToViewer();
+      markDirty();
+      showToast({ message: 'Đã gắn bản đọc vào văn bản', variant: 'success' });
+    }
+  } catch (err: any) {
+    showToast({ message: err?.statusMessage ?? 'Không thể tải bản đọc lên', variant: 'error' });
+  } finally {
+    uploadingNarration.value = false;
+    narrationTargetBlockId.value = null;
     target.value = '';
   }
 }
@@ -248,6 +328,7 @@ const {
   isPlacing: engineIsPlacing,
   placementMode,
   lastMarkerMoved,
+  lastMarkerClicked,
   lastPlacement,
   initEngine,
   loadScene: engineLoadScene,
@@ -271,8 +352,52 @@ function setSceneBrightness(value: number) {
   markDirty();
 }
 
+const lockVideoAspectRatio = ref(true);
+
+function updateVideoPanelSize(dimension: 'width' | 'height', rawValue: string | number) {
+  if (selectedHotspot.value?.plugin !== 'video' || !currentScene.value) return;
+  const marker = selectedHotspot.value as VideoMarker;
+  const oldWidth = marker.width ?? 640;
+  const oldHeight = marker.height ?? 360;
+  const aspect = oldWidth / oldHeight || 16 / 9;
+  const value = Math.round(Number(rawValue));
+  if (!Number.isFinite(value)) return;
+
+  if (dimension === 'width') {
+    marker.width = Math.max(240, Math.min(2560, value));
+    if (lockVideoAspectRatio.value) marker.height = Math.round(marker.width / aspect);
+  } else {
+    marker.height = Math.max(135, Math.min(1440, value));
+    if (lockVideoAspectRatio.value) marker.width = Math.round(marker.height * aspect);
+  }
+  markDirty();
+}
+
+function setVideoPanelSize(width: number, height: number) {
+  if (selectedHotspot.value?.plugin !== 'video' || !currentScene.value) return;
+  const marker = selectedHotspot.value as VideoMarker;
+  marker.width = width;
+  marker.height = height;
+  markDirty();
+}
+
+function setVideoRotation(axis: 'rotX' | 'rotY' | 'rotZ', degrees: string | number) {
+  if (selectedHotspot.value?.plugin !== 'video') return;
+  const marker = selectedHotspot.value as VideoMarker;
+  marker[axis] = Number(degrees) * Math.PI / 180;
+  markDirty();
+}
+
+function setPlaneMarkerScale(axis: 'scaleX' | 'scaleY', rawValue: string | number) {
+  const marker = selectedHotspot.value;
+  if (!marker || (marker.plugin !== 'navigation' && marker.plugin !== 'video') || !currentScene.value) return;
+  marker[axis] = Math.max(0.1, Math.min(10, Number(rawValue) || 1));
+  refreshMarkers(currentScene.value);
+  markDirty();
+}
+
 // ── Hotspot drag-to-reposition ───────────────────────────────────────────────
-// Watch lastMarkerMoved (emitted by HotspotPlugin via bus)
+// Watch lastMarkerMoved (emitted by MarkerPlugin via bus)
 watch(lastMarkerMoved, (moved) => {
   if (!moved || !currentScene.value) return;
   const idx = currentScene.value.markers.findIndex((m) => m.id === moved.markerId);
@@ -363,6 +488,15 @@ watch(lastPlacement, (placement) => {
     isPlacingHotspot.value = false;
     showHotspotModal.value = true;
   }
+});
+
+// Clicking a marker in the panorama selects it in the inspector. In preview
+// mode the same selection is rendered by ViewerHotspotPanel, so info markers
+// now have the same visible behaviour as in the public viewer.
+watch(lastMarkerClicked, (marker) => {
+  if (!marker) return;
+  selectedHotspotId.value = marker.id;
+  if (!previewMode.value) currentTab.value = 'hotspots';
 });
 
 // ── Scene Navigation ──────────────────────────────────────────────────────────
@@ -465,12 +599,12 @@ function cancelPlacing() {
   engineCancelPlacement();
 }
 
-function createHotspot(type: 'navigation' | 'video' | 'info' | 'model3d') {
+function createHotspot(type: 'navigation' | 'video' | 'panel') {
   if (!pendingHotspotCoords.value || !currentScene.value) return;
   const id = `h${Date.now()}`;
   const base = {
     id,
-    label: type === 'navigation' ? 'Chuyển cảnh' : type === 'video' ? 'Xem video' : type === 'model3d' ? 'Xem ảnh 3D' : 'Xem thông tin',
+    label: type === 'navigation' ? 'Chuyển cảnh' : type === 'video' ? 'Xem video' : 'Xem nội dung',
     yaw: parseFloat(pendingHotspotCoords.value.yaw.toFixed(3)),
     pitch: parseFloat(pendingHotspotCoords.value.pitch.toFixed(3)),
   };
@@ -482,16 +616,15 @@ function createHotspot(type: 'navigation' | 'video' | 'info' | 'model3d') {
       plugin: 'navigation',
       targetScene: firstOther ? firstOther.id : '',
     } as NavigationMarker);
-  } else if (type === 'info') {
+  } else if (type === 'panel') {
     currentScene.value.markers.push({
       ...base,
-      plugin: 'info',
-      content: '',
-    } as InfoMarker);
+      plugin: 'panel',
+      placement: 'vertical',
+      contents: [{ id: `${id}-text`, type: 'text', content: '' }],
+    } as PanelMarkerData);
   } else if (type === 'video') {
     currentScene.value.markers.push({ ...base, plugin: 'video', src: '', width: 720, height: 405 } as VideoMarker);
-  } else {
-    currentScene.value.markers.push({ ...base, plugin: 'model3d', image: '', content: '' } as Model3DMarker);
   }
 
   selectedHotspotId.value = id;
@@ -500,6 +633,38 @@ function createHotspot(type: 'navigation' | 'video' | 'info' | 'model3d') {
   showHotspotModal.value = false;
   pendingHotspotCoords.value = null;
   showToast({ message: 'Đã thêm điểm tương tác mới', variant: 'success' });
+}
+
+function addPanelBlock(type: PanelBlock['type']) {
+  if (selectedHotspot.value?.plugin !== 'panel') return;
+  const id = `block-${Date.now()}`;
+  const block: PanelBlock = type === 'text'
+    ? { id, type, content: '', presentation: 'text-only', speech: { lang: 'vi-VN', rate: 1, pitch: 1 } }
+    : type === 'audio'
+      ? { id, type, src: '' }
+      : type === 'image3d'
+        ? { id, type, image: '', caption: '' }
+        : { id, type, context: '' };
+  selectedHotspot.value.contents.push(block);
+  syncMarkersToViewer();
+  markDirty();
+}
+
+function removePanelBlock(index: number) {
+  if (selectedHotspot.value?.plugin !== 'panel') return;
+  selectedHotspot.value.contents.splice(index, 1);
+  syncMarkersToViewer();
+  markDirty();
+}
+
+function movePanelBlock(index: number, direction: -1 | 1) {
+  if (selectedHotspot.value?.plugin !== 'panel') return;
+  const target = index + direction;
+  if (target < 0 || target >= selectedHotspot.value.contents.length) return;
+  const [block] = selectedHotspot.value.contents.splice(index, 1);
+  selectedHotspot.value.contents.splice(target, 0, block);
+  syncMarkersToViewer();
+  markDirty();
 }
 
 function deleteHotspot(id: string) {
@@ -621,6 +786,13 @@ onMounted(() => {
       @change="handleFileChange"
     >
     <input ref="modelImageInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleModelImageChange">
+    <input
+      ref="narrationInput"
+      type="file"
+      accept="audio/wav,audio/mpeg,audio/mp4,audio/ogg,audio/aac,audio/flac,.wav,.mp3,.m4a,.ogg,.aac,.flac"
+      class="hidden"
+      @change="handleNarrationChange"
+    >
 
     <!-- ═══ TOPBAR ═══ -->
     <header class="topbar">
@@ -1123,6 +1295,132 @@ onMounted(() => {
               </div>
             </template>
 
+            <!-- Plane Object3D markers resize independently on X/Y. -->
+            <template v-if="selectedHotspot.plugin === 'navigation' || selectedHotspot.plugin === 'video'">
+              <div class="field">
+                <label>
+                  Phóng ngang (X)
+                  <span class="field-badge">{{ ((selectedHotspot.scaleX ?? 1) * 100).toFixed(0) }}%</span>
+                </label>
+                <div class="rotation-control">
+                  <input type="range" min="0.25" max="4" step="0.05"
+                    :value="selectedHotspot.scaleX ?? 1"
+                    @input="(e:any) => setPlaneMarkerScale('scaleX', e.target.value)"
+                  >
+                  <button class="reset-btn" type="button" title="Về 100%" @click="setPlaneMarkerScale('scaleX', 1)">↺</button>
+                </div>
+              </div>
+              <div class="field">
+                <label>
+                  Phóng dọc (Y)
+                  <span class="field-badge">{{ ((selectedHotspot.scaleY ?? 1) * 100).toFixed(0) }}%</span>
+                </label>
+                <div class="rotation-control">
+                  <input type="range" min="0.25" max="4" step="0.05"
+                    :value="selectedHotspot.scaleY ?? 1"
+                    @input="(e:any) => setPlaneMarkerScale('scaleY', e.target.value)"
+                  >
+                  <button class="reset-btn" type="button" title="Về 100%" @click="setPlaneMarkerScale('scaleY', 1)">↺</button>
+                </div>
+                <div class="hint-text">X và Y thay đổi độc lập; marker mặt phẳng không sử dụng chiều sâu Z.</div>
+              </div>
+            </template>
+
+            <template v-if="selectedHotspot.plugin === 'panel'">
+              <div class="field">
+                <label>Hướng hiển thị panel</label>
+                <select
+                  :value="(selectedHotspot as PanelMarkerData).placement ?? 'vertical'"
+                  @change="(e:any) => { (selectedHotspot as PanelMarkerData).placement = e.target.value; markDirty(); }"
+                >
+                  <option value="vertical">Chiều dọc</option>
+                  <option value="horizontal">Chiều ngang</option>
+                </select>
+                <div class="hint-text">Hệ thống tự chọn trên/dưới hoặc trái/phải theo khoảng trống còn lại.</div>
+              </div>
+              <div class="field">
+                <label>Nội dung trong panel</label>
+                <div class="video-size-presets">
+                  <button type="button" @click="addPanelBlock('text')">+ Văn bản</button>
+                  <button type="button" @click="addPanelBlock('image3d')">+ Ảnh 3D</button>
+                  <button type="button" @click="addPanelBlock('audio')">+ Âm thanh</button>
+                  <button type="button" @click="addPanelBlock('ai-chat')">+ AI Chat</button>
+                </div>
+                <div class="hint-text">Có thể kết hợp nhiều loại và thay đổi thứ tự hiển thị.</div>
+              </div>
+
+              <div
+                v-for="(block, blockIndex) in (selectedHotspot as PanelMarkerData).contents"
+                :key="block.id"
+                class="field panel-block-editor"
+              >
+                <label>
+                  {{ block.type === 'text' ? 'Văn bản' : block.type === 'image3d' ? 'Ảnh 3D' : block.type === 'audio' ? 'Âm thanh' : 'AI Chat' }}
+                  <span class="field-badge">{{ blockIndex + 1 }}</span>
+                </label>
+                <template v-if="block.type === 'text'">
+                  <textarea :value="block.content" placeholder="Nội dung mô tả..." @input="(e:any) => { block.content = e.target.value; markDirty(); }" />
+                  <label>Chế độ hiển thị</label>
+                  <select :value="block.presentation ?? 'text-only'" @change="(e:any) => { block.presentation = e.target.value; markDirty(); }">
+                    <option value="text-only">Chỉ văn bản</option>
+                    <option value="text-and-audio">Văn bản và bản đọc</option>
+                    <option value="audio-only">Chỉ bản đọc</option>
+                  </select>
+                  <template v-if="(block.presentation ?? 'text-only') !== 'text-only'">
+                  <label>File bản đọc (VieNeu-TTS)</label>
+                  <input
+                    :value="block.speech?.src ?? ''"
+                    type="text"
+                    placeholder="/uploads/audio/ban-doc.wav hoặc URL"
+                    @change="(e:any) => { block.speech = { ...(block.speech ?? {}), src: e.target.value }; syncMarkersToViewer(); markDirty(); }"
+                  >
+                  <div class="video-size-presets">
+                    <button type="button" :disabled="uploadingNarration" @click="triggerNarrationUpload(block.id)">
+                      {{ uploadingNarration && narrationTargetBlockId === block.id ? 'Đang tải...' : 'Tải file bản đọc' }}
+                    </button>
+                    <button
+                      v-if="block.speech?.src"
+                      type="button"
+                      @click="block.speech = { ...(block.speech ?? {}), src: undefined }; syncMarkersToViewer(); markDirty();"
+                    >Bỏ file</button>
+                  </div>
+                  <audio v-if="block.speech?.src" :src="block.speech.src" controls preload="metadata" style="width:100%" />
+                  <div class="hint-text">Xuất WAV/MP3 từ VieNeu-TTS rồi tải lên đây. Khi có file, thanh tiến trình sẽ dùng đúng thời lượng audio.</div>
+                  <details v-if="!block.speech?.src">
+                    <summary>Giọng trình duyệt dự phòng</summary>
+                  <select :value="block.speech?.lang ?? 'vi-VN'" @change="(e:any) => { block.speech = { ...(block.speech ?? {}), lang: e.target.value }; markDirty(); }">
+                    <option value="vi-VN">Tiếng Việt</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="fr-FR">Français</option>
+                    <option value="ja-JP">日本語</option>
+                    <option value="ko-KR">한국어</option>
+                  </select>
+                  <label>Tốc độ <span class="field-badge">{{ (block.speech?.rate ?? 1).toFixed(1) }}x</span></label>
+                  <input type="range" min="0.5" max="2" step="0.1" :value="block.speech?.rate ?? 1" @input="(e:any) => { block.speech = { ...(block.speech ?? {}), rate: Number(e.target.value) }; markDirty(); }">
+                  <label>Cao độ <span class="field-badge">{{ (block.speech?.pitch ?? 1).toFixed(1) }}</span></label>
+                  <input type="range" min="0.5" max="2" step="0.1" :value="block.speech?.pitch ?? 1" @input="(e:any) => { block.speech = { ...(block.speech ?? {}), pitch: Number(e.target.value) }; markDirty(); }">
+                  <div class="hint-text">Giọng đọc thực tế phụ thuộc vào giọng có sẵn trên thiết bị người xem.</div>
+                  </details>
+                  </template>
+                </template>
+                <template v-else-if="block.type === 'image3d'">
+                  <input :value="block.image" type="text" placeholder="/uploads/... hoặc https://..." @input="(e:any) => { block.image = e.target.value; markDirty(); }">
+                  <input :value="block.caption" type="text" placeholder="Chú thích ảnh (không bắt buộc)" @input="(e:any) => { block.caption = e.target.value; markDirty(); }">
+                </template>
+                <template v-else-if="block.type === 'audio'">
+                  <input :value="block.src" type="text" placeholder="/audio/file.mp3 hoặc URL" @input="(e:any) => { block.src = e.target.value; markDirty(); }">
+                  <div class="hint-text">AudioBlock chỉ phát tệp âm thanh được tải lên hoặc nhập bằng URL; khối này không tạo giọng đọc từ văn bản.</div>
+                </template>
+                <textarea v-else :value="block.context" placeholder="Ngữ cảnh dành cho AI..." @input="(e:any) => { block.context = e.target.value; markDirty(); }" />
+                <div class="video-size-presets">
+                  <button type="button" :disabled="blockIndex === 0" @click="movePanelBlock(blockIndex, -1)">↑ Lên</button>
+                  <button type="button" :disabled="blockIndex === (selectedHotspot as PanelMarkerData).contents.length - 1" @click="movePanelBlock(blockIndex, 1)">↓ Xuống</button>
+                  <button type="button" @click="removePanelBlock(blockIndex)">Xóa</button>
+                </div>
+              </div>
+            </template>
+
             <!-- Info content textarea -->
             <div v-if="selectedHotspot.plugin === 'info'" class="field">
               <label>Nội dung thông tin</label>
@@ -1136,11 +1434,63 @@ onMounted(() => {
               />
             </div>
 
-            <div v-if="selectedHotspot.plugin === 'video'" class="field">
-              <label>Đường dẫn video</label>
-              <input :value="(selectedHotspot as VideoMarker).src" type="url" placeholder="YouTube embed, Vimeo hoặc /video.mp4" @input="(e:any) => { (selectedHotspot as VideoMarker).src = e.target.value; markDirty(); }">
-              <div class="hint-text">Dùng URL nhúng (embed) cho YouTube/Vimeo hoặc đường dẫn file MP4 trực tiếp.</div>
-            </div>
+            <template v-if="selectedHotspot.plugin === 'video'">
+              <div class="field">
+                <label>Đường dẫn video</label>
+                <input :value="(selectedHotspot as VideoMarker).src" type="url" placeholder="YouTube embed, Vimeo hoặc /video.mp4" @change="(e:any) => { (selectedHotspot as VideoMarker).src = e.target.value; markDirty(); }">
+                <div class="hint-text">YouTube, Vimeo và video trực tiếp đều hiển thị ngay trong panorama.</div>
+              </div>
+
+              <div class="field video-panel-size">
+                <label>Kích thước panel</label>
+                <div class="video-size-presets">
+                  <button type="button" @click="setVideoPanelSize(480, 270)">Nhỏ</button>
+                  <button type="button" @click="setVideoPanelSize(640, 360)">Vừa</button>
+                  <button type="button" @click="setVideoPanelSize(960, 540)">Lớn</button>
+                  <button type="button" @click="setVideoPanelSize(1600, 900)">Rất lớn</button>
+                </div>
+                <div class="video-size-row">
+                  <span>Rộng</span>
+                  <input type="range" min="240" max="2560" step="10" :value="(selectedHotspot as VideoMarker).width ?? 640" @input="(e:any) => updateVideoPanelSize('width', e.target.value)">
+                  <input class="video-size-number" type="number" min="240" max="2560" step="10" :value="(selectedHotspot as VideoMarker).width ?? 640" @change="(e:any) => updateVideoPanelSize('width', e.target.value)">
+                </div>
+                <div class="video-size-row">
+                  <span>Cao</span>
+                  <input type="range" min="135" max="1440" step="5" :value="(selectedHotspot as VideoMarker).height ?? 360" @input="(e:any) => updateVideoPanelSize('height', e.target.value)">
+                  <input class="video-size-number" type="number" min="135" max="1440" step="5" :value="(selectedHotspot as VideoMarker).height ?? 360" @change="(e:any) => updateVideoPanelSize('height', e.target.value)">
+                </div>
+                <label class="video-ratio-lock">
+                  <input v-model="lockVideoAspectRatio" type="checkbox">
+                  Giữ nguyên tỉ lệ khung hình
+                </label>
+                <div class="hint-text">Kích thước hiện tại: {{ (selectedHotspot as VideoMarker).width ?? 640 }} × {{ (selectedHotspot as VideoMarker).height ?? 360 }} px</div>
+              </div>
+
+              <div class="field">
+                <label>Xoay ngang (Y) <span class="field-badge">{{ Math.round(((selectedHotspot as VideoMarker).rotY ?? 0) * 180 / Math.PI) }}°</span></label>
+                <div class="rotation-control">
+                  <input type="range" min="-90" max="90" step="1" :value="Math.round(((selectedHotspot as VideoMarker).rotY ?? 0) * 180 / Math.PI)" @input="(e:any) => setVideoRotation('rotY', e.target.value)">
+                  <button class="reset-btn" type="button" title="Về 0°" @click="setVideoRotation('rotY', 0)">↺</button>
+                </div>
+                <div class="hint-text">Quay cạnh trái hoặc phải của màn hình ra xa người xem.</div>
+              </div>
+              <div class="field">
+                <label>Nghiêng (X) <span class="field-badge">{{ Math.round(((selectedHotspot as VideoMarker).rotX ?? 0) * 180 / Math.PI) }}°</span></label>
+                <div class="rotation-control">
+                  <input type="range" min="-90" max="90" step="1" :value="Math.round(((selectedHotspot as VideoMarker).rotX ?? 0) * 180 / Math.PI)" @input="(e:any) => setVideoRotation('rotX', e.target.value)">
+                  <button class="reset-btn" type="button" title="Về 0°" @click="setVideoRotation('rotX', 0)">↺</button>
+                </div>
+                <div class="hint-text">Ngả màn hình lên hoặc xuống trong không gian 3D.</div>
+              </div>
+              <div class="field">
+                <label>Xoay mặt phẳng (Z) <span class="field-badge">{{ Math.round(((selectedHotspot as VideoMarker).rotZ ?? 0) * 180 / Math.PI) }}°</span></label>
+                <div class="rotation-control">
+                  <input type="range" min="-180" max="180" step="1" :value="Math.round(((selectedHotspot as VideoMarker).rotZ ?? 0) * 180 / Math.PI)" @input="(e:any) => setVideoRotation('rotZ', e.target.value)">
+                  <button class="reset-btn" type="button" title="Về 0°" @click="setVideoRotation('rotZ', 0)">↺</button>
+                </div>
+                <div class="hint-text">Xoay panel theo chiều kim đồng hồ hoặc ngược lại.</div>
+              </div>
+            </template>
 
             <template v-if="selectedHotspot.plugin === 'model3d'">
               <div class="field">
@@ -1303,19 +1653,15 @@ onMounted(() => {
             <div class="type-card-icon video"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
             <strong>Xem video</strong><span>Mở video giới thiệu hoặc tư liệu</span>
           </div>
-          <div class="type-card info" @click="createHotspot('info')">
+          <div class="type-card info" @click="createHotspot('panel')">
             <div class="type-card-icon info">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-                <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none" />
-                <path d="M12 11 L12 18" />
+                <rect x="4" y="4" width="16" height="16" rx="3" />
+                <path d="M8 9h8M8 13h8M8 17h5" />
               </svg>
             </div>
-            <strong>Xem thông tin</strong>
-            <span>Mở nội dung mô tả chi tiết</span>
-          </div>
-          <div class="type-card model3d" @click="createHotspot('model3d')">
-            <div class="type-card-icon model3d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M12 22V12M3 7l9 5 9-5"/></svg></div>
-            <strong>Xem ảnh 3D</strong><span>Hiện ảnh vật thể do người thiết kế thêm</span>
+            <strong>Panel nội dung</strong>
+            <span>Kết hợp văn bản, ảnh 3D, âm thanh và AI</span>
           </div>
         </div>
       </div>
@@ -1978,6 +2324,17 @@ onMounted(() => {
 .brightness-presets { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
 .brightness-presets button { padding:7px 5px; border:1px solid rgba(255,255,255,.08); border-radius:6px; background:#232833; color:rgba(255,255,255,.65); font-size:10.5px; transition:.15s; }
 .brightness-presets button:hover { border-color:rgba(245,158,11,.5); color:#fff; background:rgba(245,158,11,.12); }
+
+.video-panel-size { padding:10px; border:1px solid rgba(255,255,255,.08); border-radius:8px; background:rgba(255,255,255,.025); }
+.video-size-presets { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+.video-size-presets button { padding:7px 5px; border:1px solid rgba(255,255,255,.1); border-radius:6px; background:#232833; color:rgba(255,255,255,.72); font-size:11px; cursor:pointer; }
+.video-size-presets button:hover { border-color:rgba(220,38,38,.55); color:#fff; background:rgba(220,38,38,.14); }
+.video-size-row { display:grid; grid-template-columns:34px minmax(0,1fr) 66px; align-items:center; gap:8px; }
+.video-size-row > span { font-size:11px; color:rgba(255,255,255,.5); }
+.video-size-row input[type='range'] { width:100%; accent-color:#dc2626; }
+.field .video-size-number { padding:6px 7px; text-align:center; font-variant-numeric:tabular-nums; }
+.video-ratio-lock { display:flex; align-items:center; gap:7px; cursor:pointer; }
+.video-ratio-lock input { accent-color:#dc2626; }
 
 /* Rotation control — slider + reset button inline */
 .rotation-control {
