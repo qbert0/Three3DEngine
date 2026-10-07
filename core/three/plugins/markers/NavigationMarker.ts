@@ -156,9 +156,7 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
       data.texture.needsUpdate = true;
       this.applyHoverScale(object, new THREE.Vector3(1, 1, 1), marker, hovered, hoverScale);
 
-      // Bắt đầu ở giữa hành trình với vận tốc lớn nhất. Dùng sin thay cho
-      // 1-cos để marker mới tạo không có đoạn đứng yên ở đầu mỗi scene.
-      const zProgress = (Math.sin(data.time * 2.4) + 1) * 0.5;
+      const zProgress = (1 - Math.cos(data.time * 2.4)) * 0.5;
       markerNormal.set(0, 0, 1).applyQuaternion(data.baseQuaternion);
       object.position
         .copy(data.basePosition)

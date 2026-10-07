@@ -69,6 +69,10 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
   // Preload cache tracking
   const preloaded = new Set<string>();
+  let preloadTimer: ReturnType<typeof setTimeout> | null = null;
+  let preloadGeneration = 0;
+  let isUserDragging = false;
+  let lastUserInteractionAt = 0;
 
   // ── Init ───────────────────────────────────────────────────────
 
@@ -178,6 +182,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
       e.bus.on('scene:transition:start', () => {
         isTransitioning.value = true;
+        cancelScheduledPreload();
       });
 
       e.bus.on('scene:transition:end', ({ scene }) => {
@@ -188,6 +193,17 @@ export function useViewerEngine(options: ViewerEngineOptions) {
       e.bus.on('scene:loaded', ({ scene }) => {
         currentScene.value = scene;
         isLoading.value = false;
+      });
+      e.bus.on('interaction:dragstart', () => {
+        isUserDragging = true;
+        lastUserInteractionAt = performance.now();
+      });
+      e.bus.on('interaction:dragend', () => {
+        isUserDragging = false;
+        lastUserInteractionAt = performance.now();
+      });
+      e.bus.on('camera:fov', () => {
+        lastUserInteractionAt = performance.now();
       });
       e.bus.on('map:visibility', ({ visible }) => {
         isMapVisible.value = visible;
@@ -267,12 +283,54 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     );
 
     const targets = [...new Set([...navTargets, ...adjacent])].slice(0, 3);
+    const pending = targets.filter(target => !preloaded.has(target.panorama));
+    const generation = ++preloadGeneration;
+    lastUserInteractionAt = performance.now();
+    scheduleNextPreload(pending, 0, generation);
+  }
 
-    for (const t of targets) {
-      if (!preloaded.has(t.panorama)) {
-        preloaded.add(t.panorama);
-        engine.value?.pano.preload(t.panorama).catch(() => {});
+  /**
+   * Full-resolution panorama decode + GPU upload is expensive. Run only one
+   * preload at a time and wait until camera interaction has been idle, rather
+   * than uploading three textures on the first frames after a transition.
+   */
+  function scheduleNextPreload(
+    targets: TourScene[],
+    index: number,
+    generation: number,
+  ): void {
+    if (generation !== preloadGeneration || index >= targets.length) return;
+    if (preloadTimer) clearTimeout(preloadTimer);
+    preloadTimer = setTimeout(async () => {
+      preloadTimer = null;
+      if (generation !== preloadGeneration) return;
+
+      const idleFor = performance.now() - lastUserInteractionAt;
+      if (isUserDragging || idleFor < 1200) {
+        scheduleNextPreload(targets, index, generation);
+        return;
       }
+
+      const target = targets[index];
+      const pano = engine.value?.pano;
+      if (!target || !pano) return;
+      preloaded.add(target.panorama);
+      try {
+        await pano.preload(target.panorama);
+      } catch {
+        preloaded.delete(target.panorama);
+      }
+      // Leave breathing room between GPU uploads as well.
+      lastUserInteractionAt = performance.now() - 700;
+      scheduleNextPreload(targets, index + 1, generation);
+    }, 250);
+  }
+
+  function cancelScheduledPreload(): void {
+    preloadGeneration++;
+    if (preloadTimer) {
+      clearTimeout(preloadTimer);
+      preloadTimer = null;
     }
   }
 
@@ -300,6 +358,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
   // ── Cleanup ────────────────────────────────────────────────────
 
   function destroyEngine(): void {
+    cancelScheduledPreload();
     engine.value?.destroy();
     engine.value = null;
     preloaded.clear();

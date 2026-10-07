@@ -148,8 +148,7 @@ export class MarkerPlugin extends PluginBase {
       }
       this.group.add(markerType.createObject(marker));
     }
-    // Marker mới phải đọc được gần như ngay khi panorama kết thúc chuyển cảnh.
-    this.fadeAll(1, 180);
+    this.fadeAll(1, 350);
   }
 
   private markerTypeForObject(object: THREE.Object3D): MarkerBase | undefined {
