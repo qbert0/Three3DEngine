@@ -2,7 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-06-21',
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@vercel/speed-insights'],
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
 
   // Panorama filenames are stable assets (uploads use unique names). Let the
   // browser reuse them across scene changes and repeat visits.
@@ -64,6 +64,8 @@ export default defineNuxtConfig({
     { path: '~/components/experience', pathPrefix: false },
     { path: '~/components/editor',     pathPrefix: false },
     { path: '~/components/catalog',    pathPrefix: false },
+    // admin/ — client-only editors such as Leaflet keep their .client boundary
+    { path: '~/components/admin', prefix: 'Admin' },
     // Root components (ThemeToggle, MorphIcon, SceneViewer…) — no prefix
     { path: '~/components', pathPrefix: false, pattern: '*.vue' },
     // Themes: prefixed by folder (NatureTourSidebar, MinimalTourSidebar…)

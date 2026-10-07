@@ -1,5 +1,5 @@
-import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};globalThis.__timing__.logStart('Load chunks/build/server');import { readonly, hasInjectionContext, getCurrentInstance, inject, ref, defineComponent, createElementBlock, shallowRef, provide, cloneVNode, h, defineAsyncComponent, computed, unref, shallowReactive, Suspense, Fragment, useSSRContext, createApp, mergeProps, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, getCurrentScope, toRef, withCtx, nextTick, isReadonly, toRaw, isRef, isShallow, isReactive } from 'vue';
-import { c as createError$1, p as parseURL, e as encodePath, n as decodePath, o as hasProtocol, q as isScriptProtocol, s as joinURL, w as withQuery, t as sanitizeStatusCode, v as getContext, $ as $fetch, x as defu, y as createHooks, z as executeAsync, A as createDebugger } from '../nitro/nitro.mjs';
+import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};globalThis.__timing__.logStart('Load chunks/build/server');import { readonly, defineComponent, createElementBlock, hasInjectionContext, getCurrentInstance, inject, ref, shallowRef, provide, cloneVNode, h, defineAsyncComponent, computed, unref, shallowReactive, Suspense, Fragment, useSSRContext, createApp, mergeProps, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, getCurrentScope, toRef, withCtx, nextTick, isReadonly, toRaw, isRef, isShallow, isReactive } from 'vue';
+import { c as createError$1, p as parseURL, h as encodePath, o as decodePath, q as hasProtocol, t as isScriptProtocol, v as joinURL, w as withQuery, x as sanitizeStatusCode, y as getContext, $ as $fetch, z as defu, A as createHooks, B as executeAsync, C as createDebugger } from '../nitro/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { setActivePinia, createPinia, shouldHydrate } from 'pinia';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
@@ -484,19 +484,19 @@ const _routes = [
     name: "index",
     path: "/",
     meta: __nuxt_page_meta$a || {},
-    component: () => import('./index-C21fRdyK.mjs')
+    component: () => import('./index-_DOozQhn.mjs')
   },
   {
     name: "tours",
     path: "/tours",
     meta: __nuxt_page_meta$8 || {},
-    component: () => import('./tours-BdMhSJk0.mjs'),
+    component: () => import('./tours-Cv82DbNC.mjs'),
     children: [
       {
         name: "tours-tourId",
         path: ":tourId()",
         meta: __nuxt_page_meta$9 || {},
-        component: () => import('./_tourId_-DxY3aG26.mjs')
+        component: () => import('./_tourId_-CT-yqtcz.mjs')
       }
     ]
   },
@@ -516,25 +516,25 @@ const _routes = [
     name: "ui-demo",
     path: "/ui-demo",
     meta: __nuxt_page_meta$5 || {},
-    component: () => import('./ui-demo-CYszwJHc.mjs')
+    component: () => import('./ui-demo-C11uyjw1.mjs')
   },
   {
     name: "admin",
     path: "/admin",
     meta: __nuxt_page_meta$4 || {},
-    component: () => import('./index-BQUsc2pk.mjs')
+    component: () => import('./index-olWWWPfu.mjs')
   },
   {
     name: "admin-slug",
     path: "/admin/:slug()",
     meta: __nuxt_page_meta$3 || {},
-    component: () => import('./index-CsxKME8I.mjs')
+    component: () => import('./index-XQxqfvvW.mjs')
   },
   {
     name: "experience-tourId",
     path: "/experience/:tourId()",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./_tourId_-BYWjBRUv.mjs'),
+    component: () => import('./_tourId_-CHEljLO2.mjs'),
     children: [
       {
         name: "experience-tourId-ownerTourId-sceneId",
@@ -548,7 +548,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import('./_sceneId_-WZhf4ILr.mjs')
+    component: () => import('./_sceneId_-bpMCnmNS.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -937,7 +937,7 @@ const revive_payload_server_MVtmlZaQpj6ApFmshWfUWl5PehCebzaBf2NuRMiIbms = /* @__
     }
   }
 });
-defineComponent({
+const __nuxt_component_4 = defineComponent({
   name: "ServerPlaceholder",
   render() {
     return createElementBlock("div");
@@ -1010,9 +1010,9 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-Dvg2ORgr.mjs').then((m) => m.default || m)),
-  editor: defineAsyncComponent(() => import('./editor-D0JMPdjq.mjs').then((m) => m.default || m)),
-  experience: defineAsyncComponent(() => import('./experience-MhrPHmsv.mjs').then((m) => m.default || m))
+  default: defineAsyncComponent(() => import('./default-BB7HqOeE.mjs').then((m) => m.default || m)),
+  editor: defineAsyncComponent(() => import('./editor-Dy2R63vE.mjs').then((m) => m.default || m)),
+  experience: defineAsyncComponent(() => import('./experience-yT0e4bsx.mjs').then((m) => m.default || m))
 };
 const routeRulesMatcher = _routeRulesMatcher;
 const LayoutLoader = defineComponent({
@@ -1407,7 +1407,7 @@ const _sfc_main$1 = {
     const statusText = _error.statusMessage ?? (is404 ? "Page Not Found" : "Internal Server Error");
     const description = _error.message || _error.toString();
     const stack = void 0;
-    const _Error404 = defineAsyncComponent(() => import('./error-404-B1m4RsI1.mjs'));
+    const _Error404 = defineAsyncComponent(() => import('./error-404-C089q8je.mjs'));
     const _Error = defineAsyncComponent(() => import('./error-500-CWg02hHg.mjs'));
     const ErrorTemplate = is404 ? _Error404 : _Error;
     return (_ctx, _push, _parent, _attrs) => {
@@ -1500,5 +1500,5 @@ let entry;
 }
 const entry_default = ((ssrContext) => entry(ssrContext));
 
-export { _export_sfc as _, useToast as a, useRouter as b, useNuxtApp as c, asyncDataDefaults as d, entry_default as default, createError as e, fetchDefaults as f, encodeRoutePath as g, useRuntimeConfig as h, nuxtLinkDefaults as i, navigateTo as n, resolveRouteObject as r, tryUseNuxtApp as t, useRoute as u };;globalThis.__timing__.logEnd('Load chunks/build/server');
+export { _export_sfc as _, useToast as a, useRouter as b, __nuxt_component_4 as c, useNuxtApp as d, entry_default as default, asyncDataDefaults as e, createError as f, fetchDefaults as g, encodeRoutePath as h, useRuntimeConfig as i, nuxtLinkDefaults as j, navigateTo as n, resolveRouteObject as r, tryUseNuxtApp as t, useRoute as u };;globalThis.__timing__.logEnd('Load chunks/build/server');
 //# sourceMappingURL=server.mjs.map

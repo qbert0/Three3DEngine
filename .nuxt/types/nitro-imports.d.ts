@@ -39,6 +39,7 @@ declare global {
   const defineWebSocket: typeof import('../../node_modules/h3').defineWebSocket
   const defineWebSocketHandler: typeof import('../../node_modules/h3').defineWebSocketHandler
   const deleteCookie: typeof import('../../node_modules/h3').deleteCookie
+  const deleteTour: typeof import('../../server/utils/yamlLoader').deleteTour
   const dynamicEventHandler: typeof import('../../node_modules/h3').dynamicEventHandler
   const eventHandler: typeof import('../../node_modules/h3').eventHandler
   const fetchWithEvent: typeof import('../../node_modules/h3').fetchWithEvent
@@ -151,4 +152,4 @@ export { defineTask, runTask } from 'nitropack/runtime/internal/task';
 export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils';
 export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from '/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/nitro-server/dist/runtime/utils/paths';
 export { defineAppConfig } from '/run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/nitro-server/dist/runtime/utils/config';
-export { loadTour, listTours, saveTour, saveSceneMarkers } from '/run/media/qbert/1C8099B8809998BA/codedao/view360/server/utils/yamlLoader';
+export { loadTour, listTours, saveTour, deleteTour, saveSceneMarkers } from '/run/media/qbert/1C8099B8809998BA/codedao/view360/server/utils/yamlLoader';

@@ -2,36 +2,65 @@
  * ─────────────────────────────────────────────────────────────────
  * IMapStrategy — Strategy pattern for map rendering modes
  *
- * Each mode (2D, Real, 3D) implements this interface.
+ * Multi-floor support: each floor has its own image and node set.
  * MapMarker delegates rendering/interaction to the active strategy.
  * ─────────────────────────────────────────────────────────────────
  */
 
 import type { Camera } from 'three';
 
-// ── Types ────────────────────────────────────────────────────────
+// ── Node ─────────────────────────────────────────────────────────
 
-export type MapMode = '2d' | 'real' | '3d';
-
-export interface MapNode {
-  id: string;
-  name: string;
-  panoramaUrl: string;
-  neighbors: string[];
-  /** Position on a 2D floorplan image (px from top-left). */
-  mapPosition?: { x: number; y: number };
-  /** Geo coordinates for real map mode. */
-  geoPosition?: { lat: number; lng: number };
-  /** World-space position for 3D top-down mode. */
-  worldPosition?: { x: number; y: number; z: number };
+export interface MapNodeExit {
+  /** Target floor id */
+  floorId: string;
+  /** Target node id on that floor */
+  nodeId: string;
 }
 
-// ── Config discriminated union ───────────────────────────────────
+export interface MapNode {
+  /** Must match scene.id */
+  id: string;
+  name: string;
+  /** X position on the floorplan image (pixels from left) */
+  x: number;
+  /** Y position on the floorplan image (pixels from top) */
+  y: number;
+  /** Real-world longitude, populated from TourScene.coordinates. */
+  longitude?: number;
+  /** Real-world latitude, populated from TourScene.coordinates. */
+  latitude?: number;
+  /** Show while inactive. The current camera node is always rendered. */
+  visible?: boolean;
+  /** IDs of neighboring nodes (for connection lines) */
+  neighbors: string[];
+  /** If this node connects to a different floor */
+  exitTo?: MapNodeExit;
+}
 
-export interface MapConfigBase {
-  mode: MapMode;
+// ── Floor ────────────────────────────────────────────────────────
+
+export interface MapFloor {
+  id: string;
+  name: string;
+  /** Short label for tabs (e.g. 'Sân', 'Xưởng') */
+  shortName?: string;
+  /** URL to the floorplan image */
+  imageUrl: string;
+  /** Original image width in px (for coordinate normalization) */
+  imageWidth: number;
+  /** Original image height in px */
+  imageHeight: number;
+  /** Nodes on this floor */
   nodes: MapNode[];
-  currentNodeId?: string;
+}
+
+// ── Config ───────────────────────────────────────────────────────
+
+export interface MapConfig {
+  floors: MapFloor[];
+  /** Default floor to show on open */
+  defaultFloorId?: string;
 
   // UI
   position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
@@ -43,40 +72,12 @@ export interface MapConfigBase {
   showConnections?: boolean;
   showCameraArrow?: boolean;
   clickToNavigate?: boolean;
-  animateTransition?: boolean;
-  transitionDuration?: number;
+  showFloorTabs?: boolean;
+  /** Auto-switch floor tab when navigating to a scene on a different floor */
+  autoSwitchFloor?: boolean;
+  /** Prefer the real Leaflet map when geo coordinates are available. */
+  mode?: 'auto' | 'floorplan' | 'real';
 }
-
-export interface Map2DConfig extends MapConfigBase {
-  mode: '2d';
-  /** URL of the 2D floorplan image. */
-  imageUrl: string;
-  /** Real-world width in meters (for scale bar). */
-  widthMeters?: number;
-  /** Real-world height in meters. */
-  heightMeters?: number;
-}
-
-export interface MapRealConfig extends MapConfigBase {
-  mode: 'real';
-  provider: 'leaflet' | 'mapbox' | 'maplibre';
-  apiKey?: string;
-  styleUrl?: string;
-  initialZoom?: number;
-  initialCenter?: { lat: number; lng: number };
-  tileUrl?: string;
-}
-
-export interface Map3DConfig extends MapConfigBase {
-  mode: '3d';
-  cameraHeight?: number;
-  cameraAngle?: number;
-  background?: string;
-  showFloor?: boolean;
-  showWalls?: boolean;
-}
-
-export type MapConfig = Map2DConfig | MapRealConfig | Map3DConfig;
 
 // ── Strategy interface ───────────────────────────────────────────
 
@@ -87,11 +88,14 @@ export interface IMapStrategy {
   /** Called every frame. Strategies that need animation use this. */
   update(deltaTime: number, camera?: Camera): void;
 
-  /** Highlight the current node and optionally animate the transition. */
+  /** Highlight the current node and optionally switch floor. */
   setCurrentNode(nodeId: string): void;
 
   /** Sync the camera heading indicator on the map. */
   setCameraHeading(yaw: number, pitch: number, fov?: number): void;
+
+  /** Switch to a specific floor tab. */
+  setFloor(floorId: string): void;
 
   /** Show/hide the map. */
   setVisible(visible: boolean): void;
@@ -104,4 +108,7 @@ export interface IMapStrategy {
 
   /** Callback when user clicks a node on the map. */
   onNodeClick?: (nodeId: string) => void;
+
+  /** Callback when user switches floor tab. */
+  onFloorChange?: (floorId: string) => void;
 }

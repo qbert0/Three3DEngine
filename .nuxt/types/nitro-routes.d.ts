@@ -7,13 +7,21 @@ declare module "nitropack/types" {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/audio.post').default>>>>
     }
     '/api/admin/media': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/media.delete').default>>>>
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/media.post').default>>>>
     }
+    '/api/admin/media/preview': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/media/preview.get').default>>>>
+    }
     '/api/admin/tours/:slug': {
+      'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug].delete').default>>>>
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug].post').default>>>>
     }
     '/api/admin/tours/:slug/scenes/:sceneId/markers': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug]/scenes/[sceneId]/markers.post').default>>>>
+    }
+    '/api/admin/tours': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/index.post').default>>>>
     }
     '/api/panorama/validate': {
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/panorama/validate.post').default>>>>

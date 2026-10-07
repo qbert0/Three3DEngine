@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/routes/api/panorama/validate.post');import { d as defineEventHandler, b as getHeader, r as readMultipartFormData, c as createError, a as readBody } from '../../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/panorama/validate.post');import { d as defineEventHandler, f as getHeader, r as readMultipartFormData, c as createError, a as readBody } from '../../../nitro/nitro.mjs';
 import sharp from 'sharp';
 import 'node:http';
 import 'node:https';

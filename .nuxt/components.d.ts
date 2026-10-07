@@ -36,6 +36,8 @@ export const TourSidebar: typeof import("../components/experience/TourSidebar.vu
 export const SceneGraph: typeof import("../components/editor/SceneGraph.vue")['default']
 export const SceneGraphNode: typeof import("../components/editor/SceneGraphNode.vue")['default']
 export const TourCard: typeof import("../components/catalog/TourCard.vue")['default']
+export const AdminMapHeadingPreview: typeof import("../components/admin/MapHeadingPreview.client.vue")['default']
+export const AdminRealMapEditor: typeof import("../components/admin/RealMapEditor.client.vue")['default']
 export const MorphIcon: typeof import("../components/MorphIcon.vue")['default']
 export const SceneViewer: typeof import("../components/SceneViewer.vue")['default']
 export const ThemeToggle: typeof import("../components/ThemeToggle.vue")['default']
@@ -87,6 +89,8 @@ export const LazyTourSidebar: LazyComponent<typeof import("../components/experie
 export const LazySceneGraph: LazyComponent<typeof import("../components/editor/SceneGraph.vue")['default']>
 export const LazySceneGraphNode: LazyComponent<typeof import("../components/editor/SceneGraphNode.vue")['default']>
 export const LazyTourCard: LazyComponent<typeof import("../components/catalog/TourCard.vue")['default']>
+export const LazyAdminMapHeadingPreview: LazyComponent<typeof import("../components/admin/MapHeadingPreview.client.vue")['default']>
+export const LazyAdminRealMapEditor: LazyComponent<typeof import("../components/admin/RealMapEditor.client.vue")['default']>
 export const LazyMorphIcon: LazyComponent<typeof import("../components/MorphIcon.vue")['default']>
 export const LazySceneViewer: LazyComponent<typeof import("../components/SceneViewer.vue")['default']>
 export const LazyThemeToggle: LazyComponent<typeof import("../components/ThemeToggle.vue")['default']>

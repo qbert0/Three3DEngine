@@ -11,8 +11,11 @@ import 'node:url';
 
 const UPLOAD_DIR = join(process.cwd(), "public", "uploads");
 const THUMBNAIL_DIR = join(process.cwd(), "public", "thumbnails");
+const EDITOR_PREVIEW_DIR = join(process.cwd(), "public", "editor-previews");
 const ALLOWED_EXTENSIONS = /* @__PURE__ */ new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const MAX_FILE_SIZE = 60 * 1024 * 1024;
+sharp.cache(false);
+sharp.concurrency(1);
 const media_post = defineEventHandler(async (event) => {
   var _a, _b;
   try {
@@ -21,6 +24,10 @@ const media_post = defineEventHandler(async (event) => {
   }
   try {
     mkdirSync(THUMBNAIL_DIR, { recursive: true });
+  } catch {
+  }
+  try {
+    mkdirSync(EDITOR_PREVIEW_DIR, { recursive: true });
   } catch {
   }
   const body = await readMultipartFormData(event);
@@ -49,17 +56,21 @@ const media_post = defineEventHandler(async (event) => {
     const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const fileName = `${baseName}${ext}`;
     const thumbName = `${baseName}.webp`;
+    const editorPreviewName = `${baseName}.webp`;
     const inputPath = join(UPLOAD_DIR, fileName);
     const thumbPath = join(THUMBNAIL_DIR, thumbName);
+    const editorPreviewPath = join(EDITOR_PREVIEW_DIR, editorPreviewName);
     writeFileSync(inputPath, part.data);
     try {
       await sharp(part.data).resize(400, 225, { fit: "cover", position: "centre" }).webp({ quality: 82, effort: 4 }).toFile(thumbPath);
+      await sharp(part.data, { sequentialRead: true }).resize(2048, 1024, { fit: "fill", withoutEnlargement: true }).webp({ quality: 86, effort: 3 }).toFile(editorPreviewPath);
     } catch (error) {
       throw createError({ statusCode: 500, statusMessage: `L\u1ED7i t\u1EA1o thumbnail: ${(_b = error == null ? void 0 : error.message) != null ? _b : String(error)}` });
     }
     results.push({
       original: `/uploads/${fileName}`,
       thumbnail: `/thumbnails/${thumbName}`,
+      editorPreview: `/editor-previews/${editorPreviewName}`,
       width: meta.width,
       height: meta.height
     });

@@ -8,6 +8,7 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import type { TourConfig, TourScene, TourMarker } from '~/types/tour';
+import { generateAutoMap } from './autoMapGenerator';
 
 // Lazy-load schema — avoid importing JSON at module level in Nitro
 let _ajv: Ajv | null = null;
@@ -32,8 +33,19 @@ function getValidator() {
       theme:          { type: 'string', enum: ['nature', 'minimal', 'tourism', 'urban'], default: 'nature' },
       initialSceneId: { type: 'string' },
       plugins:        { type: 'array', items: { type: 'string' } },
+      mode:           { type: 'string', enum: ['free', 'guided'] },
+      guidedDuration: { type: 'number', minimum: 0 },
+      autoRotate:     { type: 'boolean' },
+      showMinimap:    { type: 'boolean' },
+      transition:     { type: 'string', enum: ['crossfade', 'forward', 'fly-through', 'crossfade-pan'] },
+      transitionDuration: { type: 'number', minimum: 0 },
+      transitionColor: { type: 'string' },
+      thumbnailFallbackAfterMs: { type: 'number', minimum: 0 },
+      preloadEnabled: { type: 'boolean' },
+      preloadRadius:  { type: 'number', minimum: 0 },
+      minOverlayMs:   { type: 'number', minimum: 0 },
       scenes: {
-        type: 'array', minItems: 1,
+        type: 'array', minItems: 0,
         items: {
           type: 'object',
           required: ['id', 'title', 'panorama', 'thumbnail'],
@@ -43,13 +55,18 @@ function getValidator() {
             subtitle:     { type: 'string', default: '' },
             panorama:     { type: 'string', minLength: 1 },
             thumbnail:    { type: 'string', minLength: 1 },
+            editorPanorama: { type: 'string', minLength: 1 },
             initialYaw:   { type: 'number', default: 0 },
             initialPitch: { type: 'number', default: 0 },
+            defaultCameraEnabled: { type: 'boolean', default: false },
+            panoramaRotation: { type: 'number', default: 0 },
             brightness:   { type: 'number', minimum: 0.5, maximum: 2, default: 1.25 },
+            highlightCompression: { type: 'number', minimum: 0, maximum: 1, default: 0 },
             coordinates:  {
               type: 'array', minItems: 2, maxItems: 2,
               items: { type: 'number' },
             },
+            showOnMap:    { type: 'boolean', default: false },
             markers:      { type: 'array', default: [] },
           },
         },
@@ -101,10 +118,15 @@ export function compileTour(raw: unknown): CompileResult {
       subtitle:     s.subtitle ?? '',
       panorama:     s.panorama,
       thumbnail:    s.thumbnail,
+      editorPanorama: s.editorPanorama,
       initialYaw:   s.initialYaw ?? 0,
       initialPitch: s.initialPitch ?? 0,
+      defaultCameraEnabled: s.defaultCameraEnabled ?? false,
+      panoramaRotation: s.panoramaRotation ?? 0,
       brightness:   s.brightness ?? 1.25,
+      highlightCompression: s.highlightCompression ?? 0,
       coordinates:  s.coordinates,
+      showOnMap:    s.showOnMap ?? false,
       markers,
     } satisfies TourScene;
   });
@@ -137,6 +159,7 @@ export function compileTour(raw: unknown): CompileResult {
     preloadEnabled: data.preloadEnabled,
     preloadRadius: data.preloadRadius,
     minOverlayMs: data.minOverlayMs,
+    map: data.map ?? generateAutoMap(scenes),
     scenes,
   };
 

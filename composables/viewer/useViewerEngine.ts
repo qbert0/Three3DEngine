@@ -13,6 +13,7 @@ import type { Ref } from 'vue';
 import { View360Engine } from '~/core/three/engine/View360Engine';
 import type { EngineDiagnostics } from '~/core/three/engine/View360Engine';
 import { MarkerPlugin } from '~/core/three/plugins/MarkerPlugin';
+import { MapPlugin } from '~/core/three/plugins/MapPlugin';
 import { AutorotatePlugin } from '~/core/three/plugins/AutorotatePlugin';
 import type { TourScene, TourMarker, TourConfig } from '~/types/tour';
 import type { TransitionStyle } from '~/core/three/engine/PanoSphere';
@@ -24,7 +25,7 @@ export type QualityMode = 'performance' | 'balanced' | 'quality' | 'native';
 
 export interface ViewerEngineOptions {
   /** Called when user clicks a navigation marker */
-  onNavigate: (sceneId: string) => void;
+  onNavigate: (sceneId: string, yaw?: number, pitch?: number) => void;
   /** Called when user clicks a non-navigation marker */
   onMarkerClick?: (marker: TourMarker) => void;
   /** Enable auto-rotate after idle */
@@ -56,6 +57,8 @@ export function useViewerEngine(options: ViewerEngineOptions) {
   const isTransitioning = ref(false);
   const errorMessage = ref('');
   const currentScene = ref<TourScene | null>(null);
+  const mapAvailable = ref(false);
+  const isMapVisible = ref(false);
   /** True while the intro countdown (delay before auto-start) is running */
   const isInCountdown = ref(false);
   /** Remaining ms in countdown (0–introDelay), updated every 100ms */
@@ -82,19 +85,90 @@ export function useViewerEngine(options: ViewerEngineOptions) {
         container,
         introDelay: options.introDelay ?? 0,
         pano: {
-          defaultTransition: options.transition ?? 'crossfade',
-          transitionDuration: tour?.transitionDuration ?? 900,
+          defaultTransition: tour?.transition ?? options.transition ?? 'crossfade',
+          transitionDuration: tour?.transitionDuration ?? 1200,
         },
       });
 
       // ── Register plugins ──
       e.use(new MarkerPlugin());
+
+      // Map plugin — auto-enabled when tour has map config
+      if (tour?.map) {
+        try {
+          const sceneById = new Map(tour.scenes.map(scene => [scene.id, scene]));
+          // `tour` comes from useFetch and can be a Vue Proxy. structuredClone
+          // throws DataCloneError for proxies and used to abort the whole viewer.
+          const viewerMap = JSON.parse(JSON.stringify(tour.map)) as NonNullable<TourConfig['map']>;
+
+          // The real-map editor stores the pin choice on each scene. New tours
+          // can therefore legitimately have `floors: []`; build the runtime
+          // node collection from the selected scenes instead of falling back
+          // to an empty 2D floorplan (which only renders a black canvas).
+          if (viewerMap.floors.length === 0) {
+            viewerMap.floors.push({
+              id: '__geo__',
+              name: 'Bản đồ',
+              shortName: 'Map',
+              imageUrl: '',
+              imageWidth: 1,
+              imageHeight: 1,
+              nodes: [],
+            });
+          }
+
+          const configuredNodeIds = new Set(
+            viewerMap.floors.flatMap(floor => floor.nodes.map(node => node.id)),
+          );
+          const geoFloor = viewerMap.floors[0]!;
+          for (const scene of tour.scenes) {
+            if (
+              scene.showOnMap === true
+              && scene.coordinates
+              && !configuredNodeIds.has(scene.id)
+            ) {
+              geoFloor.nodes.push({
+                id: scene.id,
+                name: scene.title,
+                x: 0,
+                y: 0,
+                longitude: scene.coordinates[0],
+                latitude: scene.coordinates[1],
+                visible: true,
+                neighbors: [],
+              });
+              configuredNodeIds.add(scene.id);
+            }
+          }
+
+          for (const floor of viewerMap.floors) {
+            for (const node of floor.nodes) {
+              const scene = sceneById.get(node.id);
+              const coordinates = scene?.coordinates;
+              node.visible = scene?.showOnMap === true;
+              if (coordinates) {
+                node.longitude = coordinates[0];
+                node.latitude = coordinates[1];
+              }
+            }
+          }
+          const mapPlugin = new MapPlugin({ defaultConfig: viewerMap });
+          e.use(mapPlugin);
+          mapAvailable.value = true;
+          isMapVisible.value = mapPlugin.isVisible();
+        } catch (mapError) {
+          // The map is supplemental UI. It must never prevent the panorama
+          // engine from starting when its configuration is malformed.
+          console.error('[useViewerEngine] Không thể khởi tạo MapPlugin:', mapError);
+        }
+      }
+
       if (options.autorotate ?? tour?.autoRotate) {
         e.use(new AutorotatePlugin({ speed: 0.3 }));
       }
 
       // ── Wire events to callbacks ──
-      e.bus.on('navigate', ({ sceneId }) => options.onNavigate(sceneId));
+      e.bus.on('navigate', ({ sceneId, yaw, pitch }) => options.onNavigate(sceneId, yaw, pitch));
 
       e.bus.on('marker:click', ({ marker }) => {
         if (marker.plugin !== 'navigation') {
@@ -114,6 +188,9 @@ export function useViewerEngine(options: ViewerEngineOptions) {
       e.bus.on('scene:loaded', ({ scene }) => {
         currentScene.value = scene;
         isLoading.value = false;
+      });
+      e.bus.on('map:visibility', ({ visible }) => {
+        isMapVisible.value = visible;
       });
 
       // ── Intro countdown state ──
@@ -214,6 +291,12 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     engine.value?.setQualityMode(mode);
   }
 
+  function toggleMap(): void {
+    const plugin = engine.value?.getPlugin<MapPlugin>('map');
+    if (!plugin) return;
+    plugin.setVisible(!plugin.isVisible());
+  }
+
   // ── Cleanup ────────────────────────────────────────────────────
 
   function destroyEngine(): void {
@@ -221,6 +304,8 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     engine.value = null;
     preloaded.clear();
     currentScene.value = null;
+    mapAvailable.value = false;
+    isMapVisible.value = false;
   }
 
   // Auto-cleanup when parent component unmounts
@@ -234,6 +319,8 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     isTransitioning: readonly(isTransitioning),
     errorMessage: readonly(errorMessage),
     currentScene: readonly(currentScene),
+    mapAvailable: readonly(mapAvailable),
+    isMapVisible: readonly(isMapVisible),
 
     // Actions
     initEngine,
@@ -243,5 +330,6 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     // Dev tools
     getDiagnostics,
     setQualityMode,
+    toggleMap,
   };
 }

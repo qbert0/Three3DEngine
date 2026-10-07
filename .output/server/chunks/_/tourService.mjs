@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/_/tourService');import { l as listTours, b as loadTour } from './yamlLoader.mjs';
+globalThis.__timing__.logStart('Load chunks/_/tourService');import { b as listTours, l as loadTour } from './yamlLoader.mjs';
 
 const tourService = {
   /** Get a single tour by slug. Returns null if not found. */

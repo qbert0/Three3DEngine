@@ -57,11 +57,12 @@ onBeforeUnmount(() => store.reset());
 // ── Three.js Engine Bridge ────────────────────────────────────────────────────
 const canvasContainerRef = ref<HTMLElement | null>(null);
 const { isLoading: engineLoading, isTransitioning, errorMessage: engineError,
-        currentScene: engineScene, initEngine, navigateTo,
+        currentScene: engineScene, mapAvailable, isMapVisible,
+        initEngine, navigateTo, toggleMap,
         getDiagnostics, setQualityMode } = useViewerEngine({
-  onNavigate: (sceneId) => handleNavigate(sceneId),
+  onNavigate: (sceneId, yaw, pitch) => handleNavigate(sceneId, yaw, pitch),
   autorotate: computed(() => tour.value?.autoRotate ?? false).value,
-  transition: 'crossfade',
+  transition: 'forward',
 });
 
 // Mount engine once canvas container is available
@@ -71,10 +72,13 @@ watch(canvasContainerRef, async (el) => {
 }, { once: true });
 
 // Navigate engine when activeSceneId changes (from UI)
+const pendingFlyDirection = ref<{ yaw?: number; pitch?: number } | null>(null);
 watch(activeSceneId, async (id) => {
   const scene = scenes.value.find(s => s.id === id);
   if (!scene || !engineScene.value || engineScene.value.id === id) return;
-  await navigateTo(scene, scenes.value);
+  const direction = pendingFlyDirection.value;
+  pendingFlyDirection.value = null;
+  await navigateTo(scene, scenes.value, direction?.yaw, direction?.pitch);
 });
 
 // ── Dev tools state (chỉ dùng trong development) ───────────────────────────
@@ -98,51 +102,18 @@ const showHelpPanel = ref(false);
 const showInfoPanel = ref(false);
 const infoPanelTitle = ref('');
 const infoPanelContent = ref('');
-const isCompassActive = ref(false);
 
 const isDockCollapsed = ref(true); // Collapsed by default as in design/viewer.html
-const dockEl = ref<HTMLElement | null>(null);
 const sceneStripEl = ref<HTMLElement | null>(null);
-let dockAutoCollapseTimer: ReturnType<typeof setTimeout> | null = null;
 
 const sceneIndex = computed(() =>
   scenes.value.findIndex(s => s.id === activeSceneId.value) + 1,
 );
 
-// ── Dock Collapsibility & Timers ──────────────────────────────────────────────
-function setDockCollapsed(collapsed: boolean) {
-  isDockCollapsed.value = collapsed;
-  if (dockAutoCollapseTimer) clearTimeout(dockAutoCollapseTimer);
-  if (!collapsed) {
-    // Auto collapse after 6s of no interaction
-    dockAutoCollapseTimer = setTimeout(() => {
-      if (dockEl.value && !dockEl.value.matches(':hover')) {
-        setDockCollapsed(true);
-      }
-    }, 6000);
-  }
-}
-
+// The dock state changes only through explicit user interaction. Scene
+// navigation must never reveal or hide it automatically.
 function toggleDock() {
-  setDockCollapsed(!isDockCollapsed.value);
-}
-
-function handleDockMouseEnter() {
-  if (dockAutoCollapseTimer) clearTimeout(dockAutoCollapseTimer);
-}
-
-function handleDockMouseLeave() {
-  if (!isDockCollapsed.value) {
-    dockAutoCollapseTimer = setTimeout(() => setDockCollapsed(true), 2000);
-  }
-}
-
-function flashDock() {
-  if (isDockCollapsed.value) {
-    isDockCollapsed.value = false;
-    if (dockAutoCollapseTimer) clearTimeout(dockAutoCollapseTimer);
-    dockAutoCollapseTimer = setTimeout(() => setDockCollapsed(true), 4000);
-  }
+  isDockCollapsed.value = !isDockCollapsed.value;
 }
 
 function scrollStripTo(idx: number) {
@@ -156,13 +127,13 @@ function scrollStripTo(idx: number) {
 }
 
 // ── Navigation handlers ───────────────────────────────────────────────────────
-function handleNavigate(sceneId: string) {
+function handleNavigate(sceneId: string, yaw?: number, pitch?: number) {
   if (sceneId === activeSceneId.value) return;
+  pendingFlyDirection.value = { yaw, pitch };
   const targetScene = scenes.value.find(s => s.id === sceneId);
   activeSceneId.value = sceneId;
   const idx = scenes.value.findIndex(s => s.id === sceneId);
   if (idx >= 0) scrollStripTo(idx);
-  flashDock();
   if (targetScene) {
     toast.show({ message: `Đã chuyển đến: ${targetScene.title}` });
   }
@@ -182,6 +153,11 @@ function goToNextScene() {
   handleNavigate(scenes.value[nextIdx].id);
 }
 
+function selectSceneFromDock(sceneId: string) {
+  handleNavigate(sceneId);
+  isDockCollapsed.value = true;
+}
+
 // ── Panel Toggles ─────────────────────────────────────────────────────────────
 function toggleHelpPanel() {
   showInfoPanel.value = false;
@@ -198,17 +174,6 @@ function handleInfoOpen(content: string, label: string) {
   infoPanelContent.value = content;
   showHelpPanel.value = false;
   showInfoPanel.value = true;
-}
-
-function triggerLightEffect() {
-  toast.show({ message: '✨ Đã đổi hiệu ứng ánh sáng' });
-}
-
-function toggleCompass() {
-  isCompassActive.value = !isCompassActive.value;
-  toast.show({
-    message: isCompassActive.value ? '🧭 Đã bật la bàn' : '🧭 Đã tắt la bàn',
-  });
 }
 
 async function shareTour() {
@@ -277,7 +242,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleKeyDown);
-  if (dockAutoCollapseTimer) clearTimeout(dockAutoCollapseTimer);
 });
 </script>
 
@@ -369,11 +333,25 @@ onBeforeUnmount(() => {
               <line x1="12" y1="17" x2="12.01" y2="17"/>
             </svg>
           </button>
-          <button type="button" class="tb-btn hide-mobile" title="Đổi hiệu ứng" @click="triggerLightEffect">
+          <!-- Tạm ẩn bộ chọn địa điểm theo yêu cầu. Không render trigger để
+               tránh mở lại bất kỳ khung scene nào ở cạnh dưới viewer.
+          <button
+            v-if="scenes.length > 1"
+            type="button"
+            class="tb-btn"
+            title="Mở danh sách địa điểm"
+            aria-label="Mở danh sách địa điểm"
+            @click="toggleDock"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6 2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6 2.1-2.1"/>
+              <rect x="3" y="4" width="7" height="6" rx="1"/>
+              <rect x="14" y="4" width="7" height="6" rx="1"/>
+              <rect x="3" y="14" width="7" height="6" rx="1"/>
+              <rect x="14" y="14" width="7" height="6" rx="1"/>
             </svg>
+            <span class="hide-mobile">Địa điểm</span>
           </button>
+          -->
           <button type="button" class="tb-btn icon-only" title="Chế độ toàn cảnh (nhấn F)" @click="toggleImmersive">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
@@ -484,17 +462,25 @@ onBeforeUnmount(() => {
       </aside>
 
       <!-- ═══ FLOATING ACTIONS ═══ -->
-      <div class="fab-stack">
+      <div :class="['fab-stack', { 'map-open': isMapVisible }]">
+        <button
+          v-if="mapAvailable"
+          type="button"
+          :class="['fab', { active: isMapVisible }]"
+          title="Bật/tắt bản đồ"
+          aria-label="Bật/tắt bản đồ"
+          @click="toggleMap"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/>
+            <line x1="9" y1="3" x2="9" y2="18"/>
+            <line x1="15" y1="6" x2="15" y2="21"/>
+          </svg>
+        </button>
         <button type="button" class="fab" title="Thông tin địa điểm" aria-label="Thông tin địa điểm" @click="toggleInfoPanel">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
             <circle cx="12" cy="7" r="1.8" fill="currentColor" stroke="none"/>
             <path d="M12 11 L12 18"/>
-          </svg>
-        </button>
-        <button type="button" :class="['fab', { active: isCompassActive }]" title="La bàn" aria-label="La bàn" @click="toggleCompass">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor" opacity="0.6"/>
           </svg>
         </button>
         <button type="button" class="fab" title="Chia sẻ" aria-label="Chia sẻ" @click="shareTour">
@@ -515,48 +501,27 @@ onBeforeUnmount(() => {
         </svg>
       </button>
 
-      <!-- ═══ BOTTOM DOCK ═══ -->
-      <div
-        ref="dockEl"
-        :class="['dock', { collapsed: isDockCollapsed }]"
-        @mouseenter="handleDockMouseEnter"
-        @mouseleave="handleDockMouseLeave"
+      <!-- Tạm ẩn toàn bộ khung chọn địa điểm phía dưới theo yêu cầu.
+      <button
+        v-if="scenes.length > 1 && !isDockCollapsed"
+        type="button"
+        class="scene-picker-scrim"
+        aria-label="Đóng danh sách địa điểm"
+        @click="isDockCollapsed = true"
+      />
+      <aside
+        v-if="scenes.length > 1"
+        :class="['scene-picker', { open: !isDockCollapsed }]"
+        aria-label="Danh sách địa điểm"
       >
-        <!-- Nút toggle -->
-        <button
-          type="button"
-          class="dock-toggle"
-          aria-label="Mở/đóng danh sách cảnh"
-          title="Mở/đóng danh sách cảnh (D)"
-          @click.stop="toggleDock"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m18 15-6-6-6 6"/>
-          </svg>
-        </button>
-
-        <div class="dock-head">
-          <div class="dock-label">
-            <span class="dock-label-dot"></span>
-            <span>{{ scenes.length }} cảnh · {{ tour.title }}</span>
+        <div class="scene-picker-head">
+          <div>
+            <strong>Chọn địa điểm</strong>
+            <span>{{ scenes.length }} cảnh trong {{ tour.title }}</span>
           </div>
-          <div class="dock-actions">
-            <button type="button" class="dock-btn" title="Cảnh trước" @click="goToPrevScene">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m15 18-6-6 6-6"/>
-              </svg>
-              <span>Trước</span>
-            </button>
-            <button type="button" class="dock-btn" title="Cảnh sau" @click="goToNextScene">
-              <span>Sau</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m9 18 6-6-6-6"/>
-              </svg>
-            </button>
-          </div>
+          <button type="button" aria-label="Đóng" @click="isDockCollapsed = true">×</button>
         </div>
-
-        <div ref="sceneStripEl" class="scene-strip">
+        <div ref="sceneStripEl" class="scene-strip scene-picker-list">
           <button
             v-for="(scene, idx) in scenes"
             :key="scene.id"
@@ -565,14 +530,15 @@ onBeforeUnmount(() => {
             :class="['scene-thumb', { active: scene.id === activeSceneId }]"
             :aria-label="`Xem: ${scene.title}`"
             :title="scene.title"
-            @click="handleNavigate(scene.id)"
+            @click="selectSceneFromDock(scene.id)"
           >
             <img :src="scene.thumbnail" :alt="scene.title" loading="lazy" />
             <span class="scene-thumb-num">{{ idx + 1 }}</span>
             <span class="scene-thumb-name">{{ scene.title }}</span>
           </button>
         </div>
-      </div>
+      </aside>
+      -->
     </template>
   </div>
 </template>
@@ -582,6 +548,8 @@ onBeforeUnmount(() => {
 .viewer-root {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -876,6 +844,10 @@ onBeforeUnmount(() => {
 }
 
 /* ═══ BOTTOM DOCK (Scene strip) ═══ */
+.scene-picker-scrim{position:absolute;inset:0;z-index:23;border:0;background:rgba(0,0,0,.12)}
+.scene-picker{position:absolute;z-index:24;left:50%;bottom:18px;width:min(760px,calc(100vw - 32px));padding:12px;border:1px solid var(--glass-border-strong);border-radius:16px;background:rgba(10,10,10,.86);box-shadow:var(--shadow-lg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);opacity:0;transform:translate(-50%,calc(100% + 30px));pointer-events:none;transition:transform .3s var(--ease-out),opacity .22s ease}
+.scene-picker.open{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.scene-picker-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:1px 2px 10px;color:#fff}.scene-picker-head>div{display:flex;flex-direction:column;gap:2px;min-width:0}.scene-picker-head strong{font-size:13px}.scene-picker-head span{overflow:hidden;color:var(--text-3);font-size:10px;text-overflow:ellipsis;white-space:nowrap}.scene-picker-head button{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08);color:#fff;font-size:22px;line-height:1}.scene-picker-list{padding-bottom:2px}
 .dock {
   position: absolute;
   bottom: 0;
@@ -892,8 +864,11 @@ onBeforeUnmount(() => {
 }
 
 .dock.collapsed {
-  transform: translateY(calc(100% - 28px));
-  opacity: 0.85;
+  /* Move the complete gradient/content area below the viewport. The toggle is
+     pulled back independently, so no black strip remains over the panorama. */
+  transform: translateY(100%);
+  opacity: 1;
+  background: transparent;
 }
 .dock.collapsed:hover {
   opacity: 1;
@@ -934,6 +909,9 @@ onBeforeUnmount(() => {
 }
 .dock.collapsed .dock-toggle svg {
   transform: rotate(180deg);
+}
+.dock.collapsed .dock-toggle {
+  top: -28px;
 }
 
 .dock.collapsed .dock-head,
@@ -1087,6 +1065,7 @@ onBeforeUnmount(() => {
   gap: 8px;
   transition: opacity 0.3s, transform 0.3s;
 }
+.fab-stack.map-open{bottom:252px}
 .fab {
   width: 42px;
   height: 42px;
@@ -1123,6 +1102,8 @@ onBeforeUnmount(() => {
 /* ═══ IMMERSIVE MODE ═══ */
 .viewer-root.immersive .topbar,
 .viewer-root.immersive .dock,
+.viewer-root.immersive .scene-picker,
+.viewer-root.immersive .scene-picker-scrim,
 .viewer-root.immersive .fab-stack,
 .viewer-root.immersive .side-panel {
   opacity: 0;
@@ -1184,6 +1165,8 @@ onBeforeUnmount(() => {
     bottom: 130px;
     right: 12px;
   }
+  .fab-stack.map-open{bottom:250px}
+  .scene-picker{bottom:10px;width:calc(100vw - 20px);padding:10px}
   .dock {
     padding: 12px 12px 10px;
   }

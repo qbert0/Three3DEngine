@@ -1,13 +1,58 @@
 <script setup lang="ts">
+import type { TourEntry } from '~/types/tour';
+
 definePageMeta({ layout: 'editor', ssr: false });
 useHead({ title: 'Admin — Quản lý Tour · View360' });
 
-const { data } = await useFetch<{ items: any[] }>('/api/tours');
+const { data, refresh } = await useFetch<{ items: TourEntry[] }>('/api/tours');
 const tours = computed(() => data.value?.items ?? []);
+const creatingTour = ref(false);
+const deletingTourSlug = ref<string | null>(null);
+const { show: showToast } = useToast();
 
 const totalScenes = computed(() =>
-  tours.value.reduce((sum: number, t: any) => sum + (t.sceneCount ?? 0), 0),
+  tours.value.reduce((sum, tour) => sum + (tour.sceneCount ?? 0), 0),
 );
+
+function adminTourTarget(tour: TourEntry): string {
+  return tour.firstSceneId
+    ? `/admin/${tour.slug}/${tour.firstSceneId}`
+    : `/admin/${tour.slug}`;
+}
+
+async function createEmptyTour() {
+  if (creatingTour.value) return;
+  creatingTour.value = true;
+  try {
+    const result = await $fetch<{ ok: boolean; slug: string }>('/api/admin/tours', {
+      method: 'POST',
+    });
+    showToast({ message: 'Đã tạo tour rỗng', variant: 'success' });
+    await navigateTo(`/admin/${result.slug}`);
+  } catch (error: any) {
+    const message = error?.data?.statusMessage ?? error?.statusMessage ?? error?.message ?? 'Không thể tạo tour';
+    showToast({ message, variant: 'error' });
+  } finally {
+    creatingTour.value = false;
+  }
+}
+
+async function deleteSelectedTour(tour: TourEntry) {
+  if (deletingTourSlug.value) return;
+  if (!confirm(`Xóa tour “${tour.title}”?\n\nFile cấu hình tour sẽ bị xóa và không thể hoàn tác.`)) return;
+
+  deletingTourSlug.value = tour.slug;
+  try {
+    await $fetch(`/api/admin/tours/${tour.slug}`, { method: 'DELETE' });
+    await refresh();
+    showToast({ message: `Đã xóa tour “${tour.title}”`, variant: 'success' });
+  } catch (error: any) {
+    const message = error?.data?.statusMessage ?? error?.statusMessage ?? error?.message ?? 'Không thể xóa tour';
+    showToast({ message, variant: 'error' });
+  } finally {
+    deletingTourSlug.value = null;
+  }
+}
 </script>
 
 <template>
@@ -44,18 +89,22 @@ const totalScenes = computed(() =>
           <h1 class="text-xl font-bold text-[--ui-color-text-primary]">Danh sách Tour</h1>
           <p class="mt-0.5 text-sm text-[--ui-color-text-muted]">Chọn tour để xem và chỉnh sửa các cảnh</p>
         </div>
-        <UiTooltip content="Thêm tour YAML vào thư mục /tours" placement="left">
+        <div class="flex items-center gap-3">
           <UiBadge variant="muted">{{ tours.length }} tour</UiBadge>
-        </UiTooltip>
+          <UiButton :loading="creatingTour" @click="createEmptyTour">+ Tạo tour</UiButton>
+        </div>
       </div>
 
       <!-- ── Tour grid ──────────────────────────────────────────────────────── -->
       <div v-if="tours.length" class="grid gap-4 sm:grid-cols-2">
-        <NuxtLink
+        <div
           v-for="tour in tours"
           :key="tour.slug"
-          :to="`/admin/${tour.slug}`"
-          class="block group"
+          class="block group cursor-pointer"
+          role="link"
+          tabindex="0"
+          @click="navigateTo(adminTourTarget(tour))"
+          @keydown.enter="navigateTo(adminTourTarget(tour))"
         >
           <UiCard variant="surface" padding="md" :hoverable="true" class="h-full transition-all group-hover:ring-[--ui-color-brand]/30">
             <div class="flex items-start justify-between gap-3">
@@ -91,13 +140,23 @@ const totalScenes = computed(() =>
                   {{ tour.theme ?? 'nature' }}
                 </UiBadge>
               </div>
-              <span class="text-xs text-[--ui-color-text-muted] group-hover:text-[--ui-color-brand] transition-colors flex items-center gap-1">
-                Chỉnh sửa
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-              </span>
+              <div class="flex items-center gap-2">
+                <UiButton
+                  v-if="tour.slug !== 'trang-bay'"
+                  variant="danger"
+                  size="sm"
+                  :loading="deletingTourSlug === tour.slug"
+                  @click.stop="deleteSelectedTour(tour)"
+                  @keydown.stop
+                >Xóa</UiButton>
+                <span class="text-xs text-[--ui-color-text-muted] group-hover:text-[--ui-color-brand] transition-colors flex items-center gap-1">
+                  Chỉnh sửa
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </span>
+              </div>
             </div>
           </UiCard>
-        </NuxtLink>
+        </div>
       </div>
 
       <!-- ── Empty state ────────────────────────────────────────────────────── -->
@@ -105,12 +164,10 @@ const totalScenes = computed(() =>
         <UiEmptyState
           icon="🗺️"
           title="Chưa có tour nào"
-          description="Thêm file .yaml vào thư mục /tours để bắt đầu tạo tour 360°."
+          description="Tạo một tour rỗng để bắt đầu xây dựng trải nghiệm 360°."
         >
           <template #actions>
-            <UiTooltip content="Xem tài liệu cú pháp YAML" placement="top">
-              <UiButton variant="secondary" size="sm">Xem hướng dẫn</UiButton>
-            </UiTooltip>
+            <UiButton size="sm" :loading="creatingTour" @click="createEmptyTour">+ Tạo tour đầu tiên</UiButton>
           </template>
         </UiEmptyState>
       </UiCard>

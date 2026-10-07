@@ -32,9 +32,33 @@ export interface NavigationMarker extends PlaneMarkerScale {
    * `rotation` is kept for backward compatibility (alias for rotZ).
    */
   rotation?: number;   // backward compat = rotZ
-  rotZ?: number;
-  rotX?: number;
-  rotY?: number;
+  rotZ?: number; // navigation arrow default: 0
+  rotX?: number; // navigation arrow default: PI/3 (60°)
+  rotY?: number; // navigation arrow default: 0
+
+  /**
+   * Display mode for navigation marker:
+   *   - `'arrow'` (default) — animated navigation arrow
+   *   - `'location-1'` — rounded location pin
+   *   - `'location-2'` — narrow location pin with a longer tail
+   *
+   * `arrow-1`, `arrow-2`, `pin`, `pin-top` and `anchor` are retained only
+   * for backward compatibility with tours saved by older editor versions.
+   */
+  icon?: 'arrow' | 'location-1' | 'location-2' | 'arrow-1' | 'arrow-2' | 'pin' | 'pin-top' | 'anchor';
+  /** Location-pin color (CSS color string). Default: '#171717'. */
+  pinColor?: string;
+  /**
+   * Optional URL to an image embedded inside the pin as a circular inset.
+   * Only used when `icon` is `'pin'`. Typically the thumbnail of the target scene.
+   */
+  iconUrl?: string;
+  /** Pin display size in world units (default 65). Only used in pin mode. */
+  iconSize?: number;
+
+  /** Tên điểm (fallback cho label) */
+  name?: string;
+
 }
 
 /** Info marker — shows a text popup */
@@ -153,11 +177,21 @@ export interface TourScene {
   subtitle: string;
   panorama: string;
   thumbnail: string;
+  /** Lower-resolution 2:1 panorama used only by the admin designer. */
+  editorPanorama?: string;
   initialYaw: number;
   initialPitch: number;
+  /** Apply initialYaw/initialPitch whenever the viewer enters this scene. */
+  defaultCameraEnabled?: boolean;
+  /** Rotation of the panorama and its scene markers in world space, radians. */
+  panoramaRotation?: number;
   /** Panorama brightness multiplier. 1 = original, recommended range 0.6–1.6. */
   brightness?: number;
+  /** Soft highlight roll-off. 0 = original, 1 = strongest compression. */
+  highlightCompression?: number;
   coordinates?: [number, number];
+  /** Persist this scene as a public map point. Current scene is always shown. */
+  showOnMap?: boolean;
   markers: TourMarker[];
 }
 
@@ -175,13 +209,15 @@ export interface TourConfig {
   guidedDuration?: number;   // seconds per scene in guided mode
   autoRotate?: boolean;      // auto rotate panorama
   showMinimap?: boolean;     // show mini map
-  transition?: 'crossfade-pan' | 'radial-blur' | 'mask-wipe' | 'vignette' | 'split-slide';
+  transition?: 'crossfade' | 'forward' | 'fly-through' | 'crossfade-pan';
   transitionDuration?: number;
   transitionColor?: string;
   thumbnailFallbackAfterMs?: number;
   preloadEnabled?: boolean;
   preloadRadius?: number;
   minOverlayMs?: number;
+  /** Multi-floor interactive map configuration */
+  map?: MapConfig;
   scenes: TourScene[];
 }
 
@@ -192,6 +228,8 @@ export interface TourEntry {
   location: string;
   summary: string;
   sceneCount: number;
+  /** Scene opened directly from the admin tour list. */
+  firstSceneId?: string;
   cover?: string;
   theme?: string;
 }

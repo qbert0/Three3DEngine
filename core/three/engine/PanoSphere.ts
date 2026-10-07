@@ -9,6 +9,7 @@ import * as THREE from 'three';
 
 export type TransitionStyle =
   | 'crossfade'         // simple opacity crossfade
+  | 'forward'           // push/zoom forward into the next panorama
   | 'fly-through'       // 3D spatial fly into next sphere
   | 'crossfade-pan';    // crossfade + camera pan drift
 
@@ -16,7 +17,9 @@ export interface PanoSphereConfig {
   radius?: number;        // sphere radius. Default 600
   segments?: number;      // lat/lon segments. Default 64/48
   defaultTransition?: TransitionStyle;
-  transitionDuration?: number;  // ms. Default 900
+  transitionDuration?: number;  // ms. Default 1200
+  /** Maximum decoded panorama textures retained in memory. 0 disables cache. Default: 4. */
+  maxCachedTextures?: number;
 }
 
 // ── GLSL Shaders (PSV-compatible raycast approach) ────────────────────────
@@ -30,9 +33,13 @@ const VERTEX_SHADER = /* glsl */`
 
   void main() {
     vLocalPos = position;
-    // mat3(modelMatrix) is a pure rotation (no scale/translate);
-    // camera in local space = transpose(R) * cameraPosition
-    vLocalCam = cameraPosition * mat3(modelMatrix);
+    // Convert the world-space camera into this sphere's local coordinates.
+    // Subtracting the model translation is essential during a walk transition:
+    // the incoming panorama has its own centre in front of the current one.
+    // With Three's orthonormal rotation matrix, row-vector multiplication by R
+    // is equivalent to applying inverse(R) to the world-space displacement.
+    vec3 sphereWorldCentre = modelMatrix[3].xyz;
+    vLocalCam = (cameraPosition - sphereWorldCentre) * mat3(modelMatrix);
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
@@ -44,6 +51,7 @@ const FRAGMENT_SHADER = /* glsl */`
   uniform float opacity;
   uniform float radius;
   uniform float brightness;
+  uniform float highlightCompression;
 
   const float PI = 3.14159265358979323846;
 
@@ -62,7 +70,21 @@ const FRAGMENT_SHADER = /* glsl */`
 
     gl_FragColor = texture2D(map, vec2(u, v));
     gl_FragColor.rgb *= brightness;
+
+    // Roll off only harsh highlights while preserving normal mid-tones.
+    float luminance = dot(gl_FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    const float highlightStart = 0.55;
+    float excess = max(luminance - highlightStart, 0.0);
+    float compressedLuminance = highlightStart
+      + excess / (1.0 + highlightCompression * excess * 5.0);
+    if (luminance > highlightStart) {
+      gl_FragColor.rgb *= compressedLuminance / luminance;
+    }
     gl_FragColor.a *= opacity;
+    // Texture sampling is performed in linear space. Convert the final colour
+    // back to the renderer output colour space; without this, mid-tones appear
+    // much darker and more contrasty than the original sRGB panorama.
+    #include <colorspace_fragment>
   }
 `;
 
@@ -81,9 +103,10 @@ export class PanoSphere {
   private readonly defaultTransition: TransitionStyle;
 
   private isTransitioning = false;
+  private immediateLoadGeneration = 0;
   private textureCache = new Map<string, THREE.Texture>();
   private pendingTextures = new Map<string, Promise<THREE.Texture>>();
-  private readonly maxCachedTextures = 4;
+  private readonly maxCachedTextures: number;
 
   /** Dimensions of the most-recently-loaded source image */
   private lastTextureInfo: { srcWidth: number; srcHeight: number; url: string } | null = null;
@@ -104,12 +127,16 @@ export class PanoSphere {
         opacity: { value: opacity },
         radius:  { value: this.radius },
         brightness: { value: 1.25 },
+        highlightCompression: { value: 0 },
       },
       vertexShader:   VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
       side:        THREE.BackSide,  // camera is inside sphere
       transparent: true,
       depthWrite:  false,
+      // Panorama photographs are already colour graded. Do not apply the
+      // renderer's cinematic ACES curve a second time.
+      toneMapped: false,
     });
   }
 
@@ -119,8 +146,9 @@ export class PanoSphere {
     this.textureLoader = new THREE.TextureLoader();
 
     this.radius = config.radius ?? 600;
-    this.transitionDuration = config.transitionDuration ?? 900;
+    this.transitionDuration = config.transitionDuration ?? 1200;
     this.defaultTransition = config.defaultTransition ?? 'crossfade';
+    this.maxCachedTextures = Math.max(0, Math.floor(config.maxCachedTextures ?? 4));
 
     const segsW = config.segments ?? 128;  // higher tessellation for fisheye
     const segsH = Math.round(segsW * 0.75);
@@ -130,6 +158,10 @@ export class PanoSphere {
 
     this.sphereA = new THREE.Mesh(geo,        this.makeShaderMat(1));
     this.sphereB = new THREE.Mesh(geo.clone(), this.makeShaderMat(0));
+    // Both meshes occupy the same sphere. Force the old panorama to render as
+    // the opaque-looking base and the incoming panorama to composite over it.
+    this.sphereA.renderOrder = 0;
+    this.sphereB.renderOrder = 1;
     this.sphereB.visible = false;
 
     this.scene.add(this.sphereA);
@@ -137,6 +169,7 @@ export class PanoSphere {
   }
 
   get busy(): boolean { return this.isTransitioning; }
+  get transitionStyle(): TransitionStyle { return this.defaultTransition; }
 
   /** Adjust panorama luminance without resizing or recompressing the source. */
   setBrightness(value: number): void {
@@ -145,12 +178,28 @@ export class PanoSphere {
     this.sphereB.material.uniforms.brightness.value = brightness;
   }
 
+  /** Compress harsh highlights without darkening the complete panorama. */
+  setHighlightCompression(value: number): void {
+    const compression = Math.max(0, Math.min(1, value));
+    this.sphereA.material.uniforms.highlightCompression.value = compression;
+    this.sphereB.material.uniforms.highlightCompression.value = compression;
+  }
+
+  /** Rotate the active panorama in world space without moving the camera. */
+  setRotation(rotation: number): void {
+    this.sphereA.rotation.y = rotation;
+  }
+
   // ── Texture Loading ────────────────────────────────────────────
 
   /**
    * Preload a texture into GPU VRAM. Cached so same URL is never loaded twice.
    */
   async preload(url: string): Promise<THREE.Texture> {
+    // Designer mode deliberately bypasses the panorama cache. It needs only
+    // the currently displayed texture, not viewer-style scene preloading.
+    if (this.maxCachedTextures === 0) return this.loadTexture(url);
+
     if (this.textureCache.has(url)) {
       const cached = this.textureCache.get(url)!;
       // Refresh insertion order so Map also acts as a small LRU cache.
@@ -172,12 +221,33 @@ export class PanoSphere {
   /**
    * Set the panorama instantly (no transition).
    */
-  async setImmediate(url: string): Promise<void> {
+  async setImmediate(url: string, rotation = 0): Promise<boolean> {
+    const generation = ++this.immediateLoadGeneration;
     const tex = await this.preload(url);
+    // Rapid scene clicks can complete out of order. A stale request must not
+    // replace the most recently requested admin scene or leak its texture.
+    if (generation !== this.immediateLoadGeneration) {
+      if (this.maxCachedTextures === 0) this.disposeTexture(tex);
+      return false;
+    }
+    const previousTexture = this.sphereA.material.uniforms.map.value as THREE.Texture;
     this.sphereA.material.uniforms.map.value     = tex;
     this.sphereA.material.uniforms.opacity.value = 1;
     this.sphereA.position.set(0, 0, 0);
+    this.sphereA.rotation.y = rotation;
     this.sphereB.visible = false;
+    // Immediate loads (notably the admin designer) do not need the previous
+    // transition texture. Releasing this reference allows the LRU to dispose
+    // the old full-resolution panorama straight away.
+    this.sphereB.material.uniforms.map.value = PanoSphere.blankTex;
+    if (this.maxCachedTextures === 0) {
+      if (previousTexture !== tex && previousTexture !== PanoSphere.blankTex) {
+        this.disposeTexture(previousTexture);
+      }
+    } else {
+      this.trimTextureCache();
+    }
+    return true;
   }
 
   /**
@@ -218,13 +288,20 @@ export class PanoSphere {
     style: TransitionStyle = this.defaultTransition,
     direction?: THREE.Vector3,
     onProgress?: (p: number) => void,
+    rotation = 0,
   ): Promise<void> {
     if (this.isTransitioning) return;
     this.isTransitioning = true;
 
     const newTex = await this.preload(url);
+    // The incoming panorama is oriented in world space before it becomes
+    // visible, so crossfade never exposes an incorrectly aligned frame.
+    this.sphereB.rotation.y = rotation;
 
     switch (style) {
+      case 'forward':
+        await this.doForward(newTex, direction, onProgress);
+        break;
       case 'fly-through':
         await this.doFlyThrough(newTex, direction, onProgress);
         break;
@@ -243,7 +320,11 @@ export class PanoSphere {
   // ── Dispose ────────────────────────────────────────────────────
 
   dispose(): void {
-    this.textureCache.forEach((t) => t.dispose());
+    const textures = new Set<THREE.Texture>(this.textureCache.values());
+    textures.add(this.sphereA.material.uniforms.map.value as THREE.Texture);
+    textures.add(this.sphereB.material.uniforms.map.value as THREE.Texture);
+    textures.delete(PanoSphere.blankTex);
+    textures.forEach((texture) => this.disposeTexture(texture));
     this.textureCache.clear();
     this.pendingTextures.clear();
     this.sphereA.geometry.dispose();
@@ -260,11 +341,30 @@ export class PanoSphere {
         url,
         (tex) => {
           tex.colorSpace = THREE.SRGBColorSpace;
+          // A panorama is periodic on the horizontal axis. ClampToEdge leaves
+          // a one-pixel line where U jumps from 1 back to 0, especially when
+          // mipmaps are sampled. Repeat lets filtering cross that seam.
+          tex.wrapS = THREE.RepeatWrapping;
+          tex.wrapT = THREE.ClampToEdgeWrapping;
+          // The custom raycast shader has a derivative discontinuity exactly
+          // where equirectangular U wraps from 1 back to 0. Mipmapping can
+          // therefore select a different level at that longitude, producing a
+          // bright vertical streak which appears/disappears as the camera
+          // rotates. Sample the source level directly for stable panorama
+          // colour at every viewing angle.
           tex.minFilter = THREE.LinearFilter;
           tex.magFilter = THREE.LinearFilter;
+          tex.generateMipmaps = false;
+          tex.anisotropy = 1;
+          tex.needsUpdate = true;
           this.renderer.initTexture(tex); // warm GPU VRAM
-          this.textureCache.set(url, tex);
-          this.trimTextureCache();
+          if (this.maxCachedTextures > 0) {
+            this.textureCache.set(url, tex);
+            // Keep the freshly loaded texture alive until its caller assigns
+            // it to a sphere; the old active texture cannot be evicted until
+            // that assignment happens.
+            this.trimTextureCache(tex);
+          }
 
           // Capture source dimensions for diagnostics
           const img = tex.image as HTMLImageElement | ImageBitmap | null;
@@ -285,18 +385,34 @@ export class PanoSphere {
   }
 
   /** Keep only nearby panoramas in GPU memory, never disposing active textures. */
-  private trimTextureCache(): void {
+  private trimTextureCache(protectedTexture?: THREE.Texture): void {
+    if (this.maxCachedTextures === 0) return;
     if (this.textureCache.size <= this.maxCachedTextures) return;
     const active = new Set<THREE.Texture>([
       this.sphereA.material.uniforms.map.value,
       this.sphereB.material.uniforms.map.value,
     ]);
+    if (protectedTexture) active.add(protectedTexture);
     for (const [url, texture] of this.textureCache) {
       if (this.textureCache.size <= this.maxCachedTextures) break;
       if (active.has(texture)) continue;
       this.textureCache.delete(url);
-      texture.dispose();
+      this.disposeTexture(texture);
     }
+  }
+
+  /** Release both GPU storage and the browser's decoded image backing store. */
+  private disposeTexture(texture: THREE.Texture): void {
+    texture.dispose();
+    const image = texture.image as HTMLImageElement | ImageBitmap | undefined;
+    if (typeof ImageBitmap !== 'undefined' && image instanceof ImageBitmap) {
+      image.close();
+      return;
+    }
+    if (typeof HTMLImageElement !== 'undefined' && image instanceof HTMLImageElement) {
+      image.src = '';
+    }
+    texture.image = null;
   }
 
   /**
@@ -324,6 +440,57 @@ export class PanoSphere {
         if (p < 1) {
           requestAnimationFrame(step);
         } else {
+          this.promoteSphereB(newTex);
+          resolve();
+        }
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
+  /**
+   * Forward push: keep the two panorama opacities complementary at every
+   * frame. This prevents the background/blank sphere from showing through
+   * during the transition while the engine applies a smooth FOV push.
+   */
+  private doForward(
+    newTex: THREE.Texture,
+    direction?: THREE.Vector3,
+    onProgress?: (p: number) => void,
+  ): Promise<void> {
+    this.sphereB.material.uniforms.map.value = newTex;
+    this.sphereB.material.uniforms.opacity.value = 0;
+    // Give the destination a real (temporary) centre in world space. The
+    // camera travels to this point; once it arrives, promoteSphereB recentres
+    // both camera and panorama atomically without changing their relationship.
+    const destination = (direction?.clone().normalize() ?? new THREE.Vector3(0, 0, -1))
+      .multiplyScalar(this.radius * 0.28);
+    this.sphereB.position.copy(destination);
+    this.sphereB.visible = true;
+
+    const duration = this.transitionDuration;
+    const start = performance.now();
+    const smootherstep = (edge0: number, edge1: number, value: number) => {
+      const x = THREE.MathUtils.clamp((value - edge0) / (edge1 - edge0), 0, 1);
+      return x * x * x * (x * (x * 6 - 15) + 10);
+    };
+
+    return new Promise((resolve) => {
+      const step = (now: number) => {
+        const p = Math.min((now - start) / duration, 1);
+        // Keep the old scene readable while the viewer starts moving, then
+        // blend around the peak of the forward motion and finish the incoming
+        // scene before the camera settles. This feels like crossing a doorway
+        // instead of applying a full-duration dissolve.
+        const mix = smootherstep(0.28, 0.78, p);
+        // Keep the old panorama fully covering the canvas. With normal alpha
+        // compositing, two complementary 50% layers only produce 75% coverage.
+        this.sphereA.material.uniforms.opacity.value = 1;
+        this.sphereB.material.uniforms.opacity.value = mix;
+        onProgress?.(p);
+
+        if (p < 1) requestAnimationFrame(step);
+        else {
           this.promoteSphereB(newTex);
           resolve();
         }
@@ -374,6 +541,7 @@ export class PanoSphere {
     this.sphereA.material.uniforms.map.value     = newTex;
     this.sphereA.material.uniforms.opacity.value = 1;
     this.sphereA.position.set(0, 0, 0);
+    this.sphereA.rotation.y = this.sphereB.rotation.y;
 
     this.sphereB.visible = false;
     this.sphereB.material.uniforms.opacity.value = 0;

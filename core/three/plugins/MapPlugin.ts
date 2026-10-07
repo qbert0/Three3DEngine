@@ -2,19 +2,20 @@
  * ─────────────────────────────────────────────────────────────────
  * MapPlugin — extends MarkerPlugin
  *
- * Adds a map overlay to the 360° viewer. Inherits ALL of
- * MarkerPlugin's infrastructure (CSS3D, raycasting, panels,
- * drag, fade, hover) and adds:
+ * Adds a multi-floor map overlay to the 360° viewer.
+ * Inherits ALL of MarkerPlugin's infrastructure (CSS3D, raycasting,
+ * panels, drag, fade, hover) and adds:
  *   - MapMarker type registration
  *   - Camera heading → map sync
- *   - Current node → map sync
+ *   - Current node → map sync (auto floor switching)
+ *   - Top-level TourConfig.map support (auto-inject)
  *   - switchMode() / setVisible() / updateConfig() APIs
  * ─────────────────────────────────────────────────────────────────
  */
 
 import { MarkerPlugin, type MarkerPluginOptions } from './MarkerPlugin';
 import { MapMarker } from './markers/MapMarker';
-import type { MapConfig, MapMode } from '../map/IMapStrategy';
+import type { MapConfig } from '../map/IMapStrategy';
 import type { TourScene, TourMarker, MapMarkerData } from '~/types/tour';
 
 export interface MapPluginOptions extends MarkerPluginOptions {
@@ -27,7 +28,7 @@ export interface MapPluginOptions extends MarkerPluginOptions {
  *
  * Usage:
  * ```ts
- * engine.addPlugin(new MapPlugin({ defaultConfig: { mode: '2d', ... } }));
+ * engine.addPlugin(new MapPlugin({ defaultConfig: tourConfig.map }));
  * ```
  */
 export class MapPlugin extends MarkerPlugin {
@@ -40,12 +41,20 @@ export class MapPlugin extends MarkerPlugin {
   private currentPitch = 0;
   private currentFov = 75;
   private currentSceneId: string | null = null;
+  /** Only mapped scenes are allowed to move the active pin/heading. */
+  private currentSceneIsMapped = false;
+  /** Map belonging to the active scene, even when its DOM panel is hidden. */
+  private currentMapData: MapMarkerData | null = null;
+  private mapOpenTask: Promise<void> | null = null;
 
   constructor(options: MapPluginOptions = {}) {
     super(options);
 
     this.defaultConfig = options.defaultConfig;
     this.mapMarker = new MapMarker();
+    // The map is optional viewer UI. Keep it hidden until the visitor
+    // explicitly opens it, unless a tour deliberately opts into visibility.
+    this.mapMarker.setMapVisible(options.defaultConfig?.visible === true);
 
     // Register the 'map' marker type so MarkerPlugin recognizes it.
     this.registerMarkerType(this.mapMarker);
@@ -61,19 +70,23 @@ export class MapPlugin extends MarkerPlugin {
       this.ctx.bus.on('camera:move', ({ yaw, pitch }) => {
         this.currentYaw = yaw;
         this.currentPitch = pitch;
-        this.mapMarker.syncCameraHeading(yaw, pitch, this.currentFov);
+        if (this.currentSceneIsMapped) {
+          this.mapMarker.syncCameraHeading(yaw, pitch, this.currentFov);
+        }
       }),
 
       this.ctx.bus.on('camera:fov', ({ fov }) => {
         this.currentFov = fov;
-        this.mapMarker.syncCameraHeading(this.currentYaw, this.currentPitch, fov);
+        if (this.currentSceneIsMapped) {
+          this.mapMarker.syncCameraHeading(this.currentYaw, this.currentPitch, fov);
+        }
       }),
     );
 
     // Listen for map node clicks dispatched as DOM CustomEvents
     const handleNodeClick = (e: Event) => {
-      const { nodeId, node, markerId } = (e as CustomEvent).detail;
-      this.ctx.bus.emit('map:node:click', { markerId, nodeId, node });
+      const { nodeId, markerId } = (e as CustomEvent).detail;
+      this.ctx.bus.emit('map:node:click', { markerId, nodeId });
       if (this.defaultConfig?.clickToNavigate !== false) {
         this.ctx.bus.emit('navigate', { sceneId: nodeId });
       }
@@ -81,7 +94,7 @@ export class MapPlugin extends MarkerPlugin {
     document.addEventListener('map:node:click', handleNodeClick);
     this.unsubs.push(() => document.removeEventListener('map:node:click', handleNodeClick));
 
-    this.ctx.bus.emit('map:ready', { mode: this.defaultConfig?.mode });
+    this.ctx.bus.emit('map:ready', {});
   }
 
   protected override onUpdate(delta: number): void {
@@ -105,14 +118,33 @@ export class MapPlugin extends MarkerPlugin {
   override onSceneReady(scene: TourScene): void {
     super.onSceneReady(scene);
     this.currentSceneId = scene.id;
+    this.currentYaw = this.ctx.camera.getYaw();
+    this.currentPitch = this.ctx.camera.getPitch();
+    this.currentFov = this.ctx.camera.getFov();
 
-    // If defaultConfig exists and scene has no explicit map marker, inject one
-    if (this.defaultConfig && !this.hasMapMarker(scene)) {
-      this.injectMapMarker(scene);
+    const explicitMap = scene.markers?.find(
+      (marker): marker is MapMarkerData => marker.plugin === 'map',
+    );
+
+    // Keep the active config independently from the Three.js object. The base
+    // plugin disposes marker objects on every scene change, including the map
+    // panel, so the viewer must be able to recreate that panel afterwards.
+    this.currentMapData = explicitMap ?? this.createDefaultMapData();
+    this.currentSceneIsMapped = this.isSceneShownOnMap(scene.id);
+
+    if (this.currentMapData && !explicitMap) {
+      this.addMarkerObject(this.mapMarker.createObject(this.currentMapData));
     }
 
-    // Sync current node on the map
-    this.mapMarker.syncCurrentNode(scene.id);
+    // Recreate the panel after a scene transition when it was open before.
+    if (this.mapMarker.isMapVisible()) void this.ensureMapPanel();
+
+    // A scene may exist in the tour without being a public map point. In that
+    // case preserve the last mapped position instead of moving/creating a pin.
+    if (this.currentSceneIsMapped) {
+      this.mapMarker.syncCurrentNode(scene.id);
+      this.mapMarker.syncCameraHeading(this.currentYaw, this.currentPitch, this.currentFov);
+    }
   }
 
   // ── Public API ──────────────────────────────────────────────
@@ -120,6 +152,7 @@ export class MapPlugin extends MarkerPlugin {
   /** Toggle map visibility. */
   setVisible(visible: boolean): void {
     this.mapMarker.setMapVisible(visible);
+    if (visible) void this.ensureMapPanel();
     this.ctx.bus.emit('map:visibility', { visible });
   }
 
@@ -128,7 +161,7 @@ export class MapPlugin extends MarkerPlugin {
     return this.mapMarker.isMapVisible();
   }
 
-  /** Switch map mode at runtime (e.g. '2d' → 'real'). */
+  /** Switch map strategy at runtime. */
   async switchMode(newConfig: MapConfig): Promise<void> {
     const markerData = this.getMapMarkerData();
     if (!markerData) {
@@ -137,10 +170,10 @@ export class MapPlugin extends MarkerPlugin {
     }
     Object.assign(markerData.config, newConfig);
     await this.mapMarker.switchMode(markerData, newConfig);
-    this.ctx.bus.emit('map:mode:changed', { mode: newConfig.mode });
+    this.ctx.bus.emit('map:config:updated', { config: newConfig });
   }
 
-  /** Update config without changing mode. */
+  /** Update config without changing strategy. */
   updateConfig(partial: Partial<MapConfig>): void {
     const markerData = this.getMapMarkerData();
     if (!markerData) return;
@@ -153,11 +186,6 @@ export class MapPlugin extends MarkerPlugin {
     return this.getMapMarkerData()?.config;
   }
 
-  /** Get current map mode. */
-  getMode(): MapMode | undefined {
-    return this.getConfig()?.mode;
-  }
-
   // ── Private helpers ─────────────────────────────────────────
 
   private hasMapMarker(scene: TourScene): boolean {
@@ -165,6 +193,7 @@ export class MapPlugin extends MarkerPlugin {
   }
 
   private getMapMarkerData(): MapMarkerData | undefined {
+    if (this.currentMapData) return this.currentMapData;
     for (const child of this.group.children) {
       const marker = child.userData.marker as TourMarker | undefined;
       if (marker?.plugin === 'map') return marker as MapMarkerData;
@@ -172,30 +201,54 @@ export class MapPlugin extends MarkerPlugin {
     return undefined;
   }
 
+  private isSceneShownOnMap(sceneId: string): boolean {
+    return this.currentMapData?.config.floors.some(floor =>
+      floor.nodes.some(node => node.id === sceneId && node.visible === true),
+    ) === true;
+  }
+
   /**
    * Inject a virtual map marker into the scene and immediately open
    * its panel. The marker is hidden (no 3D sprite) — only the panel
    * overlay is shown.
    */
-  private async injectMapMarker(scene: TourScene): Promise<void> {
-    if (!this.defaultConfig) return;
-
-    const markerData: MapMarkerData = {
+  private createDefaultMapData(): MapMarkerData | null {
+    if (!this.defaultConfig) return null;
+    return {
       id: '__map__',
       plugin: 'map',
       label: 'Bản đồ',
       yaw: 0,
       pitch: 0,
-      config: {
-        ...this.defaultConfig,
-        currentNodeId: scene.id,
-      },
+      config: { ...this.defaultConfig },
     };
+  }
 
-    const object = this.mapMarker.createObject(markerData);
-    this.addMarkerObject(object);
+  /** Ensure that toggling the map on also creates its DOM/Leaflet panel. */
+  private ensureMapPanel(): Promise<void> {
+    if (this.mapOpenTask) return this.mapOpenTask;
+    const markerData = this.currentMapData;
+    if (!markerData) return Promise.resolve();
 
-    // Auto-open the map panel
-    await this.mapMarker.openMapPanel(markerData, this.ctx.container);
+    let cancelled = false;
+    this.mapOpenTask = this.mapMarker.openMapPanel(markerData, this.ctx.container)
+      .then((opened) => {
+        cancelled = !opened;
+      })
+      .catch((error) => {
+        // A provider or Leaflet failure must not interrupt panorama rendering,
+        // but dispose the partial panel so the next click can retry cleanly.
+        console.error('[MapPlugin] Không thể mở bản đồ:', error);
+        this.mapMarker.disposeMap();
+      })
+      .finally(() => {
+        this.mapOpenTask = null;
+        // A scene transition cancelled an older async initialization. Start
+        // once more using the active scene/config instead of leaving a shell.
+        if (cancelled && this.mapMarker.isMapVisible()) {
+          void this.ensureMapPanel();
+        }
+      });
+    return this.mapOpenTask;
   }
 }

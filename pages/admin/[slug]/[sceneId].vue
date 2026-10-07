@@ -137,6 +137,341 @@ const currentScene = computed<TourScene | null>(() => {
 // Inspector tabs & state
 type InspectorTab = 'scene' | 'hotspots' | 'settings';
 const currentTab = ref<InspectorTab>('scene');
+const editorMode = ref<'panorama' | 'map'>('panorama');
+
+// ── Map editor state ──
+const mapEditorCanvas = ref<HTMLCanvasElement | null>(null);
+const mapDragNodeId = ref<string | null>(null);
+const mapImageUploading = ref(false);
+const mapEditorImages = new Map<string, HTMLImageElement>();
+
+function mapEditorContentRect(floor: NonNullable<TourConfig['map']>['floors'][number], w: number, h: number) {
+  const padding = 12;
+  const image = mapEditorImages.get(floor.id);
+  const sourceW = image?.naturalWidth || floor.imageWidth || 1;
+  const sourceH = image?.naturalHeight || floor.imageHeight || 1;
+  const scale = Math.min((w - padding * 2) / sourceW, (h - padding * 2) / sourceH);
+  const width = sourceW * scale;
+  const height = sourceH * scale;
+  return { x: (w - width) / 2, y: (h - height) / 2, width, height };
+}
+
+function ensureMapEditorImage(floor: NonNullable<TourConfig['map']>['floors'][number]) {
+  if (!floor.imageUrl) return undefined;
+  const cached = mapEditorImages.get(floor.id);
+  if (cached?.dataset.src === floor.imageUrl) return cached;
+  const image = new Image();
+  image.dataset.src = floor.imageUrl;
+  image.onload = () => {
+    floor.imageWidth = image.naturalWidth;
+    floor.imageHeight = image.naturalHeight;
+    drawMapEditor();
+  };
+  image.src = floor.imageUrl;
+  mapEditorImages.set(floor.id, image);
+  return image;
+}
+
+function ensureMapConfig() {
+  if (!tour.value) return;
+  if (!tour.value.map) {
+    tour.value.map = {
+      floors: [{
+        id: 'main',
+        name: 'Tất cả',
+        imageUrl: '',
+        imageWidth: 800,
+        imageHeight: 600,
+        nodes: tour.value.scenes.map((s, i) => ({
+          id: s.id,
+          name: s.title,
+          x: 100 + (i % 5) * 140,
+          y: 100 + Math.floor(i / 5) * 120,
+          neighbors: [] as string[],
+        })),
+      }],
+      position: 'bottom-right',
+      width: 280,
+      height: 200,
+      showConnections: true,
+      clickToNavigate: true,
+      showFloorTabs: true,
+      autoSwitchFloor: true,
+    };
+    markDirty();
+  }
+}
+
+const mapActiveFloorId = ref<string>('');
+const mapActiveFloor = computed(() => {
+  const floors = tour.value?.map?.floors ?? [];
+  return floors.find(f => f.id === mapActiveFloorId.value) ?? floors[0];
+});
+
+function drawMapEditor() {
+  const canvas = mapEditorCanvas.value;
+  if (!canvas || !tour.value?.map) return;
+  const floor = mapActiveFloor.value;
+  if (!floor) return;
+
+  const rect = canvas.parentElement!.getBoundingClientRect();
+  const w = rect.width;
+  const h = 340;
+  const dpr = Math.min(window.devicePixelRatio, 2);
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+
+  const ctx = canvas.getContext('2d')!;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+
+  // Background
+  ctx.fillStyle = '#14151f';
+  ctx.fillRect(0, 0, w, h);
+
+  const mapImage = ensureMapEditorImage(floor);
+  if (mapImage?.complete && mapImage.naturalWidth > 0) {
+    const imageRect = mapEditorContentRect(floor, w, h);
+    ctx.globalAlpha = 0.86;
+    ctx.drawImage(mapImage, imageRect.x, imageRect.y, imageRect.width, imageRect.height);
+    ctx.globalAlpha = 1;
+  }
+
+  // Grid
+  const spacing = 20;
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 0.5;
+  for (let x = spacing; x < w; x += spacing) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+  }
+  for (let y = spacing; y < h; y += spacing) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+
+  // Dots
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  for (let x = spacing; x < w; x += spacing) {
+    for (let y = spacing; y < h; y += spacing) {
+      ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  const mapRect = mapEditorContentRect(floor, w, h);
+  const padX = mapRect.x, padY = mapRect.y;
+  const aW = mapRect.width, aH = mapRect.height;
+
+  // Connections
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1.5;
+  for (const node of floor.nodes) {
+    const sx = padX + (node.x / floor.imageWidth) * aW;
+    const sy = padY + (node.y / floor.imageHeight) * aH;
+    for (const nbrId of node.neighbors ?? []) {
+      const nbr = floor.nodes.find(n => n.id === nbrId);
+      if (!nbr) continue;
+      const nx = padX + (nbr.x / floor.imageWidth) * aW;
+      const ny = padY + (nbr.y / floor.imageHeight) * aH;
+      ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(nx, ny); ctx.stroke();
+    }
+  }
+
+  // Nodes
+  for (const node of floor.nodes) {
+    const sx = padX + (node.x / floor.imageWidth) * aW;
+    const sy = padY + (node.y / floor.imageHeight) * aH;
+    const isCurrent = node.id === currentScene.value?.id;
+    const isDragging = node.id === mapDragNodeId.value;
+    const r = isCurrent ? 8 : 6;
+
+    if (isCurrent) {
+      ctx.save();
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.arc(sx, sy, r, 0, Math.PI * 2);
+      ctx.fillStyle = isDragging ? '#93c5fd' : 'rgba(255,255,255,0.7)';
+      ctx.fill();
+    }
+
+    // Label
+    ctx.font = '500 10px "Be Vietnam Pro", sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const label = (node as any).name || node.id;
+    ctx.fillText(label.length > 14 ? label.slice(0, 13) + '…' : label, sx, sy + r + 4);
+  }
+}
+
+function mapEditorPointerDown(e: PointerEvent) {
+  const canvas = mapEditorCanvas.value;
+  if (!canvas || !mapActiveFloor.value) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const floor = mapActiveFloor.value;
+  const w = rect.width, h = 340;
+  const mapRect = mapEditorContentRect(floor, w, h);
+  const padX = mapRect.x, padY = mapRect.y;
+  const aW = mapRect.width, aH = mapRect.height;
+
+  let closest: any = null;
+  let minDist = 20;
+  for (const node of floor.nodes) {
+    const sx = padX + (node.x / floor.imageWidth) * aW;
+    const sy = padY + (node.y / floor.imageHeight) * aH;
+    const dist = Math.hypot(mx - sx, my - sy);
+    if (dist < minDist) { minDist = dist; closest = node; }
+  }
+  if (closest) {
+    mapDragNodeId.value = closest.id;
+    canvas.setPointerCapture(e.pointerId);
+  } else if (currentScene.value && mx >= padX && mx <= padX + aW && my >= padY && my <= padY + aH) {
+    let node = floor.nodes.find(n => n.id === currentScene.value!.id);
+    if (!node) {
+      node = { id: currentScene.value.id, name: currentScene.value.title, x: 0, y: 0, neighbors: [] };
+      floor.nodes.push(node);
+    }
+    node.x = Math.round(((mx - padX) / aW) * floor.imageWidth);
+    node.y = Math.round(((my - padY) / aH) * floor.imageHeight);
+    mapDragNodeId.value = node.id;
+    canvas.setPointerCapture(e.pointerId);
+    markDirty();
+    drawMapEditor();
+  }
+}
+
+function mapEditorPointerMove(e: PointerEvent) {
+  if (!mapDragNodeId.value) return;
+  const canvas = mapEditorCanvas.value;
+  if (!canvas || !mapActiveFloor.value) return;
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const floor = mapActiveFloor.value;
+  const w = rect.width, h = 340;
+  const mapRect = mapEditorContentRect(floor, w, h);
+  const padX = mapRect.x, padY = mapRect.y;
+  const aW = mapRect.width, aH = mapRect.height;
+
+  const node = floor.nodes.find(n => n.id === mapDragNodeId.value);
+  if (node) {
+    node.x = Math.round(Math.max(0, Math.min(floor.imageWidth, ((mx - padX) / aW) * floor.imageWidth)));
+    node.y = Math.round(Math.max(0, Math.min(floor.imageHeight, ((my - padY) / aH) * floor.imageHeight)));
+    drawMapEditor();
+  }
+}
+
+function mapEditorPointerUp() {
+  if (mapDragNodeId.value) {
+    mapDragNodeId.value = null;
+    markDirty();
+    drawMapEditor();
+  }
+}
+
+function autoConnectNodes() {
+  if (!tour.value?.map) return;
+  // Build connections from navigation markers
+  for (const floor of tour.value.map.floors) {
+    for (const node of floor.nodes) {
+      const scene = tour.value.scenes.find(s => s.id === node.id);
+      if (!scene) continue;
+      const navTargets = scene.markers
+        .filter(m => m.plugin === 'navigation')
+        .map(m => (m as NavigationMarker).targetScene)
+        .filter((t): t is string => !!t && floor.nodes.some(n => n.id === t));
+      node.neighbors = [...new Set(navTargets)];
+    }
+  }
+  markDirty();
+  drawMapEditor();
+}
+
+async function uploadMapFloorImage(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  const floor = mapActiveFloor.value;
+  if (!file || !floor) return;
+  mapImageUploading.value = true;
+  try {
+    const formData = new FormData();
+    formData.append('files', file);
+    const result = await $fetch<{ ok: boolean; files: Array<{ original: string; width?: number; height?: number }> }>('/api/admin/media', { method: 'POST', body: formData });
+    const uploaded = result.files[0];
+    if (!uploaded) throw new Error('Máy chủ không trả về ảnh đã tải lên.');
+    floor.imageUrl = uploaded.original;
+    floor.imageWidth = uploaded.width || floor.imageWidth;
+    floor.imageHeight = uploaded.height || floor.imageHeight;
+    mapEditorImages.delete(floor.id);
+    markDirty();
+    drawMapEditor();
+    showToast({ message: 'Đã tải ảnh mặt bằng. Bấm lên ảnh để đặt điểm cảnh.', variant: 'success' });
+  } catch (error: any) {
+    showToast({ message: error?.data?.statusMessage || error?.message || 'Không thể tải ảnh mặt bằng.', variant: 'error' });
+  } finally {
+    mapImageUploading.value = false;
+    input.value = '';
+  }
+}
+
+watch(editorMode, (mode) => {
+  if (mode === 'map') {
+    ensureMapConfig();
+    if (tour.value?.map?.floors?.[0]) {
+      mapActiveFloorId.value = tour.value.map.floors[0].id;
+    }
+    nextTick(() => drawMapEditor());
+  }
+});
+
+function selectSceneFromGeoMap(sceneId: string) {
+  const index = tour.value?.scenes.findIndex(scene => scene.id === sceneId) ?? -1;
+  if (index >= 0) goToScene(index);
+}
+
+function setSceneGeoCoordinates(payload: { sceneId: string; coordinates: [number, number] }) {
+  const scene = tour.value?.scenes.find(item => item.id === payload.sceneId);
+  if (!scene) return;
+  scene.coordinates = payload.coordinates;
+  markDirty();
+}
+
+function setCurrentGeoCoordinate(axis: 'lng' | 'lat', rawValue: string) {
+  if (!currentScene.value) return;
+  const value = Number(rawValue);
+  if (!Number.isFinite(value)) return;
+  const [lng, lat] = currentScene.value.coordinates ?? [108.2022, 16.0544];
+  currentScene.value.coordinates = axis === 'lng' ? [value, lat] : [lng, value];
+  markDirty();
+}
+
+// ── Panorama world alignment ───────────────────────────────────────────────
+const RAD_TO_DEG = 180 / Math.PI;
+const DEG_TO_RAD = Math.PI / 180;
+
+function normalizeRadians(value: number): number {
+  const twoPi = Math.PI * 2;
+  return ((value + Math.PI) % twoPi + twoPi) % twoPi - Math.PI;
+}
+
+function setCurrentPanoramaRotation(degrees: number) {
+  if (!currentScene.value || !Number.isFinite(degrees)) return;
+  currentScene.value.panoramaRotation = normalizeRadians(degrees * DEG_TO_RAD);
+  setPanoramaRotation(currentScene.value.panoramaRotation);
+  markDirty();
+}
+
+watch(mapActiveFloorId, () => nextTick(() => drawMapEditor()));
 
 const selectedHotspotId = ref<string | null>(null);
 const selectedHotspot = computed<TourMarker | null>(() => {
@@ -146,10 +481,12 @@ const selectedHotspot = computed<TourMarker | null>(() => {
 
 // Real Upload State
 const fileInput = ref<HTMLInputElement | null>(null);
+const newSceneInput = ref<HTMLInputElement | null>(null);
 const modelImageInput = ref<HTMLInputElement | null>(null);
 const narrationInput = ref<HTMLInputElement | null>(null);
 const narrationTargetBlockId = ref<string | null>(null);
 const uploadingImage = ref(false);
+const addingScene = ref(false);
 const uploadingNarration = ref(false);
 const panoramaPreviewFailed = ref(false);
 
@@ -168,7 +505,7 @@ async function handleFileChange(event: Event) {
 
   uploadingImage.value = true;
   try {
-    const res = await $fetch<{ ok: boolean; files: Array<{ original: string; thumbnail: string }> }>(
+    const res = await $fetch<{ ok: boolean; files: Array<{ original: string; thumbnail: string; editorPreview: string }> }>(
       '/api/admin/media',
       {
         method: 'POST',
@@ -179,6 +516,7 @@ async function handleFileChange(event: Event) {
     if (res.ok && res.files?.length) {
       const uploaded = res.files[0];
       currentScene.value.panorama = uploaded.original;
+      currentScene.value.editorPanorama = uploaded.editorPreview;
       panoramaPreviewFailed.value = false;
       if (uploaded.thumbnail) {
         currentScene.value.thumbnail = uploaded.thumbnail;
@@ -260,14 +598,12 @@ async function handleNarrationChange(event: Event) {
   }
 }
 
-function handleThumbnailError(event: Event, panorama: string) {
+function handleThumbnailError(event: Event) {
   const img = event.target as HTMLImageElement;
-  if (img.dataset.fallbackApplied === 'true') {
-    img.style.visibility = 'hidden';
-    return;
-  }
-  img.dataset.fallbackApplied = 'true';
-  img.src = panorama;
+  // Never fall back to the full panorama here. A list of 5760×2880 images
+  // decoded in <img> elements can consume hundreds of MB independently from
+  // the WebGL texture used by the editor.
+  img.style.visibility = 'hidden';
 }
 
 // Editor toolbar state
@@ -317,6 +653,20 @@ function markSaved() {
   isDirty.value = false;
 }
 
+function setDefaultCameraEnabled(enabled: boolean) {
+  if (!currentScene.value) return;
+  currentScene.value.defaultCameraEnabled = enabled;
+  if (enabled) captureDefaultCamera();
+  else markDirty();
+}
+
+function captureDefaultCamera() {
+  if (!currentScene.value) return;
+  currentScene.value.initialYaw = cameraYaw.value;
+  currentScene.value.initialPitch = cameraPitch.value;
+  markDirty();
+}
+
 // Engine canvas container
 const container = ref<HTMLElement | null>(null);
 
@@ -325,6 +675,8 @@ const {
   isLoading: engineLoading,
   cameraYaw,
   cameraPitch,
+  interactionMode,
+  lastPanoramaRotation,
   isPlacing: engineIsPlacing,
   placementMode,
   lastMarkerMoved,
@@ -339,7 +691,16 @@ const {
   refreshMarkers,
   setFov,
   setBrightness,
+  setHighlightCompression,
+  setPanoramaRotation,
+  setInteractionMode,
 } = useDesignerEngine();
+
+watch(lastPanoramaRotation, (rotation) => {
+  if (rotation === null || !currentScene.value) return;
+  currentScene.value.panoramaRotation = rotation;
+  markDirty();
+});
 
 function updateSceneBrightness(event: Event) {
   setSceneBrightness(Number((event.target as HTMLInputElement).value));
@@ -349,6 +710,17 @@ function setSceneBrightness(value: number) {
   if (!currentScene.value) return;
   currentScene.value.brightness = value;
   setBrightness(value);
+  markDirty();
+}
+
+function updateSceneHighlightCompression(event: Event) {
+  setSceneHighlightCompression(Number((event.target as HTMLInputElement).value));
+}
+
+function setSceneHighlightCompression(value: number) {
+  if (!currentScene.value) return;
+  currentScene.value.highlightCompression = value;
+  setHighlightCompression(value);
   markDirty();
 }
 
@@ -394,6 +766,22 @@ function setPlaneMarkerScale(axis: 'scaleX' | 'scaleY', rawValue: string | numbe
   marker[axis] = Math.max(0.1, Math.min(10, Number(rawValue) || 1));
   refreshMarkers(currentScene.value);
   markDirty();
+}
+
+function navigationIsArrow(marker: NavigationMarker): boolean {
+  return !['location-1', 'location-2', 'pin', 'pin-top', 'anchor'].includes(marker.icon ?? 'arrow');
+}
+
+function navigationRotationDegrees(marker: NavigationMarker, axis: 'rotX' | 'rotY' | 'rotZ'): number {
+  if (axis === 'rotX') return Math.round((marker.rotX ?? (navigationIsArrow(marker) ? Math.PI / 3 : 0)) * 180 / Math.PI);
+  if (axis === 'rotY') return Math.round((marker.rotY ?? 0) * 180 / Math.PI);
+  return Math.round((marker.rotZ ?? marker.rotation ?? 0) * 180 / Math.PI);
+}
+
+function planeMarkerScale(marker: NavigationMarker | VideoMarker, axis: 'scaleX' | 'scaleY'): number {
+  const explicit = marker[axis];
+  if (explicit !== undefined) return explicit;
+  return marker.plugin === 'navigation' && axis === 'scaleX' && navigationIsArrow(marker) ? 2 : 1;
 }
 
 // ── Hotspot drag-to-reposition ───────────────────────────────────────────────
@@ -514,27 +902,70 @@ async function goToScene(idx: number) {
 
 // ── Add & Delete Scenes ───────────────────────────────────────────────────────
 function addScene() {
-  if (!tour.value) return;
-  const id = `s${Date.now()}`;
-  const newScene: TourScene = {
-    id,
-    title: 'Cảnh mới',
-    subtitle: 'Mô tả cảnh mới',
-    panorama: currentScene.value?.panorama ?? '',
-    thumbnail: currentScene.value?.thumbnail ?? currentScene.value?.panorama ?? '',
-    initialYaw: 0,
-    initialPitch: 0,
-    brightness: 1.25,
-    markers: [],
-  };
-  tour.value.scenes.push(newScene);
-  currentSceneIdx.value = tour.value.scenes.length - 1;
-  markDirty();
-  goToScene(currentSceneIdx.value);
-  showToast({ message: 'Đã thêm cảnh mới', variant: 'success' });
+  if (!tour.value || addingScene.value) return;
+  newSceneInput.value?.click();
 }
 
-function deleteCurrentScene() {
+async function handleNewSceneImage(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file || !tour.value) {
+    input.value = '';
+    return;
+  }
+
+  addingScene.value = true;
+  let addedSceneId: string | null = null;
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const upload = await $fetch<{
+      ok: boolean;
+      files: Array<{ original: string; thumbnail: string; editorPreview: string }>;
+    }>('/api/admin/media', { method: 'POST', body: formData });
+    const media = upload.files?.[0];
+    if (!media) throw new Error('API không trả về ảnh panorama đã tải lên.');
+
+    const id = `scene-${Date.now().toString(36)}`;
+    const titleFromFile = file.name.replace(/\.[^.]+$/u, '').replace(/[-_]+/gu, ' ').trim();
+    const newScene: TourScene = {
+      id,
+      title: titleFromFile || 'Cảnh mới',
+      subtitle: '',
+      panorama: media.original,
+      thumbnail: media.thumbnail || media.original,
+      editorPanorama: media.editorPreview,
+      initialYaw: 0,
+      initialPitch: 0,
+      defaultCameraEnabled: false,
+      panoramaRotation: 0,
+      showOnMap: false,
+      brightness: 1.25,
+      markers: [],
+    };
+    tour.value.scenes.push(newScene);
+    addedSceneId = id;
+    currentSceneIdx.value = tour.value.scenes.length - 1;
+    await $fetch(`/api/admin/tours/${slug}`, { method: 'POST', body: tour.value });
+    pushHistorySnapshot();
+    markSaved();
+    showToast({ message: 'Đã tải ảnh và thêm cảnh mới', variant: 'success' });
+    await navigateTo(`/admin/${slug}/${id}`);
+  } catch (error: any) {
+    if (addedSceneId && tour.value) {
+      const addedIndex = tour.value.scenes.findIndex((scene) => scene.id === addedSceneId);
+      if (addedIndex !== -1) tour.value.scenes.splice(addedIndex, 1);
+      currentSceneIdx.value = Math.max(0, Math.min(currentSceneIdx.value, tour.value.scenes.length - 1));
+    }
+    const message = error?.data?.statusMessage ?? error?.statusMessage ?? error?.message ?? 'Không thể thêm cảnh';
+    showToast({ message, variant: 'error' });
+  } finally {
+    addingScene.value = false;
+    input.value = '';
+  }
+}
+
+async function deleteCurrentScene() {
   if (!tour.value || !currentScene.value) return;
   if (tour.value.scenes.length <= 1) {
     showToast({ message: 'Không thể xóa cảnh cuối cùng', variant: 'error' });
@@ -542,11 +973,62 @@ function deleteCurrentScene() {
   }
   if (!confirm(`Xóa cảnh "${currentScene.value.title}"?`)) return;
 
-  tour.value.scenes.splice(currentSceneIdx.value, 1);
-  currentSceneIdx.value = Math.max(0, currentSceneIdx.value - 1);
-  markDirty();
-  goToScene(currentSceneIdx.value);
-  showToast({ message: 'Đã xóa cảnh', variant: 'success' });
+  const removedIndex = currentSceneIdx.value;
+  const removedScene = JSON.parse(JSON.stringify(currentScene.value)) as TourScene;
+  const previousInitialSceneId = tour.value.initialSceneId;
+  const [removed] = tour.value.scenes.splice(removedIndex, 1);
+  const nextIndex = Math.min(removedIndex, tour.value.scenes.length - 1);
+  const nextScene = tour.value.scenes[nextIndex];
+  if (!removed || !nextScene) return;
+
+  if (tour.value.initialSceneId === removed.id) {
+    tour.value.initialSceneId = nextScene.id;
+  }
+
+  saving.value = true;
+  try {
+    // Persist first: a reload must never restore the deleted scene.
+    await $fetch(`/api/admin/tours/${slug}`, { method: 'POST', body: tour.value });
+
+    // Only uploader-owned files are accepted by this endpoint. Bundled source
+    // images under /images are intentionally left untouched.
+    const mediaPaths = [removed.panorama, removed.thumbnail, removed.editorPanorama].filter((path, index, all): path is string => (
+      Boolean(path) && all.indexOf(path) === index
+    ));
+    const stillReferenced = new Set(tour.value.scenes.flatMap((scene) => [scene.panorama, scene.thumbnail, scene.editorPanorama]));
+    const orphanedMedia = mediaPaths.filter((path) => !stillReferenced.has(path));
+    let mediaDeleteWarning = false;
+    if (orphanedMedia.length) {
+      try {
+        await $fetch('/api/admin/media', { method: 'DELETE', body: { paths: orphanedMedia } });
+      } catch {
+        // The scene is already persisted as deleted. Do not roll it back merely
+        // because filesystem cleanup failed; report the leftover file instead.
+        mediaDeleteWarning = true;
+      }
+    }
+
+    currentSceneIdx.value = nextIndex;
+    selectedHotspotId.value = null;
+    pushHistorySnapshot();
+    markSaved();
+    await navigateTo(`/admin/${slug}/${nextScene.id}`);
+    showToast({
+      message: mediaDeleteWarning
+        ? 'Đã xóa cảnh, nhưng chưa thể dọn file ảnh trong thư mục lưu trữ'
+        : 'Đã xóa cảnh và file ảnh khỏi thư mục lưu trữ',
+      variant: mediaDeleteWarning ? 'warning' : 'success',
+    });
+  } catch (error: any) {
+    // Restore the local editor if persistence failed.
+    tour.value.scenes.splice(removedIndex, 0, removedScene);
+    tour.value.initialSceneId = previousInitialSceneId;
+    currentSceneIdx.value = removedIndex;
+    const message = error?.data?.statusMessage ?? error?.statusMessage ?? error?.message ?? 'Không thể xóa cảnh';
+    showToast({ message, variant: 'error' });
+  } finally {
+    saving.value = false;
+  }
 }
 
 // ── Reorder Scenes (Drag & Drop) ──────────────────────────────────────────────
@@ -615,6 +1097,12 @@ function createHotspot(type: 'navigation' | 'video' | 'panel') {
       ...base,
       plugin: 'navigation',
       targetScene: firstOther ? firstOther.id : '',
+      icon: 'arrow',
+      rotZ: 0,
+      rotX: Math.PI / 3,
+      rotY: 0,
+      scaleX: 2,
+      scaleY: 1,
     } as NavigationMarker);
   } else if (type === 'panel') {
     currentScene.value.markers.push({
@@ -785,6 +1273,13 @@ onMounted(() => {
       class="hidden"
       @change="handleFileChange"
     >
+    <input
+      ref="newSceneInput"
+      type="file"
+      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+      class="hidden"
+      @change="handleNewSceneImage"
+    >
     <input ref="modelImageInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleModelImageChange">
     <input
       ref="narrationInput"
@@ -884,8 +1379,9 @@ onMounted(() => {
         <div class="side-head-row">
           <h3>Danh sách cảnh</h3>
           <UiTooltip content="Thêm cảnh mới" placement="right">
-            <button class="side-add" id="addSceneBtn" @click="addScene">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <button class="side-add" id="addSceneBtn" :disabled="addingScene" @click="addScene">
+              <UiSpinner v-if="addingScene" size="sm" />
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 <path d="M12 5v14M5 12h14" />
               </svg>
             </button>
@@ -918,9 +1414,11 @@ onMounted(() => {
           </span>
           <img
             class="scene-thumb-sm"
-            :src="s.thumbnail || s.panorama"
+            :src="s.thumbnail"
             :alt="s.title"
-            @error="handleThumbnailError($event, s.panorama)"
+            loading="lazy"
+            decoding="async"
+            @error="handleThumbnailError"
           >
           <div class="scene-info">
             <strong>{{ s.title }}</strong>
@@ -936,7 +1434,40 @@ onMounted(() => {
     <!-- ═══ CENTER — PREVIEW ═══ -->
     <main class="preview">
       <div class="preview-toolbar">
+        <div class="editor-mode-switch">
+          <button type="button" :class="{ active: editorMode === 'panorama' }" @click="editorMode = 'panorama'">Panorama</button>
+          <button type="button" :class="{ active: editorMode === 'map' }" @click="editorMode = 'map'">Bản đồ</button>
+        </div>
+        <div v-if="editorMode === 'panorama'" class="editor-mode-switch alignment-mode-switch">
+          <button type="button" :class="{ active: interactionMode === 'camera' }" @click="setInteractionMode('camera')">Xoay camera</button>
+          <button type="button" :class="{ active: interactionMode === 'panorama' }" @click="setInteractionMode('panorama')">Xoay panorama</button>
+        </div>
+        <div
+          v-if="editorMode === 'panorama' && interactionMode === 'camera' && currentScene"
+          class="default-camera-control"
+          title="Nếu bật, người xem sẽ quay về góc này mỗi khi đi vào cảnh"
+        >
+          <label>
+            <input
+              type="checkbox"
+              :checked="currentScene.defaultCameraEnabled === true"
+              @change="setDefaultCameraEnabled(($event.target as HTMLInputElement).checked)"
+            >
+            <span>Góc vào cảnh</span>
+          </label>
+          <button
+            v-if="currentScene.defaultCameraEnabled"
+            type="button"
+            @click="captureDefaultCamera"
+          >
+            Lấy góc hiện tại
+          </button>
+          <output v-if="currentScene.defaultCameraEnabled">
+            {{ Math.round(currentScene.initialYaw * RAD_TO_DEG) }}° / {{ Math.round(currentScene.initialPitch * RAD_TO_DEG) }}°
+          </output>
+        </div>
         <button
+          v-if="editorMode === 'panorama'"
           :class="['tb-btn marker-add-btn', { placing: isPlacingHotspot }]"
           id="placeHotspotBtn"
           @click="startPlacingHotspot"
@@ -968,13 +1499,32 @@ onMounted(() => {
       </div>
 
       <div class="preview-canvas" id="previewCanvas">
-        <div ref="container" class="h-full w-full" />
+        <div ref="container" class="h-full w-full" :style="{ visibility: editorMode === 'panorama' ? 'visible' : 'hidden' }" />
 
-        <div class="place-hint" :class="{ active: isPlacingHotspot }" id="placeHint">
+        <AdminRealMapEditor
+          v-if="editorMode === 'map' && tour"
+          :scenes="tour.scenes"
+          :current-scene-id="currentScene?.id"
+          @select-scene="selectSceneFromGeoMap"
+          @set-coordinates="setSceneGeoCoordinates"
+        />
+
+        <AdminMapHeadingPreview
+          v-if="editorMode === 'panorama' && currentScene?.coordinates"
+          :coordinates="currentScene.coordinates"
+          :camera-yaw="cameraYaw"
+          :panorama-rotation="currentScene.panoramaRotation ?? 0"
+        />
+
+        <div v-if="editorMode === 'panorama' && interactionMode === 'panorama'" class="panorama-rotation-hint">
+          Kéo ngang để xoay panorama · Camera đang được giữ cố định
+        </div>
+
+        <div v-if="editorMode === 'panorama'" class="place-hint" :class="{ active: isPlacingHotspot }" id="placeHint">
           Nhấn lên ảnh để đặt điểm tương tác · ESC để hủy
         </div>
 
-        <div class="preview-info">
+        <div v-if="editorMode === 'panorama'" class="preview-info">
           <span class="preview-info-badge">CẢNH {{ currentSceneIdx + 1 }}/{{ tour?.scenes.length ?? 1 }}</span>
           <span class="preview-info-title" id="infoTitle">{{ currentScene?.title }}</span>
           <span class="preview-info-coord" id="infoCoord">
@@ -988,7 +1538,7 @@ onMounted(() => {
 
     <!-- ═══ SIDEBAR PHẢI — INSPECTOR ═══ -->
     <aside class="inspector sidebar-right">
-      <div class="insp-tabs">
+      <div v-if="editorMode === 'panorama'" class="insp-tabs">
         <button
           :class="['insp-tab', { active: currentTab === 'scene' }]"
           @click="currentTab = 'scene'"
@@ -1012,7 +1562,7 @@ onMounted(() => {
       <div class="insp-body" id="inspBody">
 
         <!-- ── TAB 1: CẢNH ── -->
-        <template v-if="currentTab === 'scene' && currentScene">
+        <template v-if="editorMode === 'panorama' && currentTab === 'scene' && currentScene">
           <div class="insp-section">
             <div class="insp-section-title">Thông tin cảnh</div>
             <div class="field">
@@ -1043,7 +1593,13 @@ onMounted(() => {
               title="Nhấn để tải ảnh panorama từ máy tính"
               @click="triggerImageUpload"
             >
-              <img v-if="!panoramaPreviewFailed" :src="currentScene.panorama" :alt="currentScene.title" @error="panoramaPreviewFailed = true">
+              <img
+                v-if="!panoramaPreviewFailed"
+                :src="currentScene.thumbnail || currentScene.panorama"
+                :alt="currentScene.title"
+                decoding="async"
+                @error="panoramaPreviewFailed = true"
+              >
               <div v-else class="image-error">Không đọc được ảnh. Hãy kiểm tra đường dẫn hoặc tải ảnh mới.</div>
               <div class="img-picker-overlay">
                 <UiSpinner v-if="uploadingImage" size="md" color="white" />
@@ -1098,7 +1654,24 @@ onMounted(() => {
               <button type="button" @click="setSceneBrightness(1.25)">Mặc định</button>
               <button type="button" @click="setSceneBrightness(1.4)">Sáng rõ</button>
             </div>
-            <div class="hint-text">Điều chỉnh riêng cho cảnh này, không thay đổi file ảnh gốc.</div>
+            <label class="sub-control-label">Giảm vùng chói</label>
+            <div class="brightness-control">
+              <input
+                :value="currentScene.highlightCompression ?? 0"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                @input="updateSceneHighlightCompression"
+              >
+              <output>{{ Math.round((currentScene.highlightCompression ?? 0) * 100) }}%</output>
+            </div>
+            <div class="brightness-presets">
+              <button type="button" @click="setSceneHighlightCompression(0)">Tắt</button>
+              <button type="button" @click="setSceneHighlightCompression(0.35)">Nhẹ</button>
+              <button type="button" @click="setSceneHighlightCompression(0.6)">Mạnh</button>
+            </div>
+            <div class="hint-text">Chỉ nén vùng trời và nguồn sáng gắt; không thay đổi file ảnh gốc.</div>
           </div>
 
           <div class="insp-section">
@@ -1153,7 +1726,7 @@ onMounted(() => {
         </template>
 
         <!-- ── TAB 2: ĐIỂM TƯƠNG TÁC ── -->
-        <template v-else-if="currentTab === 'hotspots' && currentScene">
+        <template v-else-if="editorMode === 'panorama' && currentTab === 'hotspots' && currentScene">
           <div class="insp-section">
             <div class="insp-section-title">
               <span>Điểm tương tác trong cảnh ({{ currentScene.markers.length }})</span>
@@ -1235,17 +1808,165 @@ onMounted(() => {
               </select>
             </div>
 
-            <!-- Navigation arrow 3D rotation — 3 axes -->
+            <!-- Navigation icon mode selector -->
             <template v-if="selectedHotspot.plugin === 'navigation'">
+              <div class="field">
+                <label>Kiểu hiển thị</label>
+                <div class="nav-icon-mode-toggle">
+                  <button
+                    type="button"
+                    :class="['nav-mode-btn', { active: ['arrow', 'arrow-1', 'arrow-2'].includes((selectedHotspot as NavigationMarker).icon ?? 'arrow') }]"
+                    @click="() => {
+                      (selectedHotspot as NavigationMarker).icon = 'arrow';
+                      (selectedHotspot as NavigationMarker).rotZ ??= 0;
+                      (selectedHotspot as NavigationMarker).rotX ??= Math.PI / 3;
+                      (selectedHotspot as NavigationMarker).rotY ??= 0;
+                      (selectedHotspot as NavigationMarker).scaleX ??= 2;
+                      (selectedHotspot as NavigationMarker).scaleY ??= 1;
+                      refreshMarkers?.(currentScene); markDirty();
+                    }"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px">
+                      <path d="m5 15 7-6 7 6"/><path d="m5 21 7-6 7 6"/>
+                    </svg>
+                    Mũi tên
+                  </button>
+                  <button
+                    type="button"
+                    :class="['nav-mode-btn', { active: ['location-1', 'pin'].includes((selectedHotspot as NavigationMarker).icon ?? '') }]"
+                    @click="() => {
+                      (selectedHotspot as NavigationMarker).icon = 'location-1';
+                      if (!(selectedHotspot as NavigationMarker).pinColor) (selectedHotspot as NavigationMarker).pinColor = '#171717';
+                      refreshMarkers?.(currentScene); markDirty();
+                    }"
+                  >
+                    <img src="/icons/navigation/location-1.svg" alt="" style="width:16px;height:20px;object-fit:contain">
+                    Vị trí 1
+                  </button>
+                  <button
+                    type="button"
+                    :class="['nav-mode-btn', { active: ['location-2', 'pin-top', 'anchor'].includes((selectedHotspot as NavigationMarker).icon ?? '') }]"
+                    @click="() => {
+                      (selectedHotspot as NavigationMarker).icon = 'location-2';
+                      if (!(selectedHotspot as NavigationMarker).pinColor) {
+                        (selectedHotspot as NavigationMarker).pinColor = '#171717';
+                      }
+                      const target = (selectedHotspot as NavigationMarker).targetScene;
+                      const targetScene = tour?.scenes?.find(s => s.id === target);
+                      if (!((selectedHotspot as NavigationMarker).iconUrl) && targetScene?.thumbnail) {
+                        (selectedHotspot as NavigationMarker).iconUrl = targetScene.thumbnail;
+                      }
+                      refreshMarkers?.(currentScene); markDirty();
+                    }"
+                  >
+                    <img src="/icons/navigation/location-2.svg" alt="" style="width:15px;height:21px;object-fit:contain">
+                    Vị trí 2
+                  </button>
+                </div>
+              </div>
+
+              <!-- Pin settings (only when pin mode) -->
+              <template v-if="['location-1', 'location-2', 'pin', 'pin-top', 'anchor'].includes((selectedHotspot as NavigationMarker).icon ?? '')">
+                <!-- Pin color -->
+                <div class="field">
+                  <label>Màu pin</label>
+                  <div class="pin-color-row">
+                    <input
+                      type="color"
+                      :value="(selectedHotspot as NavigationMarker).pinColor ?? '#171717'"
+                      @input="(e: any) => {
+                        (selectedHotspot as NavigationMarker).pinColor = e.target.value;
+                        refreshMarkers?.(currentScene); markDirty();
+                      }"
+                    >
+                    <div class="pin-color-presets">
+                      <button v-for="c in ['#ef4444','#f59e0b','#22c55e','#3b82f6','#8b5cf6','#ec4899','#1d6fa8','#171717']" :key="c" type="button"
+                        :style="{ background: c }"
+                        class="pin-color-swatch"
+                        :class="{ active: (selectedHotspot as NavigationMarker).pinColor === c }"
+                        @click="() => { (selectedHotspot as NavigationMarker).pinColor = c; refreshMarkers?.(currentScene); markDirty(); }"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Image inside pin (optional) -->
+                <div class="field">
+                  <label>Ảnh bên trong pin <span style="opacity:.5;font-weight:400">(tuỳ chọn)</span></label>
+                  <input
+                    :value="(selectedHotspot as NavigationMarker).iconUrl ?? ''"
+                    type="text"
+                    placeholder="/thumbnails/scene.jpg hoặc để trống"
+                    @change="(e: any) => {
+                      (selectedHotspot as NavigationMarker).iconUrl = e.target.value || undefined;
+                      refreshMarkers?.(currentScene); markDirty();
+                    }"
+                  >
+                  <div class="hint-text">Để trống = pin trắng trơn. Có ảnh = thumbnail tròn bên trong pin.</div>
+                </div>
+
+                <!-- Quick fill from target scene thumbnail -->
+                <div v-if="(selectedHotspot as NavigationMarker).targetScene" class="field">
+                  <button
+                    type="button"
+                    class="btn-fill-thumb"
+                    @click="() => {
+                      const target = (selectedHotspot as NavigationMarker).targetScene;
+                      const targetScene = tour?.scenes?.find(s => s.id === target);
+                      if (targetScene?.thumbnail) {
+                        (selectedHotspot as NavigationMarker).iconUrl = targetScene.thumbnail;
+                        refreshMarkers?.(currentScene); markDirty();
+                      }
+                    }"
+                  >
+                    📷 Dùng thumbnail cảnh đích
+                  </button>
+                </div>
+
+                <!-- Preview -->
+                <div v-if="(selectedHotspot as NavigationMarker).iconUrl" class="field nav-icon-preview">
+                  <label>Xem trước ảnh</label>
+                  <div class="nav-icon-preview-frame">
+                    <img
+                      :src="(selectedHotspot as NavigationMarker).iconUrl"
+                      alt="Xem trước ảnh trong pin"
+                      @error="($event.target as HTMLImageElement).style.display = 'none'"
+                    >
+                  </div>
+                </div>
+
+                <!-- Pin size -->
+                <div class="field">
+                  <label>
+                    Kích thước pin
+                    <span class="field-badge">{{ (selectedHotspot as NavigationMarker).iconSize ?? 65 }}px</span>
+                  </label>
+                  <div class="rotation-control">
+                    <input type="range" min="35" max="150" step="5"
+                      :value="(selectedHotspot as NavigationMarker).iconSize ?? 65"
+                      @input="(e: any) => {
+                        (selectedHotspot as NavigationMarker).iconSize = Number(e.target.value);
+                        refreshMarkers?.(currentScene); markDirty();
+                      }"
+                    >
+                    <button class="reset-btn" type="button" title="Về 65" @click="() => { (selectedHotspot as NavigationMarker).iconSize = 65; refreshMarkers?.(currentScene); markDirty(); }">↺</button>
+                  </div>
+                  <div class="hint-text">Kích thước pin trong không gian 3D (world units). Mặc định: 65.</div>
+                </div>
+              </template>
+            </template>
+
+            <!-- Navigation arrow 3D rotation — 3 axes (location pins do not use parallax) -->
+            <template v-if="selectedHotspot.plugin === 'navigation' && ['arrow', 'arrow-1', 'arrow-2'].includes((selectedHotspot as NavigationMarker).icon ?? 'arrow')">
               <!-- rotZ: spin around normal (former single rotation) -->
               <div class="field">
                 <label>
                   Xoay (Z) — chiều nghiêng
-                  <span class="field-badge">{{ Math.round(((selectedHotspot as NavigationMarker).rotZ ?? (selectedHotspot as NavigationMarker).rotation ?? 0) * 180 / Math.PI) }}°</span>
+                  <span class="field-badge">{{ navigationRotationDegrees(selectedHotspot as NavigationMarker, 'rotZ') }}°</span>
                 </label>
                 <div class="rotation-control">
                   <input type="range" min="-180" max="180" step="1"
-                    :value="Math.round(((selectedHotspot as NavigationMarker).rotZ ?? (selectedHotspot as NavigationMarker).rotation ?? 0) * 180 / Math.PI)"
+                    :value="navigationRotationDegrees(selectedHotspot as NavigationMarker, 'rotZ')"
                     @input="(e: any) => {
                       (selectedHotspot as NavigationMarker).rotZ = Number(e.target.value) * Math.PI / 180;
                       refreshMarkers?.(currentScene); markDirty();
@@ -1260,30 +1981,30 @@ onMounted(() => {
               <div class="field">
                 <label>
                   Nghiêng (X) — đứng / nằm
-                  <span class="field-badge">{{ Math.round(((selectedHotspot as NavigationMarker).rotX ?? 0) * 180 / Math.PI) }}°</span>
+                  <span class="field-badge">{{ navigationRotationDegrees(selectedHotspot as NavigationMarker, 'rotX') }}°</span>
                 </label>
                 <div class="rotation-control">
                   <input type="range" min="-90" max="90" step="1"
-                    :value="Math.round(((selectedHotspot as NavigationMarker).rotX ?? 0) * 180 / Math.PI)"
+                    :value="navigationRotationDegrees(selectedHotspot as NavigationMarker, 'rotX')"
                     @input="(e: any) => {
                       (selectedHotspot as NavigationMarker).rotX = Number(e.target.value) * Math.PI / 180;
                       refreshMarkers?.(currentScene); markDirty();
                     }"
                   />
-                  <button class="reset-btn" title="Về 0°" @click="() => { (selectedHotspot as NavigationMarker).rotX = 0; refreshMarkers?.(currentScene); markDirty(); }">↺</button>
+                  <button class="reset-btn" title="Về 60°" @click="() => { (selectedHotspot as NavigationMarker).rotX = Math.PI / 3; refreshMarkers?.(currentScene); markDirty(); }">↺</button>
                 </div>
-                <div class="hint-text">0° = đứng thẳng. +45° = ngả về phía trước. -45° = ngả về phía sau.</div>
+                <div class="hint-text">Mặc định 60° để mũi tên nằm theo mặt sàn. 0° = đứng thẳng.</div>
               </div>
 
               <!-- rotY: swivel left/right -->
               <div class="field">
                 <label>
                   Xoay ngang (Y) — quay mặt
-                  <span class="field-badge">{{ Math.round(((selectedHotspot as NavigationMarker).rotY ?? 0) * 180 / Math.PI) }}°</span>
+                  <span class="field-badge">{{ navigationRotationDegrees(selectedHotspot as NavigationMarker, 'rotY') }}°</span>
                 </label>
                 <div class="rotation-control">
                   <input type="range" min="-90" max="90" step="1"
-                    :value="Math.round(((selectedHotspot as NavigationMarker).rotY ?? 0) * 180 / Math.PI)"
+                    :value="navigationRotationDegrees(selectedHotspot as NavigationMarker, 'rotY')"
                     @input="(e: any) => {
                       (selectedHotspot as NavigationMarker).rotY = Number(e.target.value) * Math.PI / 180;
                       refreshMarkers?.(currentScene); markDirty();
@@ -1295,29 +2016,30 @@ onMounted(() => {
               </div>
             </template>
 
+
             <!-- Plane Object3D markers resize independently on X/Y. -->
             <template v-if="selectedHotspot.plugin === 'navigation' || selectedHotspot.plugin === 'video'">
               <div class="field">
                 <label>
                   Phóng ngang (X)
-                  <span class="field-badge">{{ ((selectedHotspot.scaleX ?? 1) * 100).toFixed(0) }}%</span>
+                  <span class="field-badge">{{ (planeMarkerScale(selectedHotspot as NavigationMarker | VideoMarker, 'scaleX') * 100).toFixed(0) }}%</span>
                 </label>
                 <div class="rotation-control">
                   <input type="range" min="0.25" max="4" step="0.05"
-                    :value="selectedHotspot.scaleX ?? 1"
+                    :value="planeMarkerScale(selectedHotspot as NavigationMarker | VideoMarker, 'scaleX')"
                     @input="(e:any) => setPlaneMarkerScale('scaleX', e.target.value)"
                   >
-                  <button class="reset-btn" type="button" title="Về 100%" @click="setPlaneMarkerScale('scaleX', 1)">↺</button>
+                  <button class="reset-btn" type="button" :title="selectedHotspot.plugin === 'navigation' && navigationIsArrow(selectedHotspot as NavigationMarker) ? 'Về 200%' : 'Về 100%'" @click="setPlaneMarkerScale('scaleX', selectedHotspot.plugin === 'navigation' && navigationIsArrow(selectedHotspot as NavigationMarker) ? 2 : 1)">↺</button>
                 </div>
               </div>
               <div class="field">
                 <label>
                   Phóng dọc (Y)
-                  <span class="field-badge">{{ ((selectedHotspot.scaleY ?? 1) * 100).toFixed(0) }}%</span>
+                  <span class="field-badge">{{ (planeMarkerScale(selectedHotspot as NavigationMarker | VideoMarker, 'scaleY') * 100).toFixed(0) }}%</span>
                 </label>
                 <div class="rotation-control">
                   <input type="range" min="0.25" max="4" step="0.05"
-                    :value="selectedHotspot.scaleY ?? 1"
+                    :value="planeMarkerScale(selectedHotspot as NavigationMarker | VideoMarker, 'scaleY')"
                     @input="(e:any) => setPlaneMarkerScale('scaleY', e.target.value)"
                   >
                   <button class="reset-btn" type="button" title="Về 100%" @click="setPlaneMarkerScale('scaleY', 1)">↺</button>
@@ -1542,7 +2264,7 @@ onMounted(() => {
         </template>
 
         <!-- ── TAB 3: CÀI ĐẶT (TÙY CHỈNH PROJECT) ── -->
-        <template v-else-if="currentTab === 'settings' && tour">
+        <template v-else-if="editorMode === 'panorama' && currentTab === 'settings' && tour">
           <div class="insp-section">
             <div class="insp-section-title">Chế độ tour</div>
             <div class="field">
@@ -1620,6 +2342,226 @@ onMounted(() => {
           </div>
         </template>
 
+        <!-- ── TAB 4: BẢN ĐỒ ── -->
+        <template v-else-if="editorMode === 'map' && tour">
+          <div class="map-mode-heading">
+            <strong>Bản đồ vị trí thực</strong>
+            <span>GPS của từng cảnh panorama</span>
+          </div>
+          <div class="insp-section">
+            <div class="insp-section-title">Cảnh đang đặt</div>
+            <div class="geo-current-scene">{{ currentScene?.title }}</div>
+            <div v-if="currentScene" class="toggle-row">
+              <label>Hiện cố định trên bản đồ</label>
+              <UiSwitch
+                :model-value="currentScene.showOnMap === true"
+                @update:model-value="(value) => { currentScene!.showOnMap = value; markDirty(); }"
+              />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Kinh độ</label>
+                <input type="number" step="0.000001" :value="currentScene?.coordinates?.[0] ?? ''" placeholder="108.2022" @change="(event: any) => setCurrentGeoCoordinate('lng', event.target.value)">
+              </div>
+              <div class="field">
+                <label>Vĩ độ</label>
+                <input type="number" step="0.000001" :value="currentScene?.coordinates?.[1] ?? ''" placeholder="16.0544" @change="(event: any) => setCurrentGeoCoordinate('lat', event.target.value)">
+              </div>
+            </div>
+            <div class="hint-text">Tọa độ luôn dùng cho vị trí và hướng camera. Chỉ cảnh bật “Hiện cố định” mới xuất hiện khi nó không phải cảnh hiện tại.</div>
+          </div>
+          <div class="insp-section" v-if="currentScene">
+            <div class="insp-section-title">Xoay panorama trên bản đồ</div>
+            <div class="brightness-control">
+              <input
+                type="range"
+                min="-180"
+                max="180"
+                step="1"
+                :value="(currentScene.panoramaRotation ?? 0) * RAD_TO_DEG"
+                @input="setCurrentPanoramaRotation(Number(($event.target as HTMLInputElement).value))"
+              >
+              <output>{{ Math.round((currentScene.panoramaRotation ?? 0) * RAD_TO_DEG) }}°</output>
+            </div>
+            <div class="field mt-2">
+              <label>Góc xoay chính xác</label>
+              <input
+                type="number"
+                min="-180"
+                max="180"
+                step="0.1"
+                :value="((currentScene.panoramaRotation ?? 0) * RAD_TO_DEG).toFixed(1)"
+                @change="setCurrentPanoramaRotation(Number(($event.target as HTMLInputElement).value))"
+              >
+            </div>
+            <div class="brightness-presets">
+              <button type="button" @click="setCurrentPanoramaRotation(-90)">-90°</button>
+              <button type="button" @click="setCurrentPanoramaRotation(0)">Đặt lại</button>
+              <button type="button" @click="setCurrentPanoramaRotation(90)">+90°</button>
+            </div>
+            <div class="hint-text">Giá trị này xoay chính panorama và toàn bộ marker của cảnh. Nó không thay đổi camera.</div>
+          </div>
+          <div class="insp-section">
+            <div class="insp-section-title">Các cảnh trên bản đồ</div>
+            <button v-for="(scene, index) in tour.scenes" :key="scene.id" type="button" class="geo-scene-row" :class="{ active: scene.id === currentScene?.id }" @click="goToScene(index)">
+              <span class="map-node-dot" :style="{ background: scene.coordinates ? '#3b82f6' : '#64748b' }" />
+              <span>{{ scene.title }}</span>
+              <small>{{ scene.coordinates ? `${scene.showOnMap === true ? 'Hiện' : 'Ẩn'} · ${scene.coordinates[1].toFixed(5)}, ${scene.coordinates[0].toFixed(5)}` : 'Chưa đặt' }}</small>
+            </button>
+          </div>
+
+          <div v-if="false">
+          <div class="insp-section">
+            <div class="insp-section-title">Trình chỉnh sửa bản đồ</div>
+
+            <!-- Floor tabs -->
+            <div v-if="tour.map && tour.map.floors.length > 1" class="map-editor-floor-tabs">
+              <button
+                v-for="f in tour.map.floors" :key="f.id"
+                type="button"
+                :class="['map-floor-tab', { active: mapActiveFloorId === f.id }]"
+                @click="mapActiveFloorId = f.id"
+              >
+                {{ f.shortName ?? f.name }}
+              </button>
+            </div>
+
+            <!-- Canvas editor -->
+            <div class="map-editor-canvas-wrap">
+              <canvas
+                ref="mapEditorCanvas"
+                @pointerdown="mapEditorPointerDown"
+                @pointermove="mapEditorPointerMove"
+                @pointerup="mapEditorPointerUp"
+                @pointercancel="mapEditorPointerUp"
+                style="cursor:grab;border-radius:8px"
+              />
+              <div class="map-editor-hint">Bấm lên ảnh để đặt cảnh hiện tại · Kéo điểm để chỉnh vị trí</div>
+            </div>
+
+            <!-- Auto-connect button -->
+            <button type="button" class="btn-fill-thumb" style="margin-top:8px" @click="autoConnectNodes">
+              🔗 Tự động kết nối từ navigation markers
+            </button>
+          </div>
+
+          <!-- Floor settings -->
+          <div v-if="mapActiveFloor" class="insp-section">
+            <div class="insp-section-title">Tầng: {{ mapActiveFloor.name }}</div>
+
+            <div class="field">
+              <label>Tên tầng</label>
+              <input
+                :value="mapActiveFloor.name"
+                type="text"
+                @change="(e: any) => { mapActiveFloor!.name = e.target.value; markDirty(); }"
+              >
+            </div>
+
+            <div class="field">
+              <label>Tên ngắn (hiện trên tab)</label>
+              <input
+                :value="mapActiveFloor.shortName ?? ''"
+                type="text"
+                placeholder="VD: Sân, Xưởng..."
+                @change="(e: any) => { mapActiveFloor!.shortName = e.target.value || undefined; markDirty(); }"
+              >
+            </div>
+
+            <div class="field">
+              <label>Ảnh nền (floorplan)</label>
+              <label class="map-image-upload">
+                <input type="file" accept="image/jpeg,image/png,image/webp" :disabled="mapImageUploading" @change="uploadMapFloorImage">
+                <span>{{ mapImageUploading ? 'Đang tải ảnh…' : 'Tải ảnh mặt bằng' }}</span>
+              </label>
+              <input
+                :value="mapActiveFloor.imageUrl ?? ''"
+                type="text"
+                placeholder="/maps/tang1.svg hoặc để trống"
+                @change="(e: any) => { mapActiveFloor!.imageUrl = e.target.value || ''; mapEditorImages.delete(mapActiveFloor!.id); markDirty(); drawMapEditor(); }"
+              >
+              <div class="hint-text">Ảnh được dùng làm nền thật của map. Sau khi tải, chọn cảnh rồi bấm vị trí tương ứng trên ảnh.</div>
+            </div>
+          </div>
+
+          <!-- Map global settings -->
+          <div class="insp-section">
+            <div class="insp-section-title">Cấu hình map</div>
+
+            <div class="field">
+              <label>Vị trí</label>
+              <select
+                :value="tour.map?.position ?? 'bottom-right'"
+                @change="(e: any) => { if (tour.value?.map) tour.value.map.position = e.target.value; markDirty(); }"
+              >
+                <option value="bottom-right">Dưới phải</option>
+                <option value="bottom-left">Dưới trái</option>
+                <option value="top-right">Trên phải</option>
+                <option value="top-left">Trên trái</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>
+                Kích thước
+                <span class="field-badge">{{ tour.map?.width ?? 280 }}×{{ tour.map?.height ?? 200 }}</span>
+              </label>
+              <div class="rotation-control">
+                <input type="range" min="200" max="500" step="10"
+                  :value="tour.map?.width ?? 280"
+                  @input="(e: any) => { if (tour.value?.map) { tour.value.map.width = Number(e.target.value); markDirty(); } }"
+                >
+              </div>
+            </div>
+
+            <div class="toggle-row">
+              <label>Hiện đường nối</label>
+              <UiSwitch
+                :model-value="tour.map?.showConnections !== false"
+                @update:model-value="(val) => { if (tour.value?.map) { tour.value.map.showConnections = val; markDirty(); } }"
+              />
+            </div>
+
+            <div class="toggle-row">
+              <label>Hiện mũi tên camera</label>
+              <UiSwitch
+                :model-value="tour.map?.showCameraArrow !== false"
+                @update:model-value="(val) => { if (tour.value?.map) { tour.value.map.showCameraArrow = val; markDirty(); } }"
+              />
+            </div>
+
+            <div class="toggle-row">
+              <label>Click node = chuyển cảnh</label>
+              <UiSwitch
+                :model-value="tour.map?.clickToNavigate !== false"
+                @update:model-value="(val) => { if (tour.value?.map) { tour.value.map.clickToNavigate = val; markDirty(); } }"
+              />
+            </div>
+
+            <div class="toggle-row">
+              <label>Tự chuyển tầng</label>
+              <UiSwitch
+                :model-value="tour.map?.autoSwitchFloor !== false"
+                @update:model-value="(val) => { if (tour.value?.map) { tour.value.map.autoSwitchFloor = val; markDirty(); } }"
+              />
+            </div>
+          </div>
+
+          <!-- Node list -->
+          <div v-if="mapActiveFloor" class="insp-section">
+            <div class="insp-section-title">Nodes ({{ mapActiveFloor.nodes.length }})</div>
+            <div class="map-node-list">
+              <div v-for="node in mapActiveFloor.nodes" :key="node.id" class="map-node-item"
+                :class="{ active: node.id === currentScene?.id }">
+                <span class="map-node-dot" :style="{ background: node.id === currentScene?.id ? '#f59e0b' : 'rgba(255,255,255,0.5)' }" />
+                <span class="map-node-name">{{ (node as any).name || node.id }}</span>
+                <span class="map-node-coords">{{ node.x }}, {{ node.y }}</span>
+              </div>
+            </div>
+          </div>
+          </div>
+        </template>
+
       </div>
     </aside>
 
@@ -1673,6 +2615,10 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.alignment-mode-switch{margin-left:8px;border-color:rgba(245,158,11,.35)}
+.alignment-mode-switch button.active{background:#f59e0b;color:#111827}
+.default-camera-control{display:flex;align-items:center;gap:8px;margin-left:8px;padding:4px 7px;border:1px solid rgba(96,165,250,.3);border-radius:8px;background:rgba(15,23,42,.62);color:#cbd5e1;font-size:10px;white-space:nowrap}.default-camera-control label{display:flex;align-items:center;gap:6px;cursor:pointer}.default-camera-control input{width:14px;height:14px;accent-color:#3b82f6}.default-camera-control button{padding:5px 8px;border-radius:5px;background:#2563eb;color:#fff;font-size:10px;font-weight:650}.default-camera-control button:hover{background:#3b82f6}.default-camera-control output{color:#93c5fd;font-variant-numeric:tabular-nums}
+.panorama-rotation-hint{position:absolute;z-index:25;left:50%;bottom:66px;transform:translateX(-50%);padding:9px 15px;border:1px solid rgba(245,158,11,.5);border-radius:999px;background:rgba(15,23,42,.88);color:#fbbf24;font-size:12px;font-weight:600;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.3)}
 /* ═══ ROOT LAYOUT ═══ */
 .admin-studio {
   display: grid;
@@ -2003,6 +2949,14 @@ onMounted(() => {
   background: #141414;
   flex-shrink: 0;
 }
+.editor-mode-switch { display:flex; padding:3px; border:1px solid rgba(255,255,255,.1); border-radius:8px; background:rgba(255,255,255,.04); }
+.editor-mode-switch button { min-width:88px; padding:7px 13px; border-radius:6px; color:rgba(255,255,255,.52); font-size:11px; font-weight:650; }
+.editor-mode-switch button.active { background:#2563eb; color:#fff; box-shadow:0 3px 10px rgba(37,99,235,.3); }
+.map-mode-heading { display:flex; flex-direction:column; gap:3px; padding:2px 2px 12px; border-bottom:1px solid rgba(255,255,255,.08); }
+.map-mode-heading strong { color:#fff; font-size:14px; }.map-mode-heading span { color:rgba(255,255,255,.45); font-size:10.5px; }
+.geo-current-scene { margin-bottom:12px; padding:10px 12px; border-radius:7px; background:rgba(59,130,246,.12); color:#bfdbfe; font-size:12px; font-weight:600; }
+.geo-scene-row { display:grid; grid-template-columns:10px minmax(0,1fr) auto; align-items:center; gap:8px; width:100%; padding:9px 8px; border-bottom:1px solid rgba(255,255,255,.06); color:rgba(255,255,255,.75); text-align:left; font-size:11px; }
+.geo-scene-row:hover,.geo-scene-row.active { background:rgba(59,130,246,.12); color:#fff; }.geo-scene-row small { color:rgba(255,255,255,.38); font:9px monospace; }
 
 .pt-tabs {
   display: flex;
@@ -2324,6 +3278,7 @@ onMounted(() => {
 .brightness-presets { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
 .brightness-presets button { padding:7px 5px; border:1px solid rgba(255,255,255,.08); border-radius:6px; background:#232833; color:rgba(255,255,255,.65); font-size:10.5px; transition:.15s; }
 .brightness-presets button:hover { border-color:rgba(245,158,11,.5); color:#fff; background:rgba(245,158,11,.12); }
+.sub-control-label { display:block; margin:12px 0 7px; color:rgba(255,255,255,.72); font-size:11px; font-weight:600; }
 
 .video-panel-size { padding:10px; border:1px solid rgba(255,255,255,.08); border-radius:8px; background:rgba(255,255,255,.025); }
 .video-size-presets { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
@@ -2363,6 +3318,194 @@ onMounted(() => {
   transition: background 0.15s;
 }
 .reset-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+/* Navigation icon mode toggle */
+.nav-icon-mode-toggle {
+  display: flex;
+  gap: 6px;
+}
+.nav-mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.55);
+  font: 500 12.5px/1 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.nav-mode-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.8);
+}
+.nav-mode-btn.active {
+  background: rgba(59,130,246,0.18);
+  border-color: rgba(59,130,246,0.5);
+  color: #93c5fd;
+}
+
+/* Fill thumbnail button */
+.btn-fill-thumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 14px;
+  border: 1px dashed rgba(255,255,255,0.18);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+  color: rgba(255,255,255,0.65);
+  font: 500 12.5px/1 'Be Vietnam Pro', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-fill-thumb:hover {
+  background: rgba(59,130,246,0.1);
+  border-color: rgba(59,130,246,0.3);
+  color: #93c5fd;
+}
+
+/* Icon preview */
+.nav-icon-preview-frame {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.3);
+  margin-top: 6px;
+}
+.nav-icon-preview-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Pin color picker */
+.pin-color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pin-color-row input[type="color"] {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+}
+.pin-color-presets {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.pin-color-swatch {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  padding: 0;
+}
+.pin-color-swatch:hover {
+  transform: scale(1.2);
+  border-color: rgba(255,255,255,0.5);
+}
+.pin-color-swatch.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.25);
+}
+
+/* ── Map editor ── */
+.map-editor-floor-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.map-floor-tab {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.5);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+.map-floor-tab:hover { background: rgba(255,255,255,0.08); }
+.map-floor-tab.active {
+  background: rgba(59,130,246,0.2);
+  border-color: rgba(59,130,246,0.5);
+  color: #93c5fd;
+}
+.map-image-upload { display:flex; align-items:center; justify-content:center; min-height:38px; margin-bottom:8px; border:1px dashed rgba(59,130,246,.55); border-radius:7px; background:rgba(59,130,246,.1); color:#bfdbfe; cursor:pointer; font-size:11px; font-weight:600; }
+.map-image-upload:hover { background:rgba(59,130,246,.17); border-color:#60a5fa; }
+.map-image-upload input { display:none; }
+.map-editor-canvas-wrap {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #14151f;
+}
+.map-editor-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+}
+.map-editor-hint {
+  padding: 6px 10px;
+  font-size: 10px;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  background: rgba(0,0,0,0.2);
+}
+.map-node-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.map-node-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  transition: background 0.12s;
+}
+.map-node-item:hover { background: rgba(255,255,255,0.05); }
+.map-node-item.active {
+  background: rgba(245,158,11,0.08);
+  color: #f59e0b;
+}
+.map-node-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.map-node-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.map-node-coords {
+  font-size: 10px;
+  opacity: 0.4;
+  font-family: monospace;
+}
 
 /* Badge next to label showing current value */
 .field-badge {

@@ -80,6 +80,8 @@ export class View360Engine {
   private isTransitioning = false;
   private introDelay: number;
   private _introCountdownTimer: ReturnType<typeof setTimeout> | null = null;
+  private resizeObserver: ResizeObserver | null = null;
+  private lastContainerSize = { width: 0, height: 0 };
 
   constructor(opts: View360EngineOptions) {
     this.container = opts.container;
@@ -116,6 +118,17 @@ export class View360Engine {
 
     // ── Resize handler ──
     window.addEventListener('resize', this.onResize);
+    if ('ResizeObserver' in window) {
+      this.resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const width = Math.round(entry.contentRect.width);
+        const height = Math.round(entry.contentRect.height);
+        if (width <= 0 || height <= 0) return;
+        this.resizeTo(width, height);
+      });
+      this.resizeObserver.observe(this.container);
+    }
 
     this.introDelay = opts.introDelay ?? 0;
 
@@ -159,15 +172,20 @@ export class View360Engine {
       this._introCountdownTimer = null;
     }
 
+    const previousYaw = this.camera.getYaw();
+    const previousPitch = this.camera.getPitch();
+    const useDefaultCamera = scene.defaultCameraEnabled === true;
     this.currentScene = scene;
     this.notifyPluginsSceneLoad(scene);
     this.pano.setBrightness(scene.brightness ?? 1.25);
+    this.pano.setHighlightCompression(scene.highlightCompression ?? 0);
 
-    await this.pano.setImmediate(scene.panorama);
+    const panoramaApplied = await this.pano.setImmediate(scene.panorama, scene.panoramaRotation ?? 0);
+    if (!panoramaApplied) return;
 
     if (playIntro) {
-      const targetYaw   = scene.initialYaw   ?? 0;
-      const targetPitch = scene.initialPitch ?? 0;
+      const targetYaw = useDefaultCamera ? (scene.initialYaw ?? 0) : previousYaw;
+      const targetPitch = useDefaultCamera ? (scene.initialPitch ?? 0) : previousPitch;
 
       // Park camera at start position (looking down, wide FOV)
       this.camera.setRaw(-Math.PI / 2, -Math.PI / 2, 130);
@@ -212,11 +230,29 @@ export class View360Engine {
 
       await this.playLittlePlanetIntro(targetYaw, targetPitch);
     } else {
-      this.camera.setOrientation(scene.initialYaw ?? 0, scene.initialPitch ?? 0);
+      // Designer and direct loads obey the same rule as navigation: scenes
+      // without a default camera keep the viewer's current world direction.
+      if (useDefaultCamera) {
+        this.camera.setOrientation(scene.initialYaw ?? 0, scene.initialPitch ?? 0);
+      } else {
+        this.camera.setOrientation(previousYaw, previousPitch);
+      }
     }
 
     this.bus.emit('scene:loaded', { scene });
     this.notifyPluginsSceneReady(scene);
+  }
+
+  /**
+   * Rotate panorama-local space as one engine-level operation.
+   * Spatial plugins subscribe to `scene:rotation`; callers must not reach into
+   * individual plugins to keep their objects aligned.
+   */
+  setSceneRotation(rotation: number): void {
+    const normalized = Number.isFinite(rotation) ? rotation : 0;
+    if (this.currentScene) this.currentScene.panoramaRotation = normalized;
+    this.pano.setRotation(normalized);
+    this.bus.emit('scene:rotation', { rotation: normalized });
   }
 
   /**
@@ -235,6 +271,7 @@ export class View360Engine {
     this.bus.emit('scene:transition:start', { from, to: scene });
     this.notifyPluginsSceneLoad(scene);
     this.pano.setBrightness(scene.brightness ?? 1.25);
+    this.pano.setHighlightCompression(scene.highlightCompression ?? 0);
 
     // Compute fly direction vector from current camera aim
     const yaw = flyYaw ?? this.camera.getYaw();
@@ -249,43 +286,52 @@ export class View360Engine {
     const camStartPos = this.camera.camera.position.clone();
     const camEndPos = dir.clone().multiplyScalar(this.pano['radius'] * 0.85);
 
-    const destYaw = scene.initialYaw ?? 0;
-    const destPitch = scene.initialPitch ?? 0;
+    // Camera belongs to world space and remains independent of the panorama.
+    // Scene alignment is applied by rotating PanoSphere itself.
     const startYaw = this.camera.getYaw();
     const startPitch = this.camera.getPitch();
+    const useDefaultCamera = scene.defaultCameraEnabled === true;
+    const destYaw = useDefaultCamera ? (scene.initialYaw ?? 0) : startYaw;
+    const destPitch = useDefaultCamera ? (scene.initialPitch ?? 0) : startPitch;
+    // Take the shortest path around the yaw circle.
+    const yawDelta = Math.atan2(Math.sin(destYaw - startYaw), Math.cos(destYaw - startYaw));
     const baseFov = this.camera.getFov();
+    const travelDistance = this.pano['radius'] * 0.28;
 
-    const transitionStyle = transition ?? 'crossfade';
+    const transitionStyle = transition ?? this.pano.transitionStyle;
     await this.pano.transition(scene.panorama, transitionStyle, dir, (p) => {
-      if (transitionStyle !== 'fly-through') return;
-      // Cubic ease
       const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      if (useDefaultCamera) {
+        this.camera.setRaw(
+          startYaw + yawDelta * ease,
+          startPitch + (destPitch - startPitch) * ease,
+        );
+      }
+      if (transitionStyle === 'forward') {
+        // Move monotonically from the old panorama centre to the temporary
+        // centre of the incoming panorama. Unlike an FOV pulse, this changes
+        // the camera's position relative to both spheres and produces a real
+        // directional perspective warp. At completion both are re-centred.
+        this.camera.camera.position.copy(dir).multiplyScalar(travelDistance * ease);
+        return;
+      }
+      if (transitionStyle !== 'fly-through') return;
 
       // Fly camera position
       this.camera.camera.position.lerpVectors(camStartPos, camEndPos, ease * 0.88);
-
-      // Rotate toward destination
-      this.camera.setRaw(
-        startYaw + (destYaw - startYaw) * ease,
-        startPitch + (destPitch - startPitch) * ease,
-      );
 
       // FOV warp for "fly" feel
       const warpFov = baseFov + Math.sin(p * Math.PI) * 20;
       this.camera.camera.fov = warpFov;
       this.camera.camera.updateProjectionMatrix();
-    });
+    }, scene.panoramaRotation ?? 0);
 
     // Reset camera position after transition. Crossfade keeps the viewer's
     // current direction so there is no camera jump when the new image appears.
     this.camera.camera.position.set(0, 0, 0);
     this.camera.camera.fov = baseFov;
     this.camera.camera.updateProjectionMatrix();
-    if (transitionStyle === 'fly-through') {
-      this.camera.setOrientation(destYaw, destPitch);
-    } else {
-      this.camera.setOrientation(startYaw, startPitch);
-    }
+    this.camera.setOrientation(destYaw, destPitch);
 
     this.currentScene = scene;
     this.isTransitioning = false;
@@ -425,6 +471,8 @@ export class View360Engine {
   destroy(): void {
     if (this.rafId !== null) cancelAnimationFrame(this.rafId);
     window.removeEventListener('resize', this.onResize);
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
 
     this.plugins.forEach((p) => p._destroy());
     this.plugins.clear();
@@ -455,11 +503,19 @@ export class View360Engine {
   };
 
   private onResize = (): void => {
-    const w = this.container.clientWidth || window.innerWidth;
-    const h = this.container.clientHeight || window.innerHeight;
-    this.camera.onResize(w, h);
-    this.renderer.setSize(w, h);
+    const rect = this.container.getBoundingClientRect();
+    this.resizeTo(
+      Math.round(rect.width) || window.innerWidth,
+      Math.round(rect.height) || window.innerHeight,
+    );
   };
+
+  private resizeTo(width: number, height: number): void {
+    if (width === this.lastContainerSize.width && height === this.lastContainerSize.height) return;
+    this.lastContainerSize = { width, height };
+    this.camera.onResize(width, height);
+    this.renderer.setSize(width, height, true);
+  }
 
   private notifyPluginsSceneLoad(scene: TourScene): void {
     this.plugins.forEach((p) => p.onSceneLoad?.(scene));

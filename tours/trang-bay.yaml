@@ -10,15 +10,175 @@ initialSceneId: scene-c7
 plugins:
   - navigation
   - info
+transition: forward
+map:
+  position: bottom-right
+  width: 300
+  height: 220
+  showConnections: true
+  showCameraArrow: true
+  clickToNavigate: true
+  showFloorTabs: true
+  autoSwitchFloor: true
+  defaultFloorId: outdoor
+  floors:
+    - id: outdoor
+      name: Ngoài trời
+      shortName: Sân
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 600
+      nodes:
+        - id: scene-c7
+          name: Cổng chính
+          x: 700
+          'y': 520
+          neighbors:
+            - scene-c5
+        - id: scene-c5
+          name: Bên sông
+          x: 580
+          'y': 420
+          neighbors:
+            - scene-c7
+            - scene-c4
+        - id: scene-c4
+          name: Trưng bày mở
+          x: 400
+          'y': 340
+          neighbors:
+            - scene-c5
+            - scene-c2
+            - scene-c3
+        - id: scene-c2
+          name: Vườn tượng
+          x: 240
+          'y': 300
+          neighbors:
+            - scene-c4
+            - scene-c1
+          exitTo:
+            floorId: tb1
+            nodeId: scene-tb1-5
+        - id: scene-c1
+          name: Xưởng đá
+          x: 120
+          'y': 240
+          neighbors:
+            - scene-c2
+        - id: scene-c3
+          name: Sảnh tân gia
+          x: 400
+          'y': 180
+          neighbors:
+            - scene-c4
+          exitTo:
+            floorId: tb2
+            nodeId: scene-tb2-3
+        - id: scene-c6
+          name: Vườn đá
+          x: 100
+          'y': 440
+          neighbors: []
+        - id: s1790786479857
+          name: Cảnh mới
+          x: 520
+          'y': 130
+          neighbors:
+            - scene-c3
+    - id: tb1
+      name: Khu Xưởng & TB1
+      shortName: Xưởng
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 300
+      nodes:
+        - id: scene-tb1-1
+          name: Lối vào xưởng
+          x: 80
+          'y': 150
+          neighbors:
+            - scene-tb1-2
+        - id: scene-tb1-2
+          name: Sân tập kết
+          x: 230
+          'y': 150
+          neighbors:
+            - scene-tb1-1
+            - scene-tb1-3
+        - id: scene-tb1-3
+          name: Góc chế tác
+          x: 400
+          'y': 150
+          neighbors:
+            - scene-tb1-2
+            - scene-tb1-4
+        - id: scene-tb1-4
+          name: Trung tâm xưởng
+          x: 570
+          'y': 150
+          neighbors:
+            - scene-tb1-3
+            - scene-tb1-5
+        - id: scene-tb1-5
+          name: Cổng trưng bày
+          x: 720
+          'y': 150
+          neighbors:
+            - scene-tb1-4
+          exitTo:
+            floorId: outdoor
+            nodeId: scene-c2
+    - id: tb2
+      name: Khu Trưng Bày 2
+      shortName: TB2
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 300
+      nodes:
+        - id: scene-tb2-1
+          name: Lối vào
+          x: 100
+          'y': 150
+          neighbors:
+            - scene-tb2-2
+        - id: scene-tb2-2
+          name: Hành lang
+          x: 300
+          'y': 150
+          neighbors:
+            - scene-tb2-1
+            - scene-tb2-3
+        - id: scene-tb2-3
+          name: Trưng bày 2
+          x: 500
+          'y': 150
+          neighbors:
+            - scene-tb2-2
+            - scene-tb2-4
+          exitTo:
+            floorId: outdoor
+            nodeId: scene-c3
+        - id: scene-tb2-4
+          name: Kết hành trình
+          x: 700
+          'y': 150
+          neighbors:
+            - scene-tb2-3
 scenes:
   - id: scene-c7
     title: Cổng Sông Vân Art Space
     subtitle: Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.
     panorama: /images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
     thumbnail: /thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg
-    initialYaw: 0
-    initialPitch: -0.05
+    initialYaw: 3.16509577797931
+    initialPitch: -0.06799836111822648
+    panoramaRotation: -2.39200153826361
     brightness: 1.3
+    highlightCompression: 0
+    coordinates:
+      - 105.95356464385529
+      - 20.208159298343244
     markers:
       - id: marker-navigation-1789273190758
         plugin: navigation
@@ -29,6 +189,7 @@ scenes:
         rotZ: -0.47123889803846897
         rotX: 0.8552113334772214
         rotY: 0
+        icon: arrow
       - id: marker-info-1789274132769
         plugin: panel
         label: Cổng chính
@@ -61,24 +222,6 @@ scenes:
             type: ai-chat
             context: ''
         placement: horizontal
-      - id: h1790652579044
-        plugin: panel
-        label: Xem ảnh 3D
-        yaw: -2.311
-        pitch: -0.053
-        contents:
-          - id: h1790652579044-image
-            type: image3d
-            image: ''
-            caption: ''
-      - id: h1790652586972
-        label: Xem video
-        yaw: -2.89
-        pitch: 0.231
-        plugin: video
-        src: https://www.youtube.com/watch?v=ujf9KANJC8U
-        width: 720
-        height: 405
   - id: scene-c1
     title: Xưởng đá
     subtitle: Điểm nhìn mở đầu, nơi tác phẩm đá gặp ánh sáng và cảnh quan Sông Vân.
@@ -86,7 +229,12 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876123.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: -0.21000000000000085
     brightness: 1.3
+    highlightCompression: 0
+    coordinates:
+      - 105.95325686037542
+      - 20.20851687272049
     markers:
       - id: h1790007426579
         label: Cảnh mới
@@ -105,7 +253,12 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876132.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0.9116921905584121
     brightness: 1.3
+    highlightCompression: 0
+    coordinates:
+      - 105.95330312848093
+      - 20.20845397804675
     markers:
       - id: h1790007374178
         label: Khoảng trưng bày mở
@@ -137,7 +290,12 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876143.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 2.2286784082777906
     brightness: 1.3
+    highlightCompression: 0
+    coordinates:
+      - 105.95325317233804
+      - 20.208376303089604
     markers:
       - id: h1790007786937
         label: Không gian trừng bày mở
@@ -150,8 +308,8 @@ scenes:
         rotY: 0.6457718232379019
       - id: h1790007866785
         label: Khu trưng bày 2
-        yaw: 0.5523
-        pitch: -0.2379
+        yaw: 0.542
+        pitch: -0.4688
         plugin: navigation
         targetScene: scene-tb2-3
         rotX: 0.8726646259971648
@@ -166,10 +324,12 @@ scenes:
             content: 'Khung sảnh chính của tân gia. '
       - id: h1790786542380
         label: Chuyển cảnh
-        yaw: 0.963
-        pitch: -0.249
+        yaw: 0.9424
+        pitch: -0.4937
         plugin: navigation
         targetScene: s1790786479857
+        rotY: 0
+        rotX: 0.8552113334772214
   - id: scene-c4
     title: Khoảng Trưng Bày Mở
     subtitle: Không gian ngoài trời với tầm nhìn rộng dành cho các tác phẩm điêu khắc.
@@ -177,7 +337,12 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876162.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 1.294598775598299
     brightness: 1.3
+    highlightCompression: 0
+    coordinates:
+      - 105.95333464443684
+      - 20.208403976762998
     markers:
       - id: c4-next
         plugin: navigation
@@ -210,7 +375,12 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876173.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 1.0723047484373343
     brightness: 1.3
+    highlightCompression: 0
+    coordinates:
+      - 105.95340371131168
+      - 20.208310372092086
     markers:
       - id: c5-next
         plugin: navigation
@@ -239,7 +409,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876183.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers: []
   - id: scene-tb1-1
     title: Lối Vào Xưởng Đá
@@ -248,7 +420,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876074.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers:
       - id: h1790007757751
         label: Cảnh mới
@@ -264,7 +438,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876090.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers:
       - id: h1790007718913
         label: Góc chế tác
@@ -287,7 +463,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876098.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers:
       - id: h1790007660078
         plugin: panel
@@ -312,17 +490,6 @@ scenes:
         plugin: navigation
         targetScene: scene-tb1-4
         rotX: 0.8726646259971648
-      - id: h1790647902226
-        label: Video
-        yaw: 2.79
-        pitch: -0.0368
-        plugin: video
-        src: https://www.youtube.com/watch?v=StfAHz2UdBY
-        width: 2560
-        height: 1440
-        rotY: -0.13962634015954636
-        rotZ: 0
-        rotX: 0.10471975511965977
   - id: scene-tb1-4
     title: Trung Tâm Xưởng
     subtitle: Điểm nhìn bao quát khu vực sáng tác và hoàn thiện tác phẩm.
@@ -330,7 +497,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876106.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers:
       - id: h1790007619346
         label: Cảnh mới
@@ -354,7 +523,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876114.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers:
       - id: h1790007511095
         label: Vườn tượng
@@ -377,7 +548,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876042.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers: []
   - id: scene-tb2-2
     title: Hành Lang Tác Phẩm
@@ -386,7 +559,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876050.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers: []
   - id: scene-tb2-3
     title: Không gian trừng bày 2
@@ -395,15 +570,24 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876058.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers:
       - id: h1790007893330
         label: Cảnh mới
-        yaw: 0.4139
-        pitch: -0.4477
+        yaw: 0.4073
+        pitch: -0.6937
         plugin: navigation
         targetScene: scene-c3
         rotX: 0.890117918517108
+      - id: h1790838747657
+        label: Chuyển cảnh
+        yaw: -0.3165
+        pitch: -0.8018
+        plugin: navigation
+        targetScene: s1790786479857
+        scaleX: 1.45
   - id: scene-tb2-4
     title: Điểm Kết Hành Trình
     subtitle: Điểm nhìn cuối để nhìn lại mối liên hệ giữa tác phẩm, làng nghề và cảnh quan.
@@ -411,7 +595,9 @@ scenes:
     thumbnail: /thumbnails/trang-bay/1788771876067.jpg
     initialYaw: 0
     initialPitch: -0.05
+    panoramaRotation: 0
     brightness: 1.3
+    highlightCompression: 0
     markers:
       - id: tb2-4-prev
         plugin: navigation
@@ -432,5 +618,22 @@ scenes:
     thumbnail: /thumbnails/1790786504095-y04xqsn9269.webp
     initialYaw: 0
     initialPitch: 0
+    panoramaRotation: 0
     brightness: 1.25
-    markers: []
+    highlightCompression: 0
+    markers:
+      - id: h1790838679145
+        label: Chuyển cảnh
+        yaw: 2.9684
+        pitch: -0.8937
+        plugin: navigation
+        targetScene: scene-c3
+        scaleX: 2.45
+        scaleY: 1.45
+      - id: h1790838716073
+        label: Chuyển cảnh
+        yaw: -1.305
+        pitch: -0.6048
+        plugin: navigation
+        targetScene: scene-tb2-3
+        rotZ: -0.12217304763960307

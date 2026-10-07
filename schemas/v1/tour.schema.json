@@ -33,9 +33,23 @@
       "items": { "type": "string" },
       "description": "List of enabled plugin names."
     },
+    "mode": { "type": "string", "enum": ["free", "guided"] },
+    "guidedDuration": { "type": "number", "minimum": 0 },
+    "autoRotate": { "type": "boolean" },
+    "showMinimap": { "type": "boolean" },
+    "transition": {
+      "type": "string",
+      "enum": ["crossfade", "forward", "fly-through", "crossfade-pan"]
+    },
+    "transitionDuration": { "type": "number", "minimum": 0 },
+    "transitionColor": { "type": "string" },
+    "thumbnailFallbackAfterMs": { "type": "number", "minimum": 0 },
+    "preloadEnabled": { "type": "boolean" },
+    "preloadRadius": { "type": "number", "minimum": 0 },
+    "minOverlayMs": { "type": "number", "minimum": 0 },
     "scenes": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "items": { "$ref": "#/definitions/TourScene" }
     }
   },
@@ -55,7 +69,16 @@
         "thumbnail": { "type": "string", "minLength": 1 },
         "initialYaw": { "type": "number", "default": 0 },
         "initialPitch": { "type": "number", "default": 0 },
+        "defaultCameraEnabled": { "type": "boolean", "default": false, "description": "Apply the scene camera yaw/pitch when entering this scene." },
+        "panoramaRotation": { "type": "number", "default": 0, "description": "World-space rotation of the panorama and its markers, in radians." },
         "brightness": { "type": "number", "minimum": 0.5, "maximum": 2, "default": 1.25 },
+        "highlightCompression": { "type": "number", "minimum": 0, "maximum": 1, "default": 0 },
+        "coordinates": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number" }
+        },
         "markers": {
           "type": "array",
           "default": [],

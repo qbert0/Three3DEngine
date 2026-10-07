@@ -37,6 +37,8 @@ export function useDesignerEngine() {
   const cameraYaw = ref(0);
   const cameraPitch = ref(0);
   const cameraFov = ref(75);
+  const interactionMode = ref<'camera' | 'panorama'>('camera');
+  const lastPanoramaRotation = ref<number | null>(null);
 
   // Marker placement mode
   const placementMode = ref<PlacementMode>('none');
@@ -54,6 +56,14 @@ export function useDesignerEngine() {
   // Unsubscribe cleanup
   const unsubs: Array<() => void> = [];
 
+  function forDesigner(scene: TourScene): TourScene {
+    const editorSource = scene.editorPanorama
+      ?? (scene.panorama.startsWith('/')
+        ? `/api/admin/media/preview?path=${encodeURIComponent(scene.panorama)}`
+        : scene.panorama);
+    return { ...scene, panorama: editorSource };
+  }
+
   // ── Init ───────────────────────────────────────────────────────
 
   async function initEngine(
@@ -66,6 +76,11 @@ export function useDesignerEngine() {
     try {
       const e = new View360Engine({
         container,
+        // The designer only needs the active scene. A 5760×2880 decoded image
+        // is roughly 63 MB before its GPU copy, so retaining viewer-style
+        // neighbour caches here quickly exhausts memory.
+        pixelRatio: 1,
+        antialias: false,
         // No autorotate in designer — camera must stay where user puts it
         camera: {
           dampingFactor: 0.1,
@@ -73,6 +88,9 @@ export function useDesignerEngine() {
         pano: {
           defaultTransition: 'crossfade',
           transitionDuration: 500,
+          // Admin never preloads neighbouring scenes. Only the active WebGL
+          // texture exists; switching scenes destroys the previous one.
+          maxCachedTextures: 0,
         },
       });
 
@@ -117,10 +135,54 @@ export function useDesignerEngine() {
       canvas.addEventListener('click', onClick);
       unsubs.push(() => canvas.removeEventListener('click', onClick));
 
+      // Alignment interaction: in panorama mode the camera is frozen and
+      // horizontal dragging rotates the panorama + its marker group instead.
+      let rotatingPanorama = false;
+      let rotationStartX = 0;
+      let rotationStart = 0;
+      const onRotationDown = (ev: PointerEvent) => {
+        if (interactionMode.value !== 'panorama' || ev.button !== 0) return;
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        rotatingPanorama = true;
+        rotationStartX = ev.clientX;
+        rotationStart = currentScene.value?.panoramaRotation ?? 0;
+        canvas.setPointerCapture(ev.pointerId);
+        canvas.style.cursor = 'ew-resize';
+      };
+      const onRotationMove = (ev: PointerEvent) => {
+        if (!rotatingPanorama || interactionMode.value !== 'panorama') return;
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        const twoPi = Math.PI * 2;
+        const raw = rotationStart + (ev.clientX - rotationStartX) * 0.003;
+        const rotation = ((raw + Math.PI) % twoPi + twoPi) % twoPi - Math.PI;
+        if (currentScene.value) currentScene.value.panoramaRotation = rotation;
+        e.setSceneRotation(rotation);
+      };
+      const onRotationUp = (ev: PointerEvent) => {
+        if (!rotatingPanorama) return;
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        rotatingPanorama = false;
+        canvas.style.cursor = interactionMode.value === 'panorama' ? 'ew-resize' : 'grab';
+        lastPanoramaRotation.value = currentScene.value?.panoramaRotation ?? 0;
+      };
+      canvas.addEventListener('pointerdown', onRotationDown, true);
+      canvas.addEventListener('pointermove', onRotationMove, true);
+      canvas.addEventListener('pointerup', onRotationUp, true);
+      canvas.addEventListener('pointercancel', onRotationUp, true);
+      unsubs.push(
+        () => canvas.removeEventListener('pointerdown', onRotationDown, true),
+        () => canvas.removeEventListener('pointermove', onRotationMove, true),
+        () => canvas.removeEventListener('pointerup', onRotationUp, true),
+        () => canvas.removeEventListener('pointercancel', onRotationUp, true),
+      );
+
       engine.value = e;
 
       // ── Load first scene without intro ──
-      await e.loadScene(initialScene, false);
+      await e.loadScene(forDesigner(initialScene), false);
     } catch (err) {
       errorMessage.value =
         err instanceof Error ? err.message : 'Không thể khởi động designer.';
@@ -134,7 +196,7 @@ export function useDesignerEngine() {
     if (!engine.value) return;
     isLoading.value = true;
     try {
-      await engine.value.loadScene(scene, false);
+      await engine.value.loadScene(forDesigner(scene), false);
     } finally {
       isLoading.value = false;
     }
@@ -174,6 +236,7 @@ export function useDesignerEngine() {
 
       // Intersect with a virtual sphere at radius 520
       const dir = raycaster.ray.direction.clone().normalize();
+      dir.applyAxisAngle(new Vector3(0, 1, 0), -(currentScene.value?.panoramaRotation ?? 0));
       const yaw = Math.atan2(-dir.x, -dir.z);
       const pitch = Math.asin(dir.y);
 
@@ -212,6 +275,21 @@ export function useDesignerEngine() {
     engine.value?.pano.setBrightness(value);
   }
 
+  function setHighlightCompression(value: number): void {
+    engine.value?.pano.setHighlightCompression(value);
+  }
+
+  function setPanoramaRotation(value: number): void {
+    if (!engine.value) return;
+    engine.value.setSceneRotation(value);
+  }
+
+  function setInteractionMode(mode: 'camera' | 'panorama'): void {
+    interactionMode.value = mode;
+    const canvas = engine.value?.['renderer'].domElement as HTMLCanvasElement | undefined;
+    if (canvas) canvas.style.cursor = mode === 'panorama' ? 'ew-resize' : 'grab';
+  }
+
   // ── Snapshot ───────────────────────────────────────────────────
 
   /** Capture current frame as a data URL (for thumbnail generation) */
@@ -246,6 +324,8 @@ export function useDesignerEngine() {
     cameraYaw: readonly(cameraYaw),
     cameraPitch: readonly(cameraPitch),
     cameraFov: readonly(cameraFov),
+    interactionMode: readonly(interactionMode),
+    lastPanoramaRotation: readonly(lastPanoramaRotation),
     placementMode: readonly(placementMode),
     isPlacing,
     lastMarkerMoved: readonly(lastMarkerMoved),
@@ -262,6 +342,9 @@ export function useDesignerEngine() {
     refreshMarkers,
     setFov,
     setBrightness,
+    setHighlightCompression,
+    setPanoramaRotation,
+    setInteractionMode,
     destroyEngine,
   };
 }

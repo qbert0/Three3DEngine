@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/routes/api/admin/tours/_slug/scenes/_sceneId/markers.post');import { d as defineEventHandler, g as getRouterParam, a as readBody, c as createError } from '../../../../../../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/admin/tours/_slug/scenes/_sceneId/markers.post');import { d as defineEventHandler, b as getRouterParam, a as readBody, c as createError } from '../../../../../../../nitro/nitro.mjs';
 import { a as saveSceneMarkers } from '../../../../../../../_/yamlLoader.mjs';
 import 'node:http';
 import 'node:https';

@@ -1,12 +1,12 @@
 globalThis.__timing__.logStart('Load chunks/build/styles');const interopDefault = r => r.default || r || [];
 const styles = {
-  "node_modules/nuxt/dist/app/entry.js": () => import('./entry-styles.yawsqXQ3.mjs').then(interopDefault),
+  "node_modules/nuxt/dist/app/entry.js": () => import('./entry-styles.D5y2lv_3.mjs').then(interopDefault),
   "pages/index.vue": () => import('./index-styles.C77txiG1.mjs').then(interopDefault),
   "pages/tours/[tourId].vue": () => import('./_tourId_-styles.bdug0q4W.mjs').then(interopDefault),
-  "pages/experience/[tourId].vue": () => import('./_tourId_-styles.D-YgM2jY.mjs').then(interopDefault),
-  "pages/admin/[slug]/[sceneId].vue": () => import('./_sceneId_-styles.DULMcwI6.mjs').then(interopDefault),
-  "node_modules/nuxt/dist/app/components/error-500.vue": () => import('./error-500-styles.ulHNpcF1.mjs').then(interopDefault),
+  "pages/experience/[tourId].vue": () => import('./_tourId_-styles.DsxySJu0.mjs').then(interopDefault),
+  "pages/admin/[slug]/[sceneId].vue": () => import('./_sceneId_-styles.pKSGEEbU.mjs').then(interopDefault),
   "node_modules/nuxt/dist/app/components/error-404.vue": () => import('./error-404-styles.CiJjK6WX.mjs').then(interopDefault),
+  "node_modules/nuxt/dist/app/components/error-500.vue": () => import('./error-500-styles.ulHNpcF1.mjs').then(interopDefault),
   "layouts/default.vue": () => import('./default-styles.B0RNH6Yy.mjs').then(interopDefault)
 };
 

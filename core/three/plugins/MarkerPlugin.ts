@@ -95,6 +95,9 @@ export class MarkerPlugin extends PluginBase {
 
     this.ctx.container.appendChild(cssElement);
     this.ctx.scene.add(this.group);
+    this.unsubs.push(this.ctx.bus.on('scene:rotation', ({ rotation }) => {
+      this.applySceneRotation(rotation);
+    }));
     this.bindPointerEvents();
   }
 
@@ -134,6 +137,9 @@ export class MarkerPlugin extends PluginBase {
 
   override onSceneReady(scene: TourScene): void {
     this.clearMarkers();
+    // Markers are authored in panorama-local yaw/pitch. Rotate their common
+    // parent with the image so they remain attached to the same visual spots.
+    this.applySceneRotation(scene.panoramaRotation ?? 0);
     for (const marker of scene.markers ?? []) {
       const markerType = this.markerTypes.get(marker.plugin);
       if (!markerType?.supports(marker)) {
@@ -142,7 +148,8 @@ export class MarkerPlugin extends PluginBase {
       }
       this.group.add(markerType.createObject(marker));
     }
-    this.fadeAll(1, 350);
+    // Marker mới phải đọc được gần như ngay khi panorama kết thúc chuyển cảnh.
+    this.fadeAll(1, 180);
   }
 
   private markerTypeForObject(object: THREE.Object3D): MarkerBase | undefined {
@@ -191,7 +198,13 @@ export class MarkerPlugin extends PluginBase {
       this.ctx.bus.emit('marker:click', { marker });
       if (marker.plugin === 'navigation' && marker.targetScene) {
         this.closeAllPanels();
-        this.ctx.bus.emit('navigate', { sceneId: marker.targetScene });
+        // Marker coordinates are panorama-local. Convert yaw to the canonical
+        // world/map direction before handing it to the transition engine.
+        this.ctx.bus.emit('navigate', {
+          sceneId: marker.targetScene,
+          yaw: marker.yaw + this.group.rotation.y,
+          pitch: marker.pitch,
+        });
       } else {
         this.openPanel(marker, object);
       }
@@ -231,6 +244,15 @@ export class MarkerPlugin extends PluginBase {
     this.markerTypes.set(markerType.markerType, markerType);
   }
 
+  /** One transform for every current and future MarkerBase implementation. */
+  private applySceneRotation(rotation: number): void {
+    this.group.rotation.y = rotation;
+    // PanelMarker projects anchors into DOM coordinates before WebGL render in
+    // the engine loop, so ensure its world matrix reflects the new rotation in
+    // this same frame rather than one frame later.
+    this.group.updateMatrixWorld(true);
+  }
+
   /** Add a marker object to the group — subclasses use this for programmatic markers. */
   protected addMarkerObject(object: THREE.Object3D): void {
     this.group.add(object);
@@ -262,6 +284,9 @@ export class MarkerPlugin extends PluginBase {
       this.setPointer(event);
       this.raycaster.setFromCamera(this.pointer, this.ctx.camera.camera);
       const direction = this.raycaster.ray.direction.clone().normalize();
+      // Marker yaw is stored in panorama-local coordinates. Convert the
+      // world-space ray back through the scene rotation before persisting it.
+      direction.applyQuaternion(this.group.quaternion.clone().invert());
       const yaw = Math.atan2(-direction.x, -direction.z);
       const pitch = Math.asin(THREE.MathUtils.clamp(direction.y, -1, 1));
       this.markerTypeForObject(this.draggingObject)?.repositionObject(this.draggingObject, yaw, pitch);

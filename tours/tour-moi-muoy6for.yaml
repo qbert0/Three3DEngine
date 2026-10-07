@@ -1,0 +1,237 @@
+slug: tour-moi-muoy6for
+title: Tour mới
+location: Chưa cập nhật
+summary: Tour mới chưa có nội dung.
+theme: nature
+initialSceneId: scene-muozlpuo
+plugins: []
+mode: free
+autoRotate: false
+showMinimap: false
+map:
+  floors:
+    - id: floor-1
+      name: Khu vực 1
+      shortName: KV1
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 600
+      nodes:
+        - id: s1790824864024
+          name: Cảnh mới
+          x: 400
+          'y': 302
+          neighbors:
+            - scene-muozlpuo
+            - scene-mup0x8h8
+        - id: scene-mup0x8h8
+          name: DJI 0002
+          x: 584
+          'y': 306
+          neighbors:
+            - scene-muozlpuo
+            - s1790824864024
+        - id: scene-muozlpuo
+          name: DJI 0001
+          x: 216
+          'y': 306
+          neighbors:
+            - s1790824864024
+            - scene-mup0x8h8
+    - id: floor-2
+      name: Khu vực 2
+      shortName: KV2
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 600
+      nodes:
+        - id: scene-muoz78zx
+          name: 2aOboR2PHRxQKjXhnAVJV6jGyf5VffRyqf7njrPM
+          x: 400
+          'y': 300
+          neighbors: []
+    - id: floor-3
+      name: Khu vực 3
+      shortName: KV3
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 600
+      nodes:
+        - id: scene-mup1b7ie
+          name: DJI 0003
+          x: 400
+          'y': 300
+          neighbors: []
+    - id: floor-4
+      name: Khu vực 4
+      shortName: KV4
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 600
+      nodes:
+        - id: scene-mup1sfwl
+          name: DJI 0004
+          x: 400
+          'y': 300
+          neighbors: []
+    - id: floor-5
+      name: Khu vực 5
+      shortName: KV5
+      imageUrl: ''
+      imageWidth: 800
+      imageHeight: 600
+      nodes:
+        - id: scene-mup1smyg
+          name: DJI 0005
+          x: 400
+          'y': 300
+          neighbors: []
+  defaultFloorId: floor-1
+  position: bottom-right
+  width: 280
+  height: 200
+  showConnections: true
+  showCameraArrow: true
+  clickToNavigate: true
+  showFloorTabs: true
+  autoSwitchFloor: true
+  visible: true
+scenes:
+  - id: s1790824864024
+    title: Cảnh mới
+    subtitle: Mô tả cảnh mới
+    panorama: /uploads/1790824871428-qk6b0x0xjif.jpg
+    thumbnail: /thumbnails/1790824871428-qk6b0x0xjif.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1
+    highlightCompression: 0
+    markers: []
+  - id: scene-muoz78zx
+    title: 2aOboR2PHRxQKjXhnAVJV6jGyf5VffRyqf7njrPM
+    subtitle: ''
+    panorama: /uploads/1790825393143-7qjndefvpbc.jpg
+    thumbnail: /thumbnails/1790825393143-7qjndefvpbc.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1
+    highlightCompression: 0
+    markers: []
+  - id: scene-muozlpuo
+    title: DJI 0001
+    subtitle: ''
+    panorama: /uploads/1790826067720-i8tcqjgqf6.jpg
+    thumbnail: /thumbnails/1790826067720-i8tcqjgqf6.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1.25
+    highlightCompression: 0
+    markers:
+      - id: h1790826658779
+        label: Chuyển cảnh
+        yaw: 3.0713
+        pitch: -0.602
+        plugin: navigation
+        targetScene: s1790824864024
+        iconUrl: /thumbnails/1790824871428-qk6b0x0xjif.webp
+        iconSize: 45
+        icon: pin
+        pinColor: '#ef4444'
+      - id: h1790828472946
+        label: Đường vào
+        yaw: 2.0227
+        pitch: 0.0445
+        plugin: navigation
+        targetScene: scene-mup0x8h8
+        icon: location-2
+        pinColor: '#ef4444'
+        iconUrl: /thumbnails/1790824871428-qk6b0x0xjif.webp
+        scaleX: 1.3
+        iconSize: 35
+        scaleY: 0.65
+    coordinates:
+      - 105.93882456422025
+      - 20.221376016839955
+  - id: scene-mup0x8h8
+    title: DJI 0002
+    subtitle: ''
+    panorama: /uploads/1790828283399-ywq1ijooop8.jpg
+    thumbnail: /thumbnails/1790828283399-ywq1ijooop8.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1.25
+    highlightCompression: 0
+    markers:
+      - id: h1790828348902
+        label: Chuyển cảnh
+        yaw: 2.5543
+        pitch: -1.3402
+        plugin: navigation
+        targetScene: s1790824864024
+        icon: pin
+        pinColor: '#ef4444'
+        iconUrl: /thumbnails/1790824871428-qk6b0x0xjif.webp
+        iconSize: 60
+        scaleX: 1.05
+        scaleY: 1
+      - id: h1790828382967
+        label: Chuyển cảnh
+        yaw: 1.0068
+        pitch: -0.3197
+        plugin: navigation
+        targetScene: scene-muozlpuo
+        icon: pin
+        pinColor: '#ef4444'
+        iconUrl: /thumbnails/1790824871428-qk6b0x0xjif.webp
+        iconSize: 55
+        scaleX: 1
+        scaleY: 1
+    coordinates:
+      - 105.93622955521185
+      - 20.219486209908116
+  - id: scene-mup1b7ie
+    title: DJI 0003
+    subtitle: ''
+    panorama: /uploads/1790828936346-8s7vag87rvm.jpg
+    thumbnail: /thumbnails/1790828936346-8s7vag87rvm.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1.25
+    highlightCompression: 0
+    markers: []
+  - id: scene-mup1sfwl
+    title: DJI 0004
+    subtitle: ''
+    panorama: /uploads/1790829740508-og9k4fih94.jpg
+    thumbnail: /thumbnails/1790829740508-og9k4fih94.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1.25
+    highlightCompression: 0
+    markers: []
+    coordinates:
+      - 105.93671500640633
+      - 20.22024602496515
+  - id: scene-mup1smyg
+    title: DJI 0005
+    subtitle: ''
+    panorama: /uploads/1790829749494-otvj53ud2l.jpg
+    thumbnail: /thumbnails/1790829749494-otvj53ud2l.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1.25
+    highlightCompression: 0
+    markers: []
+    coordinates:
+      - 105.93740165185555
+      - 20.22130287207331
+  - id: scene-mup45109
+    title: IMG 20261001 112401 00 031(1)
+    subtitle: ''
+    panorama: /uploads/1790833687282-w5klks8uzd.jpg
+    thumbnail: /thumbnails/1790833687282-w5klks8uzd.webp
+    initialYaw: 0
+    initialPitch: 0
+    brightness: 1.25
+    highlightCompression: 0
+    markers: []

@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import type { TourConfig, TourEntry } from '../../types/tour';
 import trangBayGenerated from '../data/tours/trang-bay.generated.json';
@@ -63,6 +63,8 @@ export function listTours(): TourEntry[] {
   for (const slug of tourSlugs) {
     const tour = loadTour(slug);
     if (tour) {
+      const preferredScene = tour.scenes?.find((scene) => scene.id === tour.initialSceneId)
+        ?? tour.scenes?.[0];
       entries.push({
         slug: tour.slug,
         title: tour.title,
@@ -70,6 +72,7 @@ export function listTours(): TourEntry[] {
         summary: tour.summary,
         theme: tour.theme,
         sceneCount: tour.scenes?.length ?? 0,
+        firstSceneId: preferredScene?.id,
         cover: tour.scenes?.[0]?.thumbnail,
       });
     }
@@ -85,13 +88,21 @@ export function saveTour(slug: string, config: TourConfig): void {
     staticTours[slug] = JSON.parse(JSON.stringify(config));
   }
 
-  // Write to YAML file on disk (if disk is writable)
-  try {
-    const filePath = join(TOURS_DIR, `${slug}.yaml`);
-    writeFileSync(filePath, dumpYaml(config), 'utf-8');
-  } catch (err) {
-    console.warn(`[saveTour] Disk write skipped (normal on Vercel): ${err}`);
-  }
+  // Admin mutations must reflect a real disk write. Silently swallowing this
+  // error makes the UI report success while a reload restores the old YAML.
+  const filePath = join(TOURS_DIR, `${slug}.yaml`);
+  writeFileSync(filePath, dumpYaml(config), 'utf-8');
+}
+
+/** Delete a local YAML tour. Built-in fallback tours cannot be deleted here. */
+export function deleteTour(slug: string): 'deleted' | 'not-found' | 'protected' {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return 'not-found';
+  if (Object.prototype.hasOwnProperty.call(staticTours, slug)) return 'protected';
+
+  const filePath = join(TOURS_DIR, `${slug}.yaml`);
+  if (!existsSync(filePath)) return 'not-found';
+  unlinkSync(filePath);
+  return 'deleted';
 }
 
 /** Atomically update markers for a specific scene in the tour config */

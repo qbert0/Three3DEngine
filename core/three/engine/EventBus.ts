@@ -6,7 +6,7 @@
  */
 
 import type { TourScene, TourMarker, MapMarkerData } from '~/types/tour';
-import type { MapMode, MapNode } from '~/core/three/map/IMapStrategy';
+import type { MapConfig, MapNode } from '~/core/three/map/IMapStrategy';
 
 // ── Event map: key → payload type ────────────────────────────────
 export interface EngineEventMap {
@@ -20,6 +20,8 @@ export interface EngineEventMap {
   'interaction:dragend': void;
   /** Scene fully loaded (texture on GPU, markers ready) */
   'scene:loaded': { scene: TourScene };
+  /** Panorama-local world transform changed; all spatial plugins follow it. */
+  'scene:rotation': { rotation: number };
   /** Scene transition started */
   'scene:transition:start': { from: TourScene | null; to: TourScene };
   /** Scene transition completed */
@@ -35,7 +37,7 @@ export interface EngineEventMap {
   /** Marker hovered */
   'marker:hover': { marker: TourMarker | null };
   /** Navigate to another scene (from a navigation marker) */
-  'navigate': { sceneId: string };
+  'navigate': { sceneId: string; yaw?: number; pitch?: number };
   /** Marker dragged to a new position (designer only) */
   'marker:moved': { markerId: string; yaw: number; pitch: number };
   /** Lock camera input (e.g. while dragging a marker) */
@@ -47,17 +49,15 @@ export interface EngineEventMap {
 
   // ── Map events ───────────────────────────────────────────────
   /** Map plugin initialized */
-  'map:ready': { mode?: MapMode };
+  'map:ready': Record<string, never>;
   /** Map plugin destroyed */
   'map:destroyed': void;
   /** Map visibility toggled */
   'map:visibility': { visible: boolean };
-  /** Map mode changed at runtime */
-  'map:mode:changed': { mode: MapMode };
   /** Map config updated */
-  'map:config:updated': { config: MapMarkerData['config'] };
+  'map:config:updated': { config: MapConfig };
   /** User clicked a node on the map */
-  'map:node:click': { markerId: string; nodeId: string; node: MapNode };
+  'map:node:click': { markerId: string; nodeId: string };
 }
 
 type Listener<T> = T extends void ? () => void : (payload: T) => void;

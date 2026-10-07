@@ -12,13 +12,21 @@ import sharp from 'sharp';
 
 const UPLOAD_DIR    = join(process.cwd(), 'public', 'uploads');
 const THUMBNAIL_DIR = join(process.cwd(), 'public', 'thumbnails');
+const EDITOR_PREVIEW_DIR = join(process.cwd(), 'public', 'editor-previews');
 const ALLOWED_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp']);
 const MAX_FILE_SIZE = 60 * 1024 * 1024;
+
+// The development server runs on the same machine as the browser. Avoid
+// libvips retaining decoded tiles between admin uploads and process one image
+// pipeline at a time to keep peak resident memory predictable.
+sharp.cache(false);
+sharp.concurrency(1);
 
 export default defineEventHandler(async (event) => {
   // Ensure directories exist
   try { mkdirSync(UPLOAD_DIR,    { recursive: true }); } catch {}
   try { mkdirSync(THUMBNAIL_DIR, { recursive: true }); } catch {}
+  try { mkdirSync(EDITOR_PREVIEW_DIR, { recursive: true }); } catch {}
 
   // Read multipart body
   const body = await readMultipartFormData(event);
@@ -29,6 +37,7 @@ export default defineEventHandler(async (event) => {
   const results: Array<{
     original:  string;
     thumbnail: string;
+    editorPreview: string;
     width?:    number;
     height?:   number;
   }> = [];
@@ -57,9 +66,11 @@ export default defineEventHandler(async (event) => {
     const baseName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const fileName = `${baseName}${ext}`;
     const thumbName = `${baseName}.webp`;
+    const editorPreviewName = `${baseName}.webp`;
 
     const inputPath  = join(UPLOAD_DIR,    fileName);
     const thumbPath  = join(THUMBNAIL_DIR, thumbName);
+    const editorPreviewPath = join(EDITOR_PREVIEW_DIR, editorPreviewName);
 
     // Keep the original panorama untouched and generate only a lightweight preview.
     writeFileSync(inputPath, part.data);
@@ -68,6 +79,10 @@ export default defineEventHandler(async (event) => {
         .resize(400, 225, { fit: 'cover', position: 'centre' })
         .webp({ quality: 82, effort: 4 })
         .toFile(thumbPath);
+      await sharp(part.data, { sequentialRead: true })
+        .resize(2048, 1024, { fit: 'fill', withoutEnlargement: true })
+        .webp({ quality: 86, effort: 3 })
+        .toFile(editorPreviewPath);
     } catch (error: any) {
       throw createError({ statusCode: 500, statusMessage: `Lỗi tạo thumbnail: ${error?.message ?? String(error)}` });
     }
@@ -75,6 +90,7 @@ export default defineEventHandler(async (event) => {
     results.push({
       original:  `/uploads/${fileName}`,
       thumbnail: `/thumbnails/${thumbName}`,
+      editorPreview: `/editor-previews/${editorPreviewName}`,
       width: meta.width,
       height: meta.height,
     });

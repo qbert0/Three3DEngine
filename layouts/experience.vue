@@ -10,7 +10,7 @@
 
 <template>
   <!-- Fullscreen dark wrapper — no header, no footer -->
-  <div class="h-screen w-screen overflow-hidden bg-ink">
+  <div class="h-[100dvh] w-screen overflow-hidden bg-ink">
     <slot />
   </div>
 </template>
