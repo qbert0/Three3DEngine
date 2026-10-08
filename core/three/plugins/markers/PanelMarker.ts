@@ -15,6 +15,7 @@ import type { BlockBase } from './blocks';
 
 const DEFAULT_PANEL_MIN_WIDTH = 220;
 const DEFAULT_PANEL_MAX_WIDTH = 380;
+const PANEL_RESPONSIVE_STYLE_ID = 'view360-marker-panel-responsive-style';
 
 /**
  * Common base for markers whose action is showing an anchored information panel.
@@ -52,6 +53,7 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
       this.hidePanel(anchor);
       return;
     }
+    this.ensureResponsiveStyle();
     const panel = document.createElement('section');
     panel.className = 'view360-marker-panel';
     panel.setAttribute('role', 'dialog');
@@ -122,6 +124,39 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
       const markerX = (ndcX * 0.5 + 0.5) * width;
       const markerY = (-ndcY * 0.5 + 0.5) * height;
       const marker = anchor.userData.marker as TourMarker | undefined;
+
+      // On a narrow touch viewport, an anchored panel easily covers its own
+      // marker or leaves the visible area. Match the mobile viewer design by
+      // presenting it as a safe-area-aware bottom sheet. It still closes when
+      // the owning marker leaves the camera frustum.
+      if (width <= 640) {
+        panel.style.left = '0';
+        panel.style.right = '0';
+        panel.style.top = 'auto';
+        panel.style.bottom = '0';
+        panel.style.width = '100%';
+        panel.style.minWidth = '0';
+        panel.style.maxWidth = 'none';
+        panel.style.maxHeight = '70dvh';
+        panel.style.overflowY = 'auto';
+        panel.style.paddingBottom = 'calc(18px + env(safe-area-inset-bottom, 0px))';
+        panel.style.borderRadius = '18px 18px 0 0';
+        panel.style.transform = 'none';
+        panel.style.transformOrigin = 'bottom center';
+        const arrow = panel.querySelector<HTMLElement>('[data-marker-panel-arrow]');
+        if (arrow) arrow.style.display = 'none';
+        return;
+      }
+
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.width = 'max-content';
+      panel.style.minWidth = `min(${DEFAULT_PANEL_MIN_WIDTH}px,calc(100% - 32px))`;
+      panel.style.maxWidth = `min(${DEFAULT_PANEL_MAX_WIDTH}px,calc(100% - 32px))`;
+      panel.style.maxHeight = 'none';
+      panel.style.overflowY = 'visible';
+      panel.style.paddingBottom = '16px';
+      panel.style.borderRadius = '12px';
       const requestedPlacement = marker?.plugin === 'panel' ? (marker.placement ?? 'vertical') : 'vertical';
       const placement = requestedPlacement === 'horizontal'
         ? (markerX + panelWidth + 28 <= width ? 'right' : 'left')
@@ -156,6 +191,7 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
 
       const arrow = panel.querySelector<HTMLElement>('[data-marker-panel-arrow]');
       if (arrow) {
+        arrow.style.display = '';
         arrow.style.left = placement === 'right' ? '-7px' : placement === 'left' ? 'auto' : '50%';
         arrow.style.right = placement === 'left' ? '-7px' : 'auto';
         arrow.style.top = placement === 'bottom' ? '-7px' : placement === 'left' || placement === 'right' ? '50%' : 'auto';
@@ -167,6 +203,26 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
             : `translateX(-50%) rotate(${placement === 'bottom' ? '225deg' : '45deg'})`;
       }
     });
+  }
+
+  private ensureResponsiveStyle(): void {
+    if (document.getElementById(PANEL_RESPONSIVE_STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = PANEL_RESPONSIVE_STYLE_ID;
+    style.textContent = `
+      @media (max-width:640px) {
+        .view360-marker-panel {
+          border-right:0 !important;
+          border-bottom:0 !important;
+          border-left:0 !important;
+          overscroll-behavior:contain;
+        }
+      }
+      @media (max-width:900px) and (orientation:landscape) {
+        .view360-marker-panel { max-height:80dvh !important; }
+      }
+    `;
+    document.head.appendChild(style);
   }
 
   protected appendBlocks(marker: TourMarker, panel: HTMLElement): number {

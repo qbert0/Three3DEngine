@@ -36,10 +36,12 @@ export class CameraController {
   private readonly damping: number;
   private readonly pitchLimit: number;
   private readonly dragSensitivity: number;
+  private readonly usesDefaultDragSensitivity: boolean;
   private readonly zoomSensitivity: number;
 
   // Pointer state
   private isPointerDown = false;
+  private activePointerId: number | null = null;
   private pointerStartX = 0;
   private pointerStartY = 0;
   private startYaw = 0;
@@ -68,6 +70,7 @@ export class CameraController {
     this.maxFov = config.maxFov ?? 100;
     this.damping = config.dampingFactor ?? 0.12;
     this.pitchLimit = config.pitchLimit ?? Math.PI / 2.2;
+    this.usesDefaultDragSensitivity = config.dragSensitivity === undefined;
     this.dragSensitivity = config.dragSensitivity ?? 0.003;
     this.zoomSensitivity = config.zoomSensitivity ?? 0.04;
 
@@ -175,13 +178,24 @@ export class CameraController {
   private bindPointerEvents(): void {
     const el = this.domElement;
 
+    // Pointer events alone do not disable the browser's native pan/zoom
+    // recognizer. On touch screens that recognizer can cancel a panorama drag
+    // midway through the gesture, making swiping feel intermittent.
+    el.style.touchAction = 'none';
+    el.style.userSelect = 'none';
+    el.style.webkitUserSelect = 'none';
+
     const onDown = (e: PointerEvent) => {
       if (this.inputLocked) return;
       // Only capture camera drag from the WebGL canvas itself — don't
       // steal pointer events destined for interactive CSS3D elements
       // (video/iframe play buttons, controls, etc.).
       if (e.target !== el) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (this.activePointerId !== null) return;
+      e.preventDefault();
       this.isPointerDown = true;
+      this.activePointerId = e.pointerId;
       this.pointerStartX = e.clientX;
       this.pointerStartY = e.clientY;
       this.startYaw = this.targetYaw;
@@ -191,23 +205,39 @@ export class CameraController {
     };
 
     const onMove = (e: PointerEvent) => {
-      if (!this.isPointerDown || this.inputLocked) return;
+      if (!this.isPointerDown || this.inputLocked || e.pointerId !== this.activePointerId) return;
+      e.preventDefault();
       const dx = e.clientX - this.pointerStartX;
       const dy = e.clientY - this.pointerStartY;
+
+      // Keep a full-width swipe perceptually similar on phones and desktops.
+      // The FOV factor also makes zoomed-in views more precise instead of
+      // rotating by the same large angle as a wide view.
+      const viewportWidth = Math.max(320, this.container.clientWidth || window.innerWidth);
+      const viewportHeight = Math.max(320, this.container.clientHeight || window.innerHeight);
+      const fovFactor = THREE.MathUtils.clamp(this.targetFov / 75, 0.45, 1.35);
+      const sensitivityX = this.usesDefaultDragSensitivity
+        ? (Math.PI / viewportWidth) * 0.72 * fovFactor
+        : this.dragSensitivity;
+      const sensitivityY = this.usesDefaultDragSensitivity
+        ? (Math.PI / viewportHeight) * 0.62 * fovFactor
+        : this.dragSensitivity;
 
       // Content-drag convention:
       //   Kéo phải (dx > 0) → camera quay trái → yaw tăng (+dx)
       //   Kéo lên  (dy < 0) → camera nhìn xuống → pitch giảm (+dy vì dy âm)
-      this.targetYaw = this.startYaw + dx * this.dragSensitivity;
+      this.targetYaw = this.startYaw + dx * sensitivityX;
       this.targetPitch = Math.max(
         -this.pitchLimit,
-        Math.min(this.pitchLimit, this.startPitch + dy * this.dragSensitivity)
+        Math.min(this.pitchLimit, this.startPitch + dy * sensitivityY)
       );
     };
 
-    const onUp = () => {
-      if (!this.isPointerDown) return;
+    const onUp = (e: PointerEvent) => {
+      if (!this.isPointerDown || e.pointerId !== this.activePointerId) return;
       this.isPointerDown = false;
+      this.activePointerId = null;
+      if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
       this.bus.emit('interaction:dragend');
     };
 
@@ -222,6 +252,7 @@ export class CameraController {
     el.addEventListener('pointermove', onMove);
     el.addEventListener('pointerup', onUp);
     el.addEventListener('pointercancel', onUp);
+    el.addEventListener('lostpointercapture', onUp);
     el.addEventListener('wheel', onWheel, { passive: false });
 
     this.disposers.push(
@@ -229,6 +260,7 @@ export class CameraController {
       () => el.removeEventListener('pointermove', onMove),
       () => el.removeEventListener('pointerup', onUp),
       () => el.removeEventListener('pointercancel', onUp),
+      () => el.removeEventListener('lostpointercapture', onUp),
       () => el.removeEventListener('wheel', onWheel),
     );
   }

@@ -57,7 +57,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
         </NuxtLink>
 
         <!-- Desktop nav -->
-        <nav style="display: flex; gap: 4px;" class="hidden lg:flex">
+        <nav style="display: flex; gap: 4px;" class="app-desktop-nav">
           <NuxtLink
             v-for="link in navLinks"
             :key="link.to"
@@ -74,7 +74,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
 
         <!-- Actions -->
         <div style="display: flex; align-items: center; gap: 8px;">
-          <NuxtLink to="/tickets" class="hidden sm:block">
+          <NuxtLink to="/tickets" class="app-header-cta">
             <button type="button"
               style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; background: var(--tb-forest); color: #fff; font-weight: 600; font-size: 14px; box-shadow: var(--shadow-md); transition: all .2s; border: none; cursor: pointer; font-family: var(--font-sans);"
               onmouseover="this.style.background='var(--tb-forest-dk)'; this.style.transform='translateY(-1px)'"
@@ -85,7 +85,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
           </NuxtLink>
 
           <!-- Mobile toggle -->
-          <button type="button" class="lg:hidden"
+          <button type="button" class="app-menu-toggle"
             style="width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--ink-70); transition: all .15s; background: transparent; border: none; cursor: pointer;"
             @click="mobileOpen = !mobileOpen">
             <svg v-if="!mobileOpen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/></svg>
@@ -96,7 +96,7 @@ watch(() => route.path, () => { mobileOpen.value = false; });
 
       <!-- Mobile menu -->
       <Transition name="slide-down">
-        <div v-if="mobileOpen" style="border-top: 1px solid var(--tb-line); background: rgba(245,239,232,.97); padding: 12px 24px 16px;" class="lg:hidden">
+        <div v-if="mobileOpen" style="border-top: 1px solid var(--tb-line); background: rgba(245,239,232,.97); padding: 12px 24px 16px;" class="app-mobile-menu">
           <NuxtLink v-for="link in navLinks" :key="link.to" :to="link.to"
             style="display: flex; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--ink-70); text-decoration: none; transition: all .15s;">
             {{ link.label }}
@@ -202,6 +202,10 @@ watch(() => route.path, () => { mobileOpen.value = false; });
 </template>
 
 <style scoped>
+.app-desktop-nav { display: flex; }
+.app-menu-toggle { display: none !important; }
+.app-mobile-menu { display: none; }
+
 .slide-down-enter-active, .slide-down-leave-active { transition: all .2s ease; }
 .slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }
 
@@ -210,7 +214,14 @@ watch(() => route.path, () => { mobileOpen.value = false; });
     grid-template-columns: 1fr 1fr !important;
   }
 }
+@media (max-width: 960px) {
+  .app-desktop-nav { display: none !important; }
+  .app-header-cta { display: none; }
+  .app-menu-toggle { display: grid !important; }
+  .app-mobile-menu { display: block; }
+}
 @media (max-width: 640px) {
+  .app-mobile-menu { padding: 10px 16px calc(14px + env(safe-area-inset-bottom, 0px)) !important; }
   .footer-grid-responsive {
     grid-template-columns: 1fr !important;
   }

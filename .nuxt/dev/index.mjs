@@ -1,4 +1,4 @@
-import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
+import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import './timing.js';globalThis.__timing__.logStart('Nitro Start');import { tmpdir } from 'node:os';
 import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getHeader, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, getResponseStatusText } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, dirname, join, extname, basename, sep } from 'node:path';
@@ -17,7 +17,7 @@ import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLin
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, encodePath, joinRelativeURL } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/vue/server-renderer/index.mjs';
 import destr, { destr as destr$1 } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/destr/dist/index.mjs';
-import { createHooks } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/hookable/dist/index.mjs';
+import { createDebugger, createHooks } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/hookable/dist/index.mjs';
 import { createFetch, Headers as Headers$1 } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ofetch/dist/node.mjs';
 import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/node-mock-http/dist/index.mjs';
 import { createStorage, defineDriver, prefixStorage } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/unstorage/dist/index.mjs';
@@ -2214,9 +2214,47 @@ function onConsoleLog(callback) {
 	consola$1.wrapConsole();
 }
 
+function defineNitroPlugin(def) {
+  return def;
+}
+
+const _cxk1U3wNAx6ggC_RyHFm8F53ntKLmIFx7baWVJKPXNM = defineNitroPlugin((nitro) => {
+  createDebugger(nitro.hooks, { tag: "nitro-runtime" });
+});
+
+const globalTiming = globalThis.__timing__ || {
+  start: () => 0,
+  end: () => 0,
+  metrics: []
+};
+const timingMiddleware = eventHandler((event) => {
+  const start = globalTiming.start();
+  const _end = event.node.res.end;
+  event.node.res.end = function(chunk, encoding, cb) {
+    const metrics = [
+      ["Generate", globalTiming.end(start)],
+      ...globalTiming.metrics
+    ];
+    const serverTiming = metrics.map((m) => `-;dur=${m[1]};desc="${encodeURIComponent(m[0])}"`).join(", ");
+    if (!event.node.res.headersSent) {
+      event.node.res.setHeader("Server-Timing", serverTiming);
+    }
+    _end.call(event.node.res, chunk, encoding, cb);
+    return this;
+  }.bind(event.node.res);
+});
+const _6WrNatFVoGm6wUrtUtHtf5oPY97EzBCWE861SnDw = defineNitroPlugin((nitro) => {
+  nitro.h3App.stack.unshift({
+    route: "/",
+    handler: timingMiddleware
+  });
+});
+
 const plugins = [
   _q1ZScfGbj9qCMgFQOe8zWkedPEk9DBJBLIHVGM7K5V8,
 _IUzsoUA93K60YASEe0I2h44TtPPB44dUuxIQoFr5XDQ,
+_cxk1U3wNAx6ggC_RyHFm8F53ntKLmIFx7baWVJKPXNM,
+_6WrNatFVoGm6wUrtUtHtf5oPY97EzBCWE861SnDw,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
@@ -6308,5 +6346,5 @@ function renderHTMLDocument(html) {
 const renderer = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: handler
-}, Symbol.toStringTag, { value: 'Module' }));
+}, Symbol.toStringTag, { value: 'Module' }));;globalThis.__timing__.logEnd('Nitro Start');
 //# sourceMappingURL=index.mjs.map

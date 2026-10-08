@@ -21,7 +21,7 @@ const route  = useRoute();
 const tourId = computed(() => route.params.tourId as string);
 const isDev = import.meta.dev;
 
-const sidePanelClass = 'absolute right-4 top-[76px] z-[25] flex max-h-[calc(100vh-180px)] w-[360px] max-w-[calc(100vw-32px)] translate-x-[calc(100%+24px)] flex-col overflow-hidden rounded-2xl border border-white/20 bg-black/80 opacity-0 shadow-2xl backdrop-blur-[20px] pointer-events-none transition-[transform,opacity] duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] max-sm:inset-x-0 max-sm:bottom-0 max-sm:top-auto max-sm:max-h-[70vh] max-sm:w-full max-sm:max-w-full max-sm:translate-x-0 max-sm:translate-y-full max-sm:rounded-b-none';
+const sidePanelClass = 'viewer-side-panel absolute right-4 top-[76px] z-[25] flex max-h-[calc(100vh-180px)] w-[360px] max-w-[calc(100vw-32px)] translate-x-[calc(100%+24px)] flex-col overflow-hidden rounded-2xl border border-white/20 bg-black/80 opacity-0 shadow-2xl backdrop-blur-[20px] pointer-events-none transition-[transform,opacity] duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] max-sm:inset-x-2 max-sm:bottom-auto max-sm:top-[calc(60px+env(safe-area-inset-top,0px))] max-sm:max-h-[calc(100dvh-76px-env(safe-area-inset-top,0px)-env(safe-area-inset-bottom,0px))] max-sm:w-auto max-sm:max-w-none max-sm:translate-x-0 max-sm:-translate-y-3 max-sm:rounded-[14px]';
 const panelHeadClass = 'flex items-center justify-between gap-3 border-b border-white/[.08] px-[18px] py-4';
 const panelBodyClass = 'overflow-y-auto p-[18px] text-[13px] leading-[1.65] text-white/70 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-white/15';
 const panelCloseClass = 'grid size-[30px] shrink-0 place-items-center rounded-full bg-white/[.06] text-white/70 transition hover:bg-white/[.14] hover:text-white';
@@ -415,7 +415,7 @@ onBeforeUnmount(() => {
       <ViewerCornerControls
         :map-available="mapAvailable"
         :map-visible="isMapVisible"
-        logo-size="medium"
+        logo-size="small"
         :hidden="isImmersive"
         @toggle-map="toggleMap"
         @toggle-info="toggleInfoPanel"
@@ -438,3 +438,11 @@ onBeforeUnmount(() => {
     </template>
   </div>
 </template>
+
+<style scoped>
+@media (max-width: 900px) and (orientation: landscape) {
+  .viewer-side-panel {
+    max-height: calc(100dvh - 80px - env(safe-area-inset-top, 0px)) !important;
+  }
+}
+</style>

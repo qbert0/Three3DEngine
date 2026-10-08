@@ -89,6 +89,7 @@
 /* ── Base ───────────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 html, body, #__nuxt {
@@ -102,6 +103,7 @@ body {
   color: var(--tb-ink);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 :root.dark body {
@@ -1012,6 +1014,70 @@ button, a {
   .footer-grid { grid-template-columns: 1fr; }
 }
 
+/* Mobile landing page — synchronized with design/index.html. */
+@media (max-width: 640px) {
+  .container { padding-inline: 16px; }
+
+  .hero {
+    min-height: 100svh;
+    min-height: 100dvh;
+    align-items: flex-end;
+  }
+
+  .hero-slide::after {
+    background: linear-gradient(
+      180deg,
+      rgba(12, 17, 14, .35) 0%,
+      rgba(12, 17, 14, .15) 30%,
+      rgba(10, 13, 11, .88) 100%
+    );
+  }
+
+  .hero-content {
+    max-width: none;
+    padding: 80px 16px 180px;
+  }
+
+  .hero-eyebrow { margin-bottom: 16px; font-size: 10px; }
+  .hero-title { margin-bottom: 16px; font-size: clamp(34px, 9vw, 48px); }
+  .hero-desc { font-size: 15px; }
+  .hero-ctas { width: 100%; flex-direction: column; align-items: stretch; margin-top: 24px; }
+  .hero-ctas > * { width: 100%; justify-content: center; text-align: center; }
+  .hero-dots { display: none; }
+
+  .hero-stats-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stat { padding: 16px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .stat:nth-child(2n) { border-right: 0; }
+  .stat:nth-child(n + 3) { border-bottom: 0; }
+  .stat-value { font-size: 22px; }
+  .stat-label { font-size: 10px; }
+
+  .section { padding: 64px 0; }
+  .section-head { margin-bottom: 28px; }
+  .section-eyebrow { margin-bottom: 12px; font-size: 10px; }
+  .section-sub { font-size: 14px; }
+
+  .intro-grid { gap: 40px; }
+  .intro-images { padding: 0 30px 30px 0; }
+  .intro-img-main { height: 300px; }
+  .intro-img-float { height: 140px; border-width: 6px; }
+  .intro-features { gap: 14px; }
+  .intro-feature { gap: 11px; }
+  .feature-icon { width: 34px; height: 34px; }
+
+  .highlight-grid { grid-template-columns: 1fr; gap: 14px; }
+  .highlight-card img { height: 200px; }
+
+  .tour-info { padding: 28px 22px; }
+  .tour-viewer { min-height: 280px; }
+  .tickets-grid, .events-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 380px) {
+  .hero-title { font-size: 30px; }
+  .stat-value { font-size: 18px; }
+}
+
 /* ── Nav hotspot hover effects ── */
 .nav-hotspot-btn > div {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -1422,5 +1488,4 @@ button, a {
   text-overflow: ellipsis;
   text-align: center;
 }
-
 

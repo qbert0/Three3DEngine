@@ -14,11 +14,11 @@ defineEmits<{
   share: [];
 }>();
 
-const buttonClass = 'grid size-[42px] place-items-center rounded-full border border-white/15 bg-black/55 text-white/70 shadow-md backdrop-blur-xl transition duration-200 hover:scale-110 hover:border-white/25 hover:bg-black/80 hover:text-white active:scale-95';
+const buttonClass = 'grid size-[42px] place-items-center rounded-full border border-white/15 bg-black/55 text-white/70 shadow-md backdrop-blur-xl transition duration-200 hover:scale-110 hover:border-white/25 hover:bg-black/80 hover:text-white active:scale-95 max-sm:size-[38px]';
 const logoSizeClasses = {
-  small: 'w-[160px] max-sm:w-[140px]',
-  medium: 'w-[208px] max-sm:w-[176px]',
-  large: 'w-[264px] max-sm:w-[min(208px,55vw)]',
+  small: 'w-[160px] max-sm:w-[96px]',
+  medium: 'w-[208px] max-sm:w-[120px]',
+  large: 'w-[264px] max-sm:w-[150px]',
 } as const;
 </script>
 
@@ -28,8 +28,8 @@ const logoSizeClasses = {
     :class="hidden ? 'invisible pointer-events-none opacity-0' : ''"
   >
     <div
-      class="pointer-events-auto absolute left-5 flex flex-col gap-2 transition-[bottom] duration-300 max-sm:left-3"
-      :class="mapVisible ? 'bottom-[252px]' : 'bottom-5 max-sm:bottom-3'"
+      class="viewer-corner-buttons pointer-events-auto absolute left-5 flex flex-col gap-2 duration-300 max-sm:left-3"
+      :class="mapVisible ? 'bottom-[252px]' : 'bottom-5'"
     >
       <button
         v-if="mapAvailable"
@@ -65,7 +65,7 @@ const logoSizeClasses = {
     </div>
 
     <div
-      class="pointer-events-none absolute -bottom-[23px] -right-[25px] max-sm:-bottom-[14px] max-sm:-right-[15px]"
+      class="viewer-corner-logo pointer-events-none absolute bottom-[1px] right-[1px]"
       :class="logoSizeClasses[props.logoSize]"
       aria-label="Memory Group"
     >
@@ -73,3 +73,24 @@ const logoSizeClasses = {
     </div>
   </div>
 </template>
+
+<style scoped>
+@media (max-width: 640px) {
+  .viewer-corner-buttons {
+    top: calc(60px + env(safe-area-inset-top, 0px));
+    bottom: auto !important;
+  }
+
+  .viewer-corner-logo {
+    right: max(1px, env(safe-area-inset-right, 0px));
+    bottom: max(1px, env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+  .viewer-corner-buttons {
+    top: auto;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+</style>
