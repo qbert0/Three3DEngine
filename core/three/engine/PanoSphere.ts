@@ -93,7 +93,7 @@ const FRAGMENT_SHADER = /* glsl */`
 export class PanoSphere {
   private scene: THREE.Scene;
   private renderer: THREE.WebGLRenderer;
-  private textureLoader: THREE.TextureLoader;
+  private imageBitmapLoader: THREE.ImageBitmapLoader;
 
   private sphereA: THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
   private sphereB: THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
@@ -143,12 +143,16 @@ export class PanoSphere {
   constructor(scene: THREE.Scene, renderer: THREE.WebGLRenderer, config: PanoSphereConfig = {}) {
     this.scene = scene;
     this.renderer = renderer;
-    this.textureLoader = new THREE.TextureLoader();
+    this.imageBitmapLoader = new THREE.ImageBitmapLoader();
+    this.imageBitmapLoader.setOptions({
+      imageOrientation: 'flipY',
+      premultiplyAlpha: 'none',
+    });
 
     this.radius = config.radius ?? 600;
     this.transitionDuration = config.transitionDuration ?? 1200;
     this.defaultTransition = config.defaultTransition ?? 'crossfade';
-    this.maxCachedTextures = Math.max(0, Math.floor(config.maxCachedTextures ?? 4));
+    this.maxCachedTextures = Math.max(0, Math.floor(config.maxCachedTextures ?? 2));
 
     const segsW = config.segments ?? 128;  // higher tessellation for fisheye
     const segsH = Math.round(segsW * 0.75);
@@ -337,9 +341,13 @@ export class PanoSphere {
 
   private loadTexture(url: string): Promise<THREE.Texture> {
     return new Promise((resolve, reject) => {
-      this.textureLoader.load(
+      this.imageBitmapLoader.load(
         url,
-        (tex) => {
+        (bitmap) => {
+          const tex = new THREE.Texture(bitmap);
+          // ImageBitmap was flipped during off-main-thread decoding. Prevent
+          // WebGL from trying to apply the DOM-image flip a second time.
+          tex.flipY = false;
           tex.colorSpace = THREE.SRGBColorSpace;
           // A panorama is periodic on the horizontal axis. ClampToEdge leaves
           // a one-pixel line where U jumps from 1 back to 0, especially when
@@ -382,6 +390,16 @@ export class PanoSphere {
         reject,
       );
     });
+  }
+
+  /** Promote an already decoded/uploaded texture without running a scene transition. */
+  useTexture(texture: THREE.Texture): void {
+    this.sphereA.material.uniforms.map.value = texture;
+    this.sphereA.material.uniforms.opacity.value = 1;
+    this.sphereB.visible = false;
+    this.sphereB.material.uniforms.map.value = PanoSphere.blankTex;
+    this.sphereB.material.uniforms.opacity.value = 0;
+    this.trimTextureCache();
   }
 
   /** Keep only nearby panoramas in GPU memory, never disposing active textures. */
@@ -544,6 +562,7 @@ export class PanoSphere {
     this.sphereA.rotation.y = this.sphereB.rotation.y;
 
     this.sphereB.visible = false;
+    this.sphereB.material.uniforms.map.value = PanoSphere.blankTex;
     this.sphereB.material.uniforms.opacity.value = 0;
     this.sphereB.position.set(0, 0, 0);
     this.trimTextureCache();

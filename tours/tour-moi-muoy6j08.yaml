@@ -3,7 +3,7 @@ title: Tour mới
 location: Chưa cập nhật
 summary: Tour mới chưa có nội dung.
 theme: nature
-initialSceneId: scene-muxvt079
+initialSceneId: scene-muy28efw
 plugins: []
 mode: free
 autoRotate: false
@@ -11,14 +11,18 @@ showMinimap: false
 map:
   floors: []
   visible: false
+  position: bottom-left
 scenes:
   - id: scene-muxvt079
     title: Sông vân
     subtitle: ''
-    panorama: /uploads/1791363884550-otcz1232qvm.jpg
+    panorama: /panoramas/1791363884550-otcz1232qvm-c7d26b3ac3.webp
+    previewPanorama: /panorama-previews/1791363884550-otcz1232qvm-c7d26b3ac3.webp
+    mobilePanorama: /panoramas-mobile/1791363884550-otcz1232qvm-c7d26b3ac3.webp
     thumbnail: /thumbnails/1791363884550-otcz1232qvm.webp
-    initialYaw: 13.048774175333177
-    initialPitch: 0.06151104044280376
+    initialYaw: 13.156679695098585
+    initialPitch: 0.12742673763635304
+    initialFov: 75
     defaultCameraEnabled: true
     panoramaRotation: 0.3359999999999985
     brightness: 1.25
@@ -50,20 +54,23 @@ scenes:
             presentation: text-and-audio
       - id: h1791364572700
         label: Lối vào
-        yaw: 0.0834
-        pitch: -0.4068
+        yaw: 0.1396
+        pitch: -0.31
         plugin: navigation
         targetScene: scene-muxvs1p9
         rotX: 1.0995574287564276
         scaleX: 1.6
-        scaleY: 0.75
+        scaleY: 1
   - id: scene-muxvs1p9
     title: Bờ sông Vân
     subtitle: ''
-    panorama: /uploads/1791363839591-afu6f9tqbxn.jpg
+    panorama: /panoramas/1791363839591-afu6f9tqbxn-f767b43b82.webp
+    previewPanorama: /panorama-previews/1791363839591-afu6f9tqbxn-f767b43b82.webp
+    mobilePanorama: /panoramas-mobile/1791363839591-afu6f9tqbxn-f767b43b82.webp
     thumbnail: /thumbnails/1791363839591-afu6f9tqbxn.webp
     initialYaw: 0
     initialPitch: 0
+    initialFov: 75
     defaultCameraEnabled: false
     panoramaRotation: -2.443185307179588
     brightness: 1.25
@@ -75,31 +82,35 @@ scenes:
     markers:
       - id: h1791364668908
         label: Lối ra
-        yaw: -0.3021
-        pitch: -0.4604
+        yaw: -0.2559
+        pitch: -0.3225
         plugin: navigation
         targetScene: scene-muxvt079
         rotX: 1.0471975511965976
-        scaleX: 2.15
-        scaleY: 1.45
+        scaleX: 1.6
+        scaleY: 1
       - id: h1791364735195
         label: Ngã ba dinh thự
-        yaw: 2.9628
-        pitch: -0.4539
+        yaw: 3.007
+        pitch: -0.2662
         plugin: navigation
         targetScene: scene-muxvrkpl
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
         rotZ: 0
         rotY: 0.10471975511965977
   - id: scene-muxvrkpl
     title: Ngã ba dinh thự
     subtitle: ''
-    panorama: /uploads/1791363817761-8md8wy2v15q.jpg
+    panorama: /panoramas/1791363817761-8md8wy2v15q-3bf1c26c2c.webp
+    previewPanorama: /panorama-previews/1791363817761-8md8wy2v15q-3bf1c26c2c.webp
+    mobilePanorama: /panoramas-mobile/1791363817761-8md8wy2v15q-3bf1c26c2c.webp
     thumbnail: /thumbnails/1791363817761-8md8wy2v15q.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 52.42350433648388
+    initialPitch: 0.07821308284518984
+    initialFov: 75
+    defaultCameraEnabled: true
     panoramaRotation: 1.9380000000000006
     brightness: 1.25
     highlightCompression: 0
@@ -110,37 +121,43 @@ scenes:
     markers:
       - id: h1791364794679
         label: Bờ sông Vân
-        yaw: 1.8051
-        pitch: -0.4229
+        yaw: 1.8474
+        pitch: -0.3505
         plugin: navigation
         targetScene: scene-muxvs1p9
         rotX: 1.064650843716541
-        scaleX: 1.9
+        scaleX: 1.6
+        scaleY: 1
       - id: h1791364818593
         label: Sảnh tân gia
-        yaw: 0.115
-        pitch: -0.4578
+        yaw: 0.1073
+        pitch: -0.3095
         plugin: navigation
         targetScene: scene-muxvzikj
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
         rotY: -0.17453292519943295
       - id: h1791364851805
         label: Vườn đá
-        yaw: -1.24
-        pitch: -0.403
+        yaw: -1.2337
+        pitch: -0.3883
         plugin: navigation
         targetScene: scene-muxwtgdv
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
   - id: scene-muxvzikj
     title: Sảnh tân gia
     subtitle: ''
-    panorama: /uploads/1791364188155-3d3emmjckkg.jpg
+    panorama: /panoramas/1791364188155-3d3emmjckkg-ce98279577.webp
+    previewPanorama: /panorama-previews/1791364188155-3d3emmjckkg-ce98279577.webp
+    mobilePanorama: /panoramas-mobile/1791364188155-3d3emmjckkg-ce98279577.webp
     thumbnail: /thumbnails/1791364188155-3d3emmjckkg.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 52.39940184251776
+    initialPitch: 0.09930865576602246
+    initialFov: 99.95498728952235
+    defaultCameraEnabled: true
     panoramaRotation: 1.9200000000000017
     brightness: 1.25
     highlightCompression: 0
@@ -156,25 +173,31 @@ scenes:
         plugin: navigation
         targetScene: scene-muxvrkpl
         rotX: 1.064650843716541
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
         rotY: -0.24434609527920614
+        sphereRadius: 430
       - id: h1791365961588
         label: Khu triển lãm 2
-        yaw: 0.9657
-        pitch: -0.2366
+        yaw: 0.9876
+        pitch: -0.2912
         plugin: navigation
         targetScene: scene-muxvnnpk
         rotX: 1.0297442586766543
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
+        sphereRadius: 430
       - id: h1791365983533
-        label: Khu triển lãm 3
-        yaw: 1.9865
-        pitch: -0.2653
+        label: Khu triển lãm 1
+        yaw: 1.9954
+        pitch: -0.3761
         plugin: navigation
-        targetScene: scene-muxvt079
+        targetScene: scene-muxyfx7u
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
         rotY: -0.3490658503988659
+        sphereRadius: 430
       - id: h1791372602964
         label: Sảnh tiếp khách
         yaw: -1.2332
@@ -185,16 +208,20 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
+        sphereRadius: 430
   - id: scene-muxvnnpk
     title: Khu triển lãm 2
     subtitle: ''
-    panorama: /uploads/1791363635779-44yjura05ei.jpg
+    panorama: /panoramas/1791363635779-44yjura05ei-a516f33b3d.webp
+    previewPanorama: /panorama-previews/1791363635779-44yjura05ei-a516f33b3d.webp
+    mobilePanorama: /panoramas-mobile/1791363635779-44yjura05ei-a516f33b3d.webp
     thumbnail: /thumbnails/1791363635779-44yjura05ei.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: -3.259301727885268
+    initialPitch: 0.009177571916662191
+    initialFov: 75
+    defaultCameraEnabled: true
     panoramaRotation: 0
     brightness: 1.25
     highlightCompression: 0
@@ -207,23 +234,28 @@ scenes:
         plugin: navigation
         targetScene: scene-muxvzikj
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
         rotY: 0.5759586531581288
       - id: h1791366118997
-        label: Chuyển cảnh
+        label: 'Khu triển lãm 3 '
         yaw: -0.3431
         pitch: -0.5123
         plugin: navigation
-        targetScene: scene-muxvt079
+        targetScene: scene-muxyetn4
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
   - id: scene-muxwnmgu
     title: Trung tâm vườn đá
     subtitle: ''
-    panorama: /uploads/1791365312935-jxwx0865xya.jpg
+    panorama: /panoramas/1791365312935-jxwx0865xya-cdf76ad3c8.webp
+    previewPanorama: /panorama-previews/1791365312935-jxwx0865xya-cdf76ad3c8.webp
+    mobilePanorama: /panoramas-mobile/1791365312935-jxwx0865xya-cdf76ad3c8.webp
     thumbnail: /thumbnails/1791365312935-jxwx0865xya.webp
     initialYaw: 0
     initialPitch: 0
+    initialFov: 75
     defaultCameraEnabled: false
     panoramaRotation: -0.6600000000000001
     brightness: 1.25
@@ -235,20 +267,24 @@ scenes:
     markers:
       - id: h1791366286027
         label: Ngoài vườn đá
-        yaw: 0.0548
-        pitch: -0.826
+        yaw: 0.0815
+        pitch: -0.33
         plugin: navigation
         targetScene: scene-muxwtgdv
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
   - id: scene-muxwnvwr
     title: Xưởng chế tác
     subtitle: ''
-    panorama: /uploads/1791365325140-3hi8ecj0hj9.jpg
+    panorama: /panoramas/1791365325140-3hi8ecj0hj9-40f20f752c.webp
+    previewPanorama: /panorama-previews/1791365325140-3hi8ecj0hj9-40f20f752c.webp
+    mobilePanorama: /panoramas-mobile/1791365325140-3hi8ecj0hj9-40f20f752c.webp
     thumbnail: /thumbnails/1791365325140-3hi8ecj0hj9.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 26.724650860755446
+    initialPitch: 0.07807083650312939
+    initialFov: 75
+    defaultCameraEnabled: true
     panoramaRotation: -1.2750000000000004
     brightness: 1.25
     highlightCompression: 0
@@ -259,40 +295,45 @@ scenes:
     markers:
       - id: h1791366229657
         label: Vườn đá
-        yaw: -0.6297
-        pitch: -0.4866
+        yaw: -0.561
+        pitch: -0.3229
         plugin: navigation
         targetScene: scene-muxwtgdv
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
         rotX: 1.0471975511965976
       - id: h1791369872912
         label: Khu chế tác
-        yaw: 2.8052
-        pitch: -0.3379
+        yaw: -3.1156
+        pitch: -0.2976
         plugin: navigation
         targetScene: scene-muxz694t
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
       - id: h1791371567758
         label: Bên hổng xưởng
-        yaw: -1.2493
-        pitch: -0.5338
+        yaw: -1.4096
+        pitch: -0.4545
         plugin: navigation
         targetScene: scene-muxzy2ve
         icon: arrow
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muxwtgdv
     title: Vườn đá
     subtitle: ''
-    panorama: /uploads/1791365584178-n40gdw9885d.jpg
+    panorama: /panoramas/1791365584178-n40gdw9885d-722be813bb.webp
+    previewPanorama: /panorama-previews/1791365584178-n40gdw9885d-722be813bb.webp
+    mobilePanorama: /panoramas-mobile/1791365584178-n40gdw9885d-722be813bb.webp
     thumbnail: /thumbnails/1791365584178-n40gdw9885d.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 2.077119538688537
+    initialPitch: -0.0003664959906456124
+    initialFov: 99.95245094594205
+    defaultCameraEnabled: true
     panoramaRotation: -1.029
     brightness: 1.25
     highlightCompression: 0
@@ -303,35 +344,41 @@ scenes:
     markers:
       - id: h1791365672086
         label: Chuyển cảnh
-        yaw: -1.023
-        pitch: -0.373
+        yaw: -0.9948
+        pitch: -0.3254
         plugin: navigation
         targetScene: scene-muxvrkpl
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
       - id: h1791366164920
         label: Trung tâm vườn đá
-        yaw: 3.1164
-        pitch: -0.4455
+        yaw: -3.1409
+        pitch: -0.3698
         plugin: navigation
         targetScene: scene-muxwnmgu
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
       - id: h1791366181890
         label: Xưởng chế tác
-        yaw: 1.7367
-        pitch: -0.4921
+        yaw: 1.7409
+        pitch: -0.3223
         plugin: navigation
         targetScene: scene-muxwnvwr
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
   - id: scene-muxyetn4
-    title: Khu triển lãm 3 (1)
+    title: Khu triển lãm 1 (2)
     subtitle: ''
-    panorama: /uploads/1791368261710-snm5n8lytlr.jpg
+    panorama: /panoramas/1791368261710-snm5n8lytlr-4b0043f6f0.webp
+    previewPanorama: /panorama-previews/1791368261710-snm5n8lytlr-4b0043f6f0.webp
+    mobilePanorama: /panoramas-mobile/1791368261710-snm5n8lytlr-4b0043f6f0.webp
     thumbnail: /thumbnails/1791368261710-snm5n8lytlr.webp
-    initialYaw: 0.0930843525060696
-    initialPitch: -0.12301909848693962
+    initialYaw: -6.784291137679468
+    initialPitch: 0.02435219470441974
+    initialFov: 94.15024443925522
     defaultCameraEnabled: true
     panoramaRotation: 0.3539999999999992
     brightness: 1.25
@@ -348,7 +395,8 @@ scenes:
         plugin: navigation
         targetScene: scene-muxvnnpk
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
       - id: h1791368570816
         label: Sảnh tân gia
         yaw: -1.0013
@@ -356,26 +404,30 @@ scenes:
         plugin: navigation
         targetScene: scene-muxvzikj
         rotX: 1.0471975511965976
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
         rotY: 0.12217304763960307
         rotZ: 0.017453292519943295
       - id: h1791368626921
-        label: khu 2
+        label: Khu trong
         yaw: -1.5597
         pitch: -0.3834
         plugin: navigation
         targetScene: scene-muxyfx7u
         rotX: 1.0297442586766543
         scaleX: 1.6
-        scaleY: 0.8
+        scaleY: 1
   - id: scene-muxyfx7u
-    title: Khu triển lãm 3 (2)
+    title: Khu triển lãm 1 (1)
     subtitle: ''
-    panorama: /uploads/1791368312299-zfdxc5svjsj.jpg
+    panorama: /panoramas/1791368312299-zfdxc5svjsj-cd51d4e70d.webp
+    previewPanorama: /panorama-previews/1791368312299-zfdxc5svjsj-cd51d4e70d.webp
+    mobilePanorama: /panoramas-mobile/1791368312299-zfdxc5svjsj-cd51d4e70d.webp
     thumbnail: /thumbnails/1791368312299-zfdxc5svjsj.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 1.7042968588582186
+    initialPitch: 0.02688421883676339
+    initialFov: 75
+    defaultCameraEnabled: true
     panoramaRotation: -1.08
     brightness: 1.25
     highlightCompression: 0
@@ -385,20 +437,24 @@ scenes:
     showOnMap: false
     markers:
       - id: h1791368763417
-        label: Chuyển cảnh
+        label: Cổng khu
         yaw: 2.8545
         pitch: -0.3624
         plugin: navigation
-        targetScene: scene-muxvt079
+        targetScene: scene-muxyetn4
         rotX: 1.0297442586766543
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
   - id: scene-muxz5hlz
     title: Khu quan sát
     subtitle: ''
-    panorama: /uploads/1791369505710-lftwo6im5ii.jpg
+    panorama: /panoramas/1791369505710-lftwo6im5ii-1af6b97344.webp
+    previewPanorama: /panorama-previews/1791369505710-lftwo6im5ii-1af6b97344.webp
+    mobilePanorama: /panoramas-mobile/1791369505710-lftwo6im5ii-1af6b97344.webp
     thumbnail: /thumbnails/1791369505710-lftwo6im5ii.webp
-    initialYaw: 14.836740964849923
-    initialPitch: -0.3720889901042078
+    initialYaw: 14.812739360502702
+    initialPitch: -0.06327752357172817
+    initialFov: 99.95468573974509
     defaultCameraEnabled: true
     panoramaRotation: -0.8550000000000004
     brightness: 1.25
@@ -414,15 +470,20 @@ scenes:
         pitch: -0.3455
         plugin: navigation
         targetScene: scene-muxz694t
+        scaleX: 1
+        scaleY: 0.8
         icon: location-1
         pinColor: '#171717'
   - id: scene-muxz694t
     title: Khu chế tác
     subtitle: ''
-    panorama: /uploads/1791369541302-k5x54val0l.jpg
+    panorama: /panoramas/1791369541302-k5x54val0l-2f7a69d79c.webp
+    previewPanorama: /panorama-previews/1791369541302-k5x54val0l-2f7a69d79c.webp
+    mobilePanorama: /panoramas-mobile/1791369541302-k5x54val0l-2f7a69d79c.webp
     thumbnail: /thumbnails/1791369541302-k5x54val0l.webp
-    initialYaw: 19.351840394310763
-    initialPitch: -0.24611267980878748
+    initialYaw: 19.321749340855334
+    initialPitch: -0.00022657842283153255
+    initialFov: 99.95392443017141
     defaultCameraEnabled: true
     panoramaRotation: 0.7740000000000009
     brightness: 1.25
@@ -439,24 +500,30 @@ scenes:
         plugin: navigation
         targetScene: scene-muxwnvwr
         rotX: 1.0297442586766543
-        scaleX: 2
+        scaleX: 1.6
+        scaleY: 1
       - id: h1791369934532
         label: Góc quan sát
         yaw: -1.0298
         pitch: 0.1705
         plugin: navigation
         targetScene: scene-muxz5hlz
+        scaleX: 1
+        scaleY: 0.8
         icon: location-1
         pinColor: '#171717'
   - id: scene-muxzy2ve
     title: Bên hông xưởng
     subtitle: ''
-    panorama: /uploads/1791370838724-8dg485jluu8.jpg
+    panorama: /panoramas/1791370838724-8dg485jluu8-0c5fd0a1b8.webp
+    previewPanorama: /panorama-previews/1791370838724-8dg485jluu8-0c5fd0a1b8.webp
+    mobilePanorama: /panoramas-mobile/1791370838724-8dg485jluu8-0c5fd0a1b8.webp
     thumbnail: /thumbnails/1791370838724-8dg485jluu8.webp
     editorPanorama: /editor-previews/1791370838724-8dg485jluu8.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 22.447660265527343
+    initialPitch: 0.032679566689811805
+    initialFov: 99.95392443017141
+    defaultCameraEnabled: true
     panoramaRotation: 0.48900000000000077
     brightness: 1.25
     highlightCompression: 0
@@ -475,7 +542,7 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791371636547
         label: Hành lang triển lãm
@@ -487,16 +554,19 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muxzynnf
     title: Hành lang triển lãm
     subtitle: ''
-    panorama: /uploads/1791370865551-z0836imf9m.jpg
+    panorama: /panoramas/1791370865551-z0836imf9m-a0c65fa688.webp
+    previewPanorama: /panorama-previews/1791370865551-z0836imf9m-a0c65fa688.webp
+    mobilePanorama: /panoramas-mobile/1791370865551-z0836imf9m-a0c65fa688.webp
     thumbnail: /thumbnails/1791370865551-z0836imf9m.webp
     editorPanorama: /editor-previews/1791370865551-z0836imf9m.webp
-    initialYaw: 52.30041534357572
-    initialPitch: -0.14980664398513213
+    initialYaw: 52.351316457476635
+    initialPitch: 0.05710375261822427
+    initialFov: 99.9522068354564
     defaultCameraEnabled: true
     panoramaRotation: -0.9089999999999989
     brightness: 1.25
@@ -516,7 +586,7 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791371669948
         label: Góc tân gia
@@ -528,10 +598,10 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791373488676
-        label: Khu triển lãm 1
+        label: Khu triển lãm 3
         yaw: 3.0909
         pitch: -0.4417
         plugin: navigation
@@ -540,17 +610,20 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muxzyu0r
     title: Góc tân gia
     subtitle: ''
-    panorama: /uploads/1791370873981-zy2t135moj.jpg
+    panorama: /panoramas/1791370873981-zy2t135moj-6eae97d826.webp
+    previewPanorama: /panorama-previews/1791370873981-zy2t135moj-6eae97d826.webp
+    mobilePanorama: /panoramas-mobile/1791370873981-zy2t135moj-6eae97d826.webp
     thumbnail: /thumbnails/1791370873981-zy2t135moj.webp
     editorPanorama: /editor-previews/1791370873981-zy2t135moj.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 50.12835431713641
+    initialPitch: 0.012050380482422358
+    initialFov: 99.9522068354564
+    defaultCameraEnabled: true
     panoramaRotation: -1.2029999999999994
     brightness: 1.25
     highlightCompression: 0
@@ -561,36 +634,39 @@ scenes:
     markers:
       - id: h1791371685866
         label: 'Sảnh tiếp khách '
-        yaw: 0.096
-        pitch: -0.607
+        yaw: 0.1684
+        pitch: -0.4632
         plugin: navigation
         targetScene: scene-muxzz1f4
         icon: arrow
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791371691814
         label: Hành lang triển lãm
-        yaw: 1.9863
-        pitch: -0.7391
+        yaw: 1.9117
+        pitch: -0.4754
         plugin: navigation
         targetScene: scene-muxzynnf
         icon: arrow
         rotZ: -0.29670597283903605
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muxzz1f4
     title: Sảnh tiếp khách
     subtitle: ''
-    panorama: /uploads/1791370883431-47q760webjq.jpg
+    panorama: /panoramas/1791370883431-47q760webjq-e2cb9e4246.webp
+    previewPanorama: /panorama-previews/1791370883431-47q760webjq-e2cb9e4246.webp
+    mobilePanorama: /panoramas-mobile/1791370883431-47q760webjq-e2cb9e4246.webp
     thumbnail: /thumbnails/1791370883431-47q760webjq.webp
     editorPanorama: /editor-previews/1791370883431-47q760webjq.webp
     initialYaw: 49.339315956125795
     initialPitch: -0.12882682501107923
+    initialFov: 75
     defaultCameraEnabled: true
     panoramaRotation: -0.9390000000000001
     brightness: 1.25
@@ -602,36 +678,39 @@ scenes:
     markers:
       - id: h1791372545343
         label: Góc tân gia
-        yaw: 2.7339
-        pitch: -0.6631
+        yaw: 2.7804
+        pitch: -0.3001
         plugin: navigation
         targetScene: scene-muxzyu0r
         icon: arrow
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791372567902
         label: Sảnh tân gia
-        yaw: -1.8096
-        pitch: -0.5982
+        yaw: -1.7165
+        pitch: -0.5184
         plugin: navigation
         targetScene: scene-muxvzikj
         icon: arrow
         rotZ: 0.19198621771937624
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muy12wxo
-    title: Triển lãm 1 (1)
+    title: Triển lãm 3 (1)
     subtitle: ''
-    panorama: /uploads/1791372743999-mc9nfi1vhz.jpg
+    panorama: /panoramas/1791372743999-mc9nfi1vhz-41729234a2.webp
+    previewPanorama: /panorama-previews/1791372743999-mc9nfi1vhz-41729234a2.webp
+    mobilePanorama: /panoramas-mobile/1791372743999-mc9nfi1vhz-41729234a2.webp
     thumbnail: /thumbnails/1791372743999-mc9nfi1vhz.webp
     editorPanorama: /editor-previews/1791372743999-mc9nfi1vhz.webp
-    initialYaw: 50.26621805371376
-    initialPitch: -0.1768276324037347
+    initialYaw: 47.488021399771704
+    initialPitch: 0.04520205497695087
+    initialFov: 94.15410045323439
     defaultCameraEnabled: true
     panoramaRotation: -2.6771853071795864
     brightness: 1.25
@@ -651,41 +730,44 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791372911158
         label: Bia đá
-        yaw: -2.624
-        pitch: -0.276
+        yaw: -2.5868
+        pitch: -0.459
         plugin: navigation
         targetScene: scene-muy13pai
         icon: arrow
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791372913863
         label: Ghế đá nghệ thuật
-        yaw: 3.1253
-        pitch: -0.2464
+        yaw: 3.0827
+        pitch: -0.4353
         plugin: navigation
         targetScene: scene-muy138jo
         icon: arrow
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muy138jo
-    title: Triển lãm 1 (3)
+    title: Triển lãm 3 (3)
     subtitle: ''
-    panorama: /uploads/1791372759191-pm63036bo4h.jpg
+    panorama: /panoramas/1791372759191-pm63036bo4h-42459c569a.webp
+    previewPanorama: /panorama-previews/1791372759191-pm63036bo4h-42459c569a.webp
+    mobilePanorama: /panoramas-mobile/1791372759191-pm63036bo4h-42459c569a.webp
     thumbnail: /thumbnails/1791372759191-pm63036bo4h.webp
     editorPanorama: /editor-previews/1791372759191-pm63036bo4h.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 49.015141407387226
+    initialPitch: 0.0359995252892606
+    initialFov: 99.95451159878264
+    defaultCameraEnabled: true
     panoramaRotation: 1.9379999999999988
     brightness: 1.25
     highlightCompression: 0
@@ -704,7 +786,7 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791373110230
         label: Đá tảng
@@ -716,7 +798,7 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791373138343
         label: Phiến đá
@@ -728,16 +810,19 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muy13e1t
-    title: triển lãm 1 (4)
+    title: triển lãm 3 (4)
     subtitle: ''
-    panorama: /uploads/1791372766244-yirii93ny8e.jpg
+    panorama: /panoramas/1791372766244-yirii93ny8e-a89669515a.webp
+    previewPanorama: /panorama-previews/1791372766244-yirii93ny8e-a89669515a.webp
+    mobilePanorama: /panoramas-mobile/1791372766244-yirii93ny8e-a89669515a.webp
     thumbnail: /thumbnails/1791372766244-yirii93ny8e.webp
     editorPanorama: /editor-previews/1791372766244-yirii93ny8e.webp
-    initialYaw: 50.77052725953823
-    initialPitch: -0.28474742919877605
+    initialYaw: 52.30957163204661
+    initialPitch: -0.0027850746746205936
+    initialFov: 75
     defaultCameraEnabled: true
     panoramaRotation: 2.1270000000000007
     brightness: 1.25
@@ -757,7 +842,7 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791373036059
         label: Tảng đá
@@ -769,17 +854,20 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muy13pai
-    title: Triển lãm 1 (2)
+    title: Triển lãm 3 (2)
     subtitle: ''
-    panorama: /uploads/1791372780871-9ozia4yzmfj.jpg
+    panorama: /panoramas/1791372780871-9ozia4yzmfj-90c291d8c3.webp
+    previewPanorama: /panorama-previews/1791372780871-9ozia4yzmfj-90c291d8c3.webp
+    mobilePanorama: /panoramas-mobile/1791372780871-9ozia4yzmfj-90c291d8c3.webp
     thumbnail: /thumbnails/1791372780871-9ozia4yzmfj.webp
     editorPanorama: /editor-previews/1791372780871-9ozia4yzmfj.webp
-    initialYaw: 0
-    initialPitch: 0
-    defaultCameraEnabled: false
+    initialYaw: 52.327589826048715
+    initialPitch: -0.0025318258504717257
+    initialFov: 99.9500338171303
+    defaultCameraEnabled: true
     panoramaRotation: 2.2170000000000005
     brightness: 1.25
     highlightCompression: 0
@@ -798,7 +886,7 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791372958286
         label: Khúc đá
@@ -810,7 +898,7 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
       - id: h1791372967532
         label: Đá tảng
@@ -822,16 +910,19 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1.6
         scaleY: 1
   - id: scene-muy28efw
-    title: DJI 0991
+    title: Không gian trước
     subtitle: ''
-    panorama: /uploads/1791374679999-qb06gn55i3r.jpg
+    panorama: /panoramas/1791374679999-qb06gn55i3r-c99a7d39d1.webp
+    previewPanorama: /panorama-previews/1791374679999-qb06gn55i3r-c99a7d39d1.webp
+    mobilePanorama: /panoramas-mobile/1791374679999-qb06gn55i3r-c99a7d39d1.webp
     thumbnail: /thumbnails/1791374679999-qb06gn55i3r.webp
     editorPanorama: /editor-previews/1791374679999-qb06gn55i3r.webp
-    initialYaw: 15.518894379349558
-    initialPitch: -0.359989012921342
+    initialYaw: 19.516842360065187
+    initialPitch: -0.29684906854110565
+    initialFov: 75
     defaultCameraEnabled: true
     panoramaRotation: -2.4941853071795865
     brightness: 1.25
@@ -843,52 +934,114 @@ scenes:
     markers:
       - id: h1791383593701
         label: Cổng vào
-        yaw: 3.092
-        pitch: -0.699
+        yaw: 3.1079
+        pitch: -0.7424
         plugin: navigation
         targetScene: scene-muxvt079
         icon: location-1
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 1.3
+        scaleX: 1
         scaleY: 0.8
         pinColor: '#171717'
-      - id: h1791383613747
-        label: Nhà tân gia
-        yaw: -2.9676
-        pitch: -0.2907
-        plugin: navigation
-        targetScene: scene-muxvzikj
-        icon: location-1
-        rotZ: 0
-        rotX: 1.0471975511965976
-        rotY: 0
-        scaleX: 1.3
-        scaleY: 0.8
-        pinColor: '#171717'
+        iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp
       - id: h1791384047895
-        label: '2'
-        yaw: 2.1561
-        pitch: 0.0489
+        label: Không gian sông Vân
+        yaw: 2.7057
+        pitch: -0.3026
         plugin: navigation
         targetScene: scene-muy28jkw
         icon: location-2
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1
         scaleY: 1
+        pinColor: '#ef4444'
+        iconUrl: /thumbnails/1791374687320-qp74k2s456.webp
+      - id: h1791387598748
+        label: Khu triển lãm 1
+        yaw: -3.0261
+        pitch: -0.472
+        plugin: navigation
+        targetScene: scene-muxyfx7u
+        icon: location-1
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 0.8
+        pinColor: '#171717'
+        iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp
+      - id: h1791387630961
+        label: Khu triển lãm 2
+        yaw: -2.8014
+        pitch: -0.3345
+        plugin: navigation
+        targetScene: scene-muxvnnpk
+        icon: location-1
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 0.8
+        pinColor: '#171717'
+        iconUrl: /thumbnails/1791363635779-44yjura05ei.webp
+      - id: h1791387680963
+        label: Khu triển lãm 3
+        yaw: -3.0804
+        pitch: -0.2442
+        plugin: navigation
+        targetScene: scene-muy12wxo
+        icon: location-1
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 0.95
+        scaleY: 0.85
+        pinColor: '#171717'
+        iconUrl: /thumbnails/1791372743999-mc9nfi1vhz.webp
+      - id: h1791388042656
+        label: Xưởng sản xuất
+        yaw: 3.1094
+        pitch: -0.145
+        plugin: navigation
+        targetScene: scene-muxz5hlz
+        icon: location-1
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 0.85
+        scaleY: 0.7
+        pinColor: '#171717'
+        iconUrl: /thumbnails/1791369505710-lftwo6im5ii.webp
+      - id: h1791453371462
+        label: Không gian xưởng
+        yaw: 2.7444
+        pitch: -0.1309
+        plugin: navigation
+        targetScene: scene-muy29vy6
+        icon: drone
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 0.9
+        scaleY: 0.85
+        sphereRadius: 520
         pinColor: '#171717'
         iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp
   - id: scene-muy28jkw
-    title: DJI 0992
+    title: Không gian sông Vân
     subtitle: ''
-    panorama: /uploads/1791374687320-qp74k2s456.jpg
+    panorama: /panoramas/1791374687320-qp74k2s456-67987efee1.webp
+    previewPanorama: /panorama-previews/1791374687320-qp74k2s456-67987efee1.webp
+    mobilePanorama: /panoramas-mobile/1791374687320-qp74k2s456-67987efee1.webp
     thumbnail: /thumbnails/1791374687320-qp74k2s456.webp
     editorPanorama: /editor-previews/1791374687320-qp74k2s456.webp
-    initialYaw: 2.9819910645074623
-    initialPitch: -0.296994373191275
+    initialYaw: 3.8561909723148386
+    initialPitch: -0.2905629619153496
+    initialFov: 90.44699611509506
     defaultCameraEnabled: true
     panoramaRotation: 0.8339999999999996
     brightness: 1.25
@@ -899,67 +1052,112 @@ scenes:
     showOnMap: true
     markers:
       - id: h1791383747256
-        label: Sảnh tân gia
-        yaw: 3.1114
-        pitch: -0.3948
+        label: 'Sảnh tân gia '
+        yaw: 3.1359
+        pitch: -0.4008
         plugin: navigation
         targetScene: scene-muxvzikj
         icon: location-1
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 1.3
+        scaleX: 1
         scaleY: 0.8
         pinColor: '#171717'
       - id: h1791383769204
         label: Vườn đá
-        yaw: 2.321
-        pitch: -0.341
+        yaw: 2.2541
+        pitch: -0.2855
         plugin: navigation
         targetScene: scene-muxwtgdv
         icon: location-1
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 1.3
+        scaleX: 1
         scaleY: 0.8
         pinColor: '#171717'
       - id: h1791384078480
-        label: '3'
-        yaw: 1.8691
-        pitch: -0.0688
+        label: Không gian xưởng
+        yaw: 1.8525
+        pitch: -0.0145
         plugin: navigation
         targetScene: scene-muy29vy6
         icon: location-2
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1
         scaleY: 1
         pinColor: '#171717'
         iconUrl: /thumbnails/1791374750110-9o5fa6w6uhl.webp
       - id: h1791384094609
-        label: '1'
-        yaw: -1.6822
-        pitch: 0.0364
+        label: Không gian trước
+        yaw: -1.675
+        pitch: 0.0561
         plugin: navigation
         targetScene: scene-muy28efw
         icon: location-2
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
+        scaleX: 1
         scaleY: 1
         pinColor: '#171717'
-        iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp
+        iconUrl: /thumbnails/1791374679999-qb06gn55i3r.webp
+      - id: h1791445732791
+        label: Không gian triển lãm 1
+        yaw: -2.588
+        pitch: -0.2517
+        plugin: navigation
+        targetScene: scene-muxyfx7u
+        icon: local
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 0.8
+        sphereRadius: 520
+        pinColor: '#171717'
+      - id: h1791452418729
+        label: Không gian triển lãm 2
+        yaw: -2.866
+        pitch: -0.026
+        plugin: navigation
+        targetScene: scene-muxvnnpk
+        icon: local
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 0.8
+        sphereRadius: 520
+        pinColor: '#171717'
+      - id: h1791452440656
+        label: Không gian triển lãm 3
+        yaw: 2.623
+        pitch: -0.081
+        plugin: navigation
+        targetScene: scene-muy12wxo
+        icon: local
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 0.8
+        sphereRadius: 520
+        pinColor: '#171717'
   - id: scene-muy29vy6
-    title: DJI 0993
+    title: Không gian xưởng
     subtitle: ''
-    panorama: /uploads/1791374750110-9o5fa6w6uhl.jpg
+    panorama: /panoramas/1791374750110-9o5fa6w6uhl-7f201ca019.webp
+    previewPanorama: /panorama-previews/1791374750110-9o5fa6w6uhl-7f201ca019.webp
+    mobilePanorama: /panoramas-mobile/1791374750110-9o5fa6w6uhl-7f201ca019.webp
     thumbnail: /thumbnails/1791374750110-9o5fa6w6uhl.webp
     editorPanorama: /editor-previews/1791374750110-9o5fa6w6uhl.webp
-    initialYaw: 2.37290075049857
-    initialPitch: -0.1469888357257739
+    initialYaw: 3.980500585454933
+    initialPitch: -0.12593753281084308
+    initialFov: 89.35182338391104
     defaultCameraEnabled: true
     panoramaRotation: 1.7339999999999982
     brightness: 1.25
@@ -979,20 +1177,64 @@ scenes:
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 1.3
+        scaleX: 1
         scaleY: 0.8
         pinColor: '#171717'
       - id: h1791384113346
-        label: '2'
-        yaw: -2.1145
-        pitch: 0.1158
+        label: Không gian sông Vân
+        yaw: -2.1059
+        pitch: 0.0758
         plugin: navigation
         targetScene: scene-muy28jkw
         icon: location-2
         rotZ: 0
         rotX: 1.0471975511965976
         rotY: 0
-        scaleX: 2
-        scaleY: 1
+        scaleX: 1.35
+        scaleY: 1.35
         pinColor: '#171717'
         iconUrl: /thumbnails/1791374687320-qp74k2s456.webp
+      - id: h1791446010013
+        label: Vườn đá
+        yaw: -2.766
+        pitch: -0.326
+        plugin: navigation
+        targetScene: scene-muxwtgdv
+        icon: local
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 0.8
+        sphereRadius: 520
+        pinColor: '#171717'
+        iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp
+      - id: h1791452470656
+        label: Không gian triển lãm 3
+        yaw: 3.0137
+        pitch: -0.0621
+        plugin: navigation
+        targetScene: scene-muy12wxo
+        icon: local
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 0.8
+        sphereRadius: 520
+        pinColor: '#171717'
+      - id: h1791453510859
+        label: Không gian trước
+        yaw: -2.4956
+        pitch: 0.2987
+        plugin: navigation
+        targetScene: scene-muy28efw
+        icon: drone
+        rotZ: 0
+        rotX: 1.0471975511965976
+        rotY: 0
+        scaleX: 1
+        scaleY: 1
+        sphereRadius: 520
+        pinColor: '#171717'
+        iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp

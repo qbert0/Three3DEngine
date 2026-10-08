@@ -94,7 +94,7 @@ export class MapMarker extends PanelMarker {
       'backdrop-filter:blur(8px)',
       'background:rgba(10,10,20,0.85)',
       'transition:opacity .2s ease',
-      this.positionCSS(marker.config.position ?? 'bottom-right'),
+      this.positionCSS(marker.config.position ?? 'bottom-left'),
       `width:${marker.config.width ?? 300}px`,
       `height:${marker.config.height ?? 220}px`,
     ].join(';');
@@ -234,8 +234,8 @@ export class MapMarker extends PanelMarker {
       case 'top-left':     return 'top:16px;left:16px';
       case 'top-right':    return 'top:16px;right:16px';
       case 'bottom-left':  return 'bottom:16px;left:16px';
-      case 'bottom-right':
-      default:             return 'bottom:16px;right:16px';
+      case 'bottom-right': return 'bottom:16px;right:16px';
+      default:             return 'bottom:16px;left:16px';
     }
   }
 }

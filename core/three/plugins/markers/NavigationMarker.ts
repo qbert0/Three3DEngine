@@ -2,15 +2,8 @@ import * as THREE from 'three';
 import { PlaneObject3DMarker } from './PlaneObject3DMarker';
 import type { NavigationMarker as NavigationMarkerData } from '~/types/tour';
 
-const PARALLAX_STRENGTH = 0.15;
-const DEFAULT_PIN_SIZE = 65;
-const CANVAS_SIZE = 256;
-
-const cameraForward = new THREE.Vector3();
-const markerAxis = new THREE.Vector3();
-const markerNormal = new THREE.Vector3();
-const leanEuler = new THREE.Euler();
-const leanQuaternion = new THREE.Quaternion();
+const _navigationWorldPosition = new THREE.Vector3();
+const _navigationCameraPosition = new THREE.Vector3();
 
 type MarkerMode = 'arrow' | 'location-1' | 'location-2';
 
@@ -33,53 +26,64 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
   readonly markerType = 'navigation' as const;
   protected readonly style = { color: '#1d6fa8', icon: '↑', label: 'Điểm đến' };
 
-  private meshes = new Map<THREE.Mesh, NavigationMeshData>();
+  protected meshes = new Map<THREE.Mesh, NavigationMeshData>();
   /** Cache loaded images by URL to avoid re-downloading */
   private imageCache = new Map<string, HTMLImageElement>();
+  private readonly fixedMode?: MarkerMode;
+  private readonly variants: NavigationMarker[];
+  protected readonly showLeaderLine: boolean;
+  protected readonly navigationColor: string = '#2388e8';
+  protected readonly titleFontSize: number = 86;
+  protected readonly iconHitMargin: number = 5;
+  protected readonly canvasWidth: number = 256;
+  protected readonly canvasHeight: number = 256;
+  protected readonly defaultIconWidth: number = 62;
+  protected readonly defaultIconHeight: number = 65;
+
+  constructor(
+    fixedMode?: MarkerMode,
+    showLeaderLine = true,
+    variants: NavigationMarker[] = [],
+  ) {
+    super();
+    this.fixedMode = fixedMode;
+    this.showLeaderLine = showLeaderLine;
+    this.variants = variants;
+  }
 
   // ═══════════════════════════════════════════════════════════════
   //  CREATE
   // ═══════════════════════════════════════════════════════════════
 
   override createObject(marker: NavigationMarkerData): THREE.Object3D {
+    if (this.variants.length) {
+      return (this.variants.find(variant => variant.supports(marker)) ?? this.variants[0]!).createObject(marker);
+    }
+
+    const mode = this.resolveMode(marker);
     const canvas = document.createElement('canvas');
-    canvas.width = CANVAS_SIZE;
-    canvas.height = CANVAS_SIZE;
+    // Plane gốc chỉ chứa icon. Title/leader là child riêng để không mở rộng hitbox.
+    canvas.width = this.canvasWidth;
+    canvas.height = this.canvasHeight;
     const context = canvas.getContext('2d')!;
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
 
     // ── Chọn mode ──
     // Ưu tiên marker.icon nếu có; nếu không thì auto dựa vào pitch.
-    const mode = this.resolveMode(marker);
-
-    const color = (marker as any).pinColor ?? '#171717';
+    const color = this.resolveColor(marker);
     const label = (marker as any).label ?? (marker as any).name ?? '';
+    const labelFont = this.resolveLabelFont(marker.labelFont);
 
     // Kích thước mesh theo mode
-    let size: number;
-    let sizeY: number;
-    if (mode === 'location-1') {
-      size = (marker as any).iconSize ?? DEFAULT_PIN_SIZE;
-      sizeY = size * 1.25;
-    } else if (mode === 'location-2') {
-      size = (marker as any).iconSize ?? DEFAULT_PIN_SIZE;
-      sizeY = size * 1.35;
-    } else {
-      size = 62;
-      sizeY = 65;
-    }
+    const sizeY = (marker as any).iconSize ?? this.defaultIconHeight;
+    const size = (marker as any).iconSize ?? this.defaultIconWidth;
+    this.drawIcon(context, canvas, color, 0, false);
 
-    if (mode === 'arrow') {
-      this.drawArrow(context, canvas, 0, false);
-    } else if (mode === 'location-2') {
-      this.drawLocation2(context, canvas, color, 0, false);
-    } else {
-      this.drawPin(context, canvas, color, 0, false);
-    }
+    const geometry = new THREE.PlaneGeometry(size, sizeY);
 
     const mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(size, sizeY),
+      geometry,
       new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
@@ -90,6 +94,10 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
     );
     mesh.renderOrder = 999;
     mesh.userData = { marker, markerType: this };
+    this.restrictRaycastToIcon(mesh, canvas);
+    if (this.showLeaderLine && label.trim()) {
+      mesh.add(this.createTitleObject(marker, label, labelFont, size, sizeY));
+    }
     this.repositionObject(mesh, marker.yaw, marker.pitch);
 
     const data: NavigationMeshData = {
@@ -104,20 +112,111 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
     };
     this.meshes.set(mesh, data);
 
-    // Load ảnh inset bất đồng bộ
-    if (mode !== 'arrow' && (marker as any).iconUrl) {
-      this.loadIcon((marker as any).iconUrl).then((img) => {
-        data.pinImage = img;
-        if (mode === 'location-2') {
-          this.drawLocation2(context, canvas, color, 0, false, img);
-        } else {
-          this.drawPin(context, canvas, color, 0, false, img);
-        }
-        texture.needsUpdate = true;
-      });
-    }
-
     return mesh;
+  }
+
+  /**
+   * Title là plane con chỉ để hiển thị. Nó không raycast nên hover/click luôn
+   * được quyết định bởi đúng icon gốc, kể cả khi title rất dài.
+   */
+  protected createTitleObject(
+    marker: NavigationMarkerData,
+    label: string,
+    labelFont: string,
+    iconWidth: number,
+    iconHeight: number,
+  ): THREE.Mesh {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1600;
+    canvas.height = 300;
+    const context = canvas.getContext('2d')!;
+    this.drawLeaderLabel(context, label, labelFont, 18, 238, this.navigationColor);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    const scale = this.getScale(marker);
+    const displayHeight = iconHeight;
+    const displayWidth = displayHeight * canvas.width / canvas.height;
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(displayWidth / scale.x, displayHeight / scale.y),
+      new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        depthTest: false,
+        side: THREE.DoubleSide,
+        opacity: 0,
+      }),
+    );
+    // Chồng nhẹ plane label lên icon để chấm đầu leader không bị hở xa.
+    mesh.position.set(iconWidth / 2 + displayWidth / (2 * scale.x) - 22 / scale.x, 0, 1);
+    mesh.renderOrder = 1000;
+    mesh.userData.navigationTitle = true;
+    mesh.raycast = () => {};
+    return mesh;
+  }
+
+  /**
+   * A transparent Mesh still raycasts as its complete rectangular geometry.
+   * Navigation labels make that rectangle very wide, so constrain hits to one
+   * explicit rectangular hitbox around the icon. Leader/title stay excluded.
+   */
+  private restrictRaycastToIcon(
+    mesh: THREE.Mesh,
+    canvas: HTMLCanvasElement,
+  ): void {
+    const bounds = this.getIconHitBounds();
+    if (!bounds) return;
+    const baseRaycast = mesh.raycast.bind(mesh);
+
+    mesh.raycast = (raycaster, intersections) => {
+      const candidates: THREE.Intersection[] = [];
+      baseRaycast(raycaster, candidates);
+      for (const hit of candidates) {
+        if (!hit.uv) continue;
+        const x = Math.floor(hit.uv.x * canvas.width);
+        const y = Math.floor((1 - hit.uv.y) * canvas.height);
+        const insideIconHitbox = !(
+          x < bounds.left - this.iconHitMargin
+          || x > bounds.right + this.iconHitMargin
+          || y < bounds.top - this.iconHitMargin
+          || y > bounds.bottom + this.iconHitMargin
+        );
+        if (insideIconHitbox) intersections.push(hit);
+      }
+    };
+  }
+
+  protected getIconHitBounds(): { left: number; top: number; right: number; bottom: number } | null {
+    return null;
+  }
+
+  protected resolveColor(marker: NavigationMarkerData): string {
+    return (marker as any).pinColor ?? '#171717';
+  }
+
+  protected drawIcon(
+    _ctx: CanvasRenderingContext2D,
+    _canvas: HTMLCanvasElement,
+    _color: string,
+    _time: number,
+    _hovered: boolean,
+  ): void {}
+
+  /**
+   * Cả Arrow, Local và Drone đều bám mặt cầu. Bù projection theo cos góc nhìn
+   * để marker không phình to khi đi từ chính diện ra mép camera.
+   */
+  override updateProjection(object: THREE.Object3D, camera: THREE.Camera): void {
+    object.getWorldPosition(_navigationWorldPosition);
+    _navigationCameraPosition.copy(_navigationWorldPosition).applyMatrix4(camera.matrixWorldInverse);
+    const distance = _navigationWorldPosition.distanceTo(camera.position);
+    if (distance <= 0) return;
+    const perspectiveCompensation = THREE.MathUtils.clamp(
+      -_navigationCameraPosition.z / distance,
+      0.2,
+      1,
+    );
+    object.scale.multiplyScalar(perspectiveCompensation);
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -130,7 +229,7 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
     hovered: boolean,
     _pulse: number,
     hoverScale: number,
-    camera: THREE.Camera,
+    _camera: THREE.Camera,
   ): void {
     if (!(object instanceof THREE.Mesh)) return;
     const data = this.meshes.get(object);
@@ -138,42 +237,21 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
 
     data.time += delta;
     const marker = object.userData.marker as NavigationMarkerData;
-    const color = (marker as any).pinColor ?? '#171717';
-    const label = data.label;
+    const color = this.resolveColor(marker);
 
-    if (data.mode === 'location-1') {
-      // ── Pin dưới đất: pulse + hover glow, KHÔNG parallax ──
-      this.drawPin(data.context, data.canvas, color, data.time, hovered, data.pinImage);
-      data.texture.needsUpdate = true;
-      this.applyHoverScale(object, new THREE.Vector3(1, 1, 1), marker, hovered, hoverScale);
-    } else if (data.mode === 'location-2') {
-      this.drawLocation2(data.context, data.canvas, color, data.time, hovered, data.pinImage);
-      data.texture.needsUpdate = true;
-      this.applyHoverScale(object, new THREE.Vector3(1, 1, 1), marker, hovered, hoverScale);
-    } else {
-      // ── Arrow: giữ nguyên kích thước, chuyển động thật theo local Z ──
-      this.drawArrow(data.context, data.canvas, data.time, hovered);
-      data.texture.needsUpdate = true;
-      this.applyHoverScale(object, new THREE.Vector3(1, 1, 1), marker, hovered, hoverScale);
+    this.syncTitleOpacity(object);
 
-      const zProgress = (1 - Math.cos(data.time * 2.4)) * 0.5;
-      markerNormal.set(0, 0, 1).applyQuaternion(data.baseQuaternion);
-      object.position
-        .copy(data.basePosition)
-        .addScaledVector(markerNormal, zProgress * 12);
+    this.drawIcon(data.context, data.canvas, color, data.time, hovered);
+    data.texture.needsUpdate = true;
+    this.applyHoverScale(object, new THREE.Vector3(1, 1, 1), marker, false, hoverScale);
+  }
 
-      cameraForward.set(0, 0, -1).applyQuaternion(camera.quaternion);
-      markerAxis.set(1, 0, 0).applyQuaternion(data.baseQuaternion);
-      const projectionX = cameraForward.dot(markerAxis);
-      markerAxis.set(0, 1, 0).applyQuaternion(data.baseQuaternion);
-      const projectionY = cameraForward.dot(markerAxis);
-      leanEuler.set(
-        projectionY * PARALLAX_STRENGTH,
-        -projectionX * PARALLAX_STRENGTH,
-        0,
-      );
-      leanQuaternion.setFromEuler(leanEuler);
-      object.quaternion.copy(data.baseQuaternion).multiply(leanQuaternion);
+  protected syncTitleOpacity(object: THREE.Mesh): void {
+    const rootOpacity = (object.material as THREE.MeshBasicMaterial).opacity;
+    for (const child of object.children) {
+      if (child instanceof THREE.Mesh && child.userData.navigationTitle) {
+        (child.material as THREE.MeshBasicMaterial).opacity = rootOpacity;
+      }
     }
   }
 
@@ -199,7 +277,7 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
   protected override getScale(marker: NavigationMarkerData): THREE.Vector3 {
     const isArrow = this.resolveMode(marker) === 'arrow';
     return new THREE.Vector3(
-      this.normalizeScale(marker.scaleX ?? (isArrow ? 2 : 1)),
+      this.normalizeScale(marker.scaleX ?? (isArrow ? 1.6 : 1)),
       this.normalizeScale(marker.scaleY ?? 1),
       1,
     );
@@ -207,10 +285,13 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
 
   override disposeObject(object: THREE.Object3D): void {
     if (!(object instanceof THREE.Mesh)) return;
-    const material = object.material as THREE.MeshBasicMaterial;
-    material.map?.dispose();
-    material.dispose();
-    object.geometry.dispose();
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
+      const material = child.material as THREE.MeshBasicMaterial;
+      material.map?.dispose();
+      material.dispose();
+      child.geometry.dispose();
+    });
     this.meshes.delete(object);
   }
 
@@ -218,219 +299,48 @@ export class NavigationMarker extends PlaneObject3DMarker<NavigationMarkerData> 
   //  MODE RESOLUTION
   // ═══════════════════════════════════════════════════════════════
 
-  private resolveMode(marker: NavigationMarkerData): MarkerMode {
+  protected resolveMode(marker: NavigationMarkerData): MarkerMode {
+    if (this.fixedMode) return this.fixedMode;
     const icon = (marker as any).icon;
-    if (icon === 'location-1' || icon === 'pin') return 'location-1';
-    if (icon === 'location-2' || icon === 'pin-top' || icon === 'anchor') return 'location-2';
+    if (icon === 'local' || icon === 'location-1' || icon === 'pin') return 'location-1';
+    if (icon === 'drone' || icon === 'location-2' || icon === 'pin-top' || icon === 'anchor') return 'location-2';
     // Giá trị arrow-1/arrow-2 từng được ghi bởi bản editor trước vẫn là mũi tên.
     return 'arrow';
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  //  ARROW MODE — animated chevron
-  // ═══════════════════════════════════════════════════════════════
-
-  private drawArrow(
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    _time: number,
-    hovered: boolean,
-  ): void {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // Canvas chỉ vẽ một hình cố định; animation được thực hiện bằng vị trí
-    // 3D của mesh, tuyệt đối không scale nét vẽ.
-    this.drawChevron(ctx, 106, hovered ? 1 : 0.82, hovered);
-  }
-
-  private drawChevron(
-    ctx: CanvasRenderingContext2D,
-    tipY: number,
-    pulse: number,
-    hovered: boolean,
-  ): void {
-    ctx.save();
-    ctx.globalAlpha = 1;
-    ctx.lineWidth = hovered ? 42 : 40;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#ffffff';
-    ctx.shadowColor = `rgba(220, 240, 255, ${hovered ? 0.95 : 0.18 + pulse * 0.72})`;
-    ctx.shadowBlur = hovered ? 22 : 3 + pulse * 18;
+  private drawLeaderLabel(ctx: CanvasRenderingContext2D, label: string, fontFamily: string, jointX: number, jointY: number, color: string): void {
+    const title = label.trim() || 'Điểm đến';
+    ctx.font = `700 ${this.titleFontSize}px ${fontFamily}`;
+    const textWidth = Math.min(ctx.measureText(title).width, 1250);
+    const underlineY = 145;
+    const leaderAngle = THREE.MathUtils.degToRad(65);
+    const elbowX = jointX + Math.abs(jointY - underlineY) / Math.tan(leaderAngle);
+    const textX = elbowX + 28;
+    const baseline = underlineY - 18;
+    ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 8; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.arc(jointX, jointY, 9, 0, Math.PI * 2); ctx.fill();
+    // Chấm neo -> đoạn chéo đi lên -> đoạn ngang làm chân title.
     ctx.beginPath();
-    ctx.moveTo(37, tipY + 67);
-    ctx.lineTo(128, tipY);
-    ctx.lineTo(219, tipY + 67);
+    ctx.moveTo(jointX + 7, jointY - 5);
+    ctx.lineTo(elbowX, underlineY);
+    ctx.lineTo(textX + textWidth, underlineY);
     ctx.stroke();
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.75)'; ctx.shadowBlur = 7;
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.font = `700 ${this.titleFontSize}px ${fontFamily}`;
+    ctx.fillText(title, textX, baseline, 1250);
     ctx.restore();
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  //  PIN MODE (dưới đất) — hình 1
-  //  Ghim tròn + đuôi nhọn dài, ảnh inset lấp đầy, viền trắng dày
-  // ═══════════════════════════════════════════════════════════════
-
-  private drawPin(
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    color: string,
-    time: number,
-    hovered: boolean,
-    insetImage?: HTMLImageElement,
-  ): void {
-    const w = canvas.width;
-    const h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
-
-    const cx = w / 2;
-    const pinRadius = 68;
-    const pinCenterY = 82;
-    const pinTipY = 228;
-    const pulse = 1 + Math.sin(time * 3) * 0.02;
-
-    ctx.save();
-    ctx.translate(cx, h / 2);
-    ctx.scale(pulse, pulse);
-    ctx.translate(-cx, -h / 2);
-
-    // ── Drop shadow ──
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-    ctx.shadowBlur = 16;
-    ctx.shadowOffsetY = 6;
-    this.drawPinPath(ctx, cx, pinCenterY, pinRadius, pinTipY);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.restore();
-
-    // ── Hover glow ──
-    if (hovered) {
-      ctx.save();
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.7)';
-      ctx.shadowBlur = 26;
-      this.drawPinPath(ctx, cx, pinCenterY, pinRadius, pinTipY);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
-      ctx.restore();
+  protected resolveLabelFont(font: NavigationMarkerData['labelFont']): string {
+    switch (font) {
+      case 'outfit': return '"Outfit", system-ui, sans-serif';
+      case 'montserrat': return '"Montserrat", "Be Vietnam Pro", sans-serif';
+      case 'serif': return 'Georgia, "Times New Roman", serif';
+      case 'be-vietnam-pro':
+      default: return '"Be Vietnam Pro", system-ui, sans-serif';
     }
-
-    // ── Pin body ──
-    this.drawPinPath(ctx, cx, pinCenterY, pinRadius, pinTipY);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-
-    // Viền trắng mảnh; thumbnail gần sát mép như icon tham chiếu.
-    this.drawPinPath(ctx, cx, pinCenterY, pinRadius, pinTipY);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = hovered ? 4 : 2;
-    ctx.stroke();
-
-    // ── Ảnh inset lấp đầy phần tròn ──
-    const innerRadius = pinRadius - 8;
-
-    if (insetImage && insetImage.complete && insetImage.naturalWidth > 0) {
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(cx, pinCenterY, innerRadius, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.clip();
-      this.drawCoverImage(ctx, insetImage, cx, pinCenterY, innerRadius * 2, innerRadius * 2);
-      ctx.restore();
-
-      // Vòng trắng nhỏ ngăn thumbnail với thân pin.
-      ctx.beginPath();
-      ctx.arc(cx, pinCenterY, innerRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    } else {
-      // Fallback trung tính để vòng trắng vẫn đọc được khi chưa chọn ảnh.
-      ctx.beginPath();
-      ctx.arc(cx, pinCenterY, innerRadius, 0, Math.PI * 2);
-      ctx.fillStyle = color;
-      ctx.fill();
-    }
-
-    ctx.restore();
-  }
-
-  /** Path pin dưới đất: hình tròn + đuôi nhọn dài. */
-  private drawPinPath(
-    ctx: CanvasRenderingContext2D,
-    cx: number,
-    cy: number,
-    r: number,
-    tipY: number,
-  ): void {
-    const tangentAngle = Math.asin(Math.min(24 / r, 1));
-    ctx.beginPath();
-    ctx.arc(
-      cx, cy, r,
-      Math.PI / 2 + tangentAngle,
-      Math.PI / 2 - tangentAngle,
-      false,
-    );
-    ctx.lineTo(cx, tipY);
-    ctx.closePath();
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  //  LOCATION 2 — đầu nhỏ, vai mềm và đuôi dài như icon tham chiếu
-  // ═══════════════════════════════════════════════════════════════
-
-  private drawLocation2(
-    ctx: CanvasRenderingContext2D,
-    canvas: HTMLCanvasElement,
-    color: string,
-    time: number,
-    hovered: boolean,
-    insetImage?: HTMLImageElement,
-  ): void {
-    const cx = canvas.width / 2;
-    const cy = 78;
-    const radius = 56;
-    const tipY = 236;
-    const innerRadius = radius - 8;
-    const pulse = 1 + Math.sin(time * 3) * 0.018;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.save();
-    ctx.translate(cx, 128);
-    ctx.scale(pulse, pulse);
-    ctx.translate(-cx, -128);
-
-    ctx.save();
-    ctx.shadowColor = hovered ? 'rgba(255,255,255,.75)' : 'rgba(0,0,0,.38)';
-    ctx.shadowBlur = hovered ? 25 : 15;
-    ctx.shadowOffsetY = hovered ? 0 : 6;
-    this.drawLocation2Path(ctx, cx, cy, radius, tipY);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.restore();
-
-    this.drawLocation2Path(ctx, cx, cy, radius, tipY);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = hovered ? 4 : 2;
-    ctx.stroke();
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2);
-    ctx.clip();
-    if (insetImage?.complete && insetImage.naturalWidth > 0) {
-      this.drawCoverImage(ctx, insetImage, cx, cy, innerRadius * 2, innerRadius * 2);
-    } else {
-      ctx.fillStyle = color;
-      ctx.fillRect(cx - innerRadius, cy - innerRadius, innerRadius * 2, innerRadius * 2);
-    }
-    ctx.restore();
-    ctx.beginPath();
-    ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.restore();
   }
 
   private drawLocation2Path(

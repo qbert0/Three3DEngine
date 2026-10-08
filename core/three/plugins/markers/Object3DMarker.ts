@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { MarkerBase } from './MarkerBase';
 import type { TourMarker } from '~/types/tour';
 
+const _cameraWorldQuaternion = new THREE.Quaternion();
+const _parentWorldQuaternion = new THREE.Quaternion();
+
 export interface Object3DTransform {
   rotX?: number;
   rotY?: number;
@@ -9,6 +12,7 @@ export interface Object3DTransform {
   scaleX?: number;
   scaleY?: number;
   scaleZ?: number;
+  sphereRadius?: number;
 }
 
 /**
@@ -21,10 +25,10 @@ export abstract class Object3DMarker<
   TMarker extends TourMarker & Object3DTransform,
 > extends MarkerBase<TMarker> {
   override repositionObject(object: THREE.Object3D, yaw: number, pitch: number): void {
-    this.positionOnSphere(object, yaw, pitch);
+    const marker = object.userData.marker as TMarker | undefined;
+    this.positionOnSphere(object, yaw, pitch, marker?.sphereRadius);
     object.lookAt(0, 0, 0);
 
-    const marker = object.userData.marker as TMarker | undefined;
     if (marker) this.applyRotation(object, marker);
   }
 
@@ -33,6 +37,20 @@ export abstract class Object3DMarker<
     if (rotation.z) object.rotateZ(rotation.z);
     if (rotation.x) object.rotateX(rotation.x);
     if (rotation.y) object.rotateY(rotation.y);
+  }
+
+  /** Giữ mặt phẳng object song song với mặt phẳng camera trong world space. */
+  protected faceCamera(object: THREE.Object3D, camera: THREE.Camera): void {
+    camera.getWorldQuaternion(_cameraWorldQuaternion);
+    if (object.parent) {
+      object.parent.getWorldQuaternion(_parentWorldQuaternion);
+      object.quaternion
+        .copy(_parentWorldQuaternion)
+        .invert()
+        .multiply(_cameraWorldQuaternion);
+    } else {
+      object.quaternion.copy(_cameraWorldQuaternion);
+    }
   }
 
   protected getRotation(marker: TMarker): THREE.Euler {

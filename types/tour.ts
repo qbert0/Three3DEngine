@@ -18,6 +18,8 @@ export interface NavigationMarker extends PlaneMarkerScale {
   label: string;
   yaw: number;
   pitch: number;
+  /** Khoảng cách từ tâm camera trên mặt cầu 3D. Mặc định 520, hợp lệ 120–580. */
+  sphereRadius?: number;
   targetScene: string;
   /**
    * 3D rotation of the nav arrow (all in radians, applied AFTER lookAt toward sphere center).
@@ -45,7 +47,7 @@ export interface NavigationMarker extends PlaneMarkerScale {
    * `arrow-1`, `arrow-2`, `pin`, `pin-top` and `anchor` are retained only
    * for backward compatibility with tours saved by older editor versions.
    */
-  icon?: 'arrow' | 'location-1' | 'location-2' | 'arrow-1' | 'arrow-2' | 'pin' | 'pin-top' | 'anchor';
+  icon?: 'arrow' | 'local' | 'drone' | 'location-1' | 'location-2' | 'arrow-1' | 'arrow-2' | 'pin' | 'pin-top' | 'anchor';
   /** Location-pin color (CSS color string). Default: '#171717'. */
   pinColor?: string;
   /**
@@ -55,6 +57,8 @@ export interface NavigationMarker extends PlaneMarkerScale {
   iconUrl?: string;
   /** Pin display size in world units (default 65). Only used in pin mode. */
   iconSize?: number;
+  /** Font used by the public viewer's navigation title. */
+  labelFont?: 'be-vietnam-pro' | 'outfit' | 'montserrat' | 'serif';
 
   /** Tên điểm (fallback cho label) */
   name?: string;
@@ -176,12 +180,18 @@ export interface TourScene {
   title: string;
   subtitle: string;
   panorama: string;
+  /** Fast 2K panorama shown immediately while the viewer waits for full quality. */
+  previewPanorama?: string;
+  /** Bandwidth-friendly panorama selected on small/coarse-pointer devices. */
+  mobilePanorama?: string;
   thumbnail: string;
   /** Lower-resolution 2:1 panorama used only by the admin designer. */
   editorPanorama?: string;
   initialYaw: number;
   initialPitch: number;
-  /** Apply initialYaw/initialPitch whenever the viewer enters this scene. */
+  /** Vertical camera field of view saved with the entry camera. 75° = default zoom. */
+  initialFov?: number;
+  /** Apply initialYaw/initialPitch/initialFov whenever the viewer enters this scene. */
   defaultCameraEnabled?: boolean;
   /** Rotation of the panorama and its scene markers in world space, radians. */
   panoramaRotation?: number;

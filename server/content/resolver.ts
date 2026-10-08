@@ -25,6 +25,9 @@ export function resolveMediaUrls(tour: TourConfig, baseUrl: string): TourConfig 
     scenes: tour.scenes.map(scene => ({
       ...scene,
       panorama:  resolve(scene.panorama),
+      previewPanorama: scene.previewPanorama ? resolve(scene.previewPanorama) : undefined,
+      mobilePanorama: scene.mobilePanorama ? resolve(scene.mobilePanorama) : undefined,
+      editorPanorama: scene.editorPanorama ? resolve(scene.editorPanorama) : undefined,
       thumbnail: resolve(scene.thumbnail),
     })),
   };

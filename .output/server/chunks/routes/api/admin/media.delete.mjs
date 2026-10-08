@@ -12,7 +12,10 @@ import 'node:url';
 const MANAGED_MEDIA_DIRS = {
   "/uploads/": join(process.cwd(), "public", "uploads"),
   "/thumbnails/": join(process.cwd(), "public", "thumbnails"),
-  "/editor-previews/": join(process.cwd(), "public", "editor-previews")
+  "/editor-previews/": join(process.cwd(), "public", "editor-previews"),
+  "/panorama-previews/": join(process.cwd(), "public", "panorama-previews"),
+  "/panoramas/": join(process.cwd(), "public", "panoramas"),
+  "/panoramas-mobile/": join(process.cwd(), "public", "panoramas-mobile")
 };
 const media_delete = defineEventHandler(async (event) => {
   var _a, _b;

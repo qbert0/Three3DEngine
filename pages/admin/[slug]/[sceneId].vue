@@ -190,7 +190,7 @@ function ensureMapConfig() {
           neighbors: [] as string[],
         })),
       }],
-      position: 'bottom-right',
+      position: 'bottom-left',
       width: 280,
       height: 200,
       showConnections: true,
@@ -505,7 +505,7 @@ async function handleFileChange(event: Event) {
 
   uploadingImage.value = true;
   try {
-    const res = await $fetch<{ ok: boolean; files: Array<{ original: string; thumbnail: string; editorPreview: string }> }>(
+    const res = await $fetch<{ ok: boolean; files: Array<{ original: string; thumbnail: string; editorPreview: string; previewPanorama: string; viewerPanorama: string; mobilePanorama: string }> }>(
       '/api/admin/media',
       {
         method: 'POST',
@@ -515,7 +515,9 @@ async function handleFileChange(event: Event) {
 
     if (res.ok && res.files?.length) {
       const uploaded = res.files[0];
-      currentScene.value.panorama = uploaded.original;
+      currentScene.value.panorama = uploaded.viewerPanorama;
+      currentScene.value.previewPanorama = uploaded.previewPanorama;
+      currentScene.value.mobilePanorama = uploaded.mobilePanorama;
       currentScene.value.editorPanorama = uploaded.editorPreview;
       panoramaPreviewFailed.value = false;
       if (uploaded.thumbnail) {
@@ -664,6 +666,7 @@ function captureDefaultCamera() {
   if (!currentScene.value) return;
   currentScene.value.initialYaw = cameraYaw.value;
   currentScene.value.initialPitch = cameraPitch.value;
+  currentScene.value.initialFov = cameraFov.value;
   markDirty();
 }
 
@@ -675,6 +678,7 @@ const {
   isLoading: engineLoading,
   cameraYaw,
   cameraPitch,
+  cameraFov,
   interactionMode,
   lastPanoramaRotation,
   isPlacing: engineIsPlacing,
@@ -695,6 +699,11 @@ const {
   setPanoramaRotation,
   setInteractionMode,
 } = useDesignerEngine();
+
+watch(cameraFov, (fov) => {
+  // Keep the toolbar percentage aligned with wheel zoom and restored scene FOV.
+  zoom.value = Math.round(50 + ((120 - fov) / 90) * 150);
+});
 
 watch(lastPanoramaRotation, (rotation) => {
   if (rotation === null || !currentScene.value) return;
@@ -768,8 +777,19 @@ function setPlaneMarkerScale(axis: 'scaleX' | 'scaleY', rawValue: string | numbe
   markDirty();
 }
 
+function setNavigationSphereRadius(rawValue: string | number) {
+  if (selectedHotspot.value?.plugin !== 'navigation' || !currentScene.value) return;
+  selectedHotspot.value.sphereRadius = Math.max(120, Math.min(580, Number(rawValue) || 520));
+  refreshMarkers(currentScene.value);
+  markDirty();
+}
+
 function navigationIsArrow(marker: NavigationMarker): boolean {
-  return !['location-1', 'location-2', 'pin', 'pin-top', 'anchor'].includes(marker.icon ?? 'arrow');
+  return !['local', 'drone', 'location-1', 'location-2', 'pin', 'pin-top', 'anchor'].includes(marker.icon ?? 'arrow');
+}
+
+function navigationIsLocal(marker: NavigationMarker): boolean {
+  return ['local', 'location-1', 'pin'].includes(marker.icon ?? '');
 }
 
 function navigationRotationDegrees(marker: NavigationMarker, axis: 'rotX' | 'rotY' | 'rotZ'): number {
@@ -781,7 +801,9 @@ function navigationRotationDegrees(marker: NavigationMarker, axis: 'rotX' | 'rot
 function planeMarkerScale(marker: NavigationMarker | VideoMarker, axis: 'scaleX' | 'scaleY'): number {
   const explicit = marker[axis];
   if (explicit !== undefined) return explicit;
-  return marker.plugin === 'navigation' && axis === 'scaleX' && navigationIsArrow(marker) ? 2 : 1;
+  if (marker.plugin === 'navigation' && axis === 'scaleX' && navigationIsArrow(marker)) return 1.6;
+  if (marker.plugin === 'navigation' && axis === 'scaleY' && navigationIsLocal(marker)) return 0.8;
+  return 1;
 }
 
 // ── Hotspot drag-to-reposition ───────────────────────────────────────────────
@@ -921,7 +943,7 @@ async function handleNewSceneImage(event: Event) {
     formData.append('file', file);
     const upload = await $fetch<{
       ok: boolean;
-      files: Array<{ original: string; thumbnail: string; editorPreview: string }>;
+      files: Array<{ original: string; thumbnail: string; editorPreview: string; previewPanorama: string; viewerPanorama: string; mobilePanorama: string }>;
     }>('/api/admin/media', { method: 'POST', body: formData });
     const media = upload.files?.[0];
     if (!media) throw new Error('API không trả về ảnh panorama đã tải lên.');
@@ -932,11 +954,14 @@ async function handleNewSceneImage(event: Event) {
       id,
       title: titleFromFile || 'Cảnh mới',
       subtitle: '',
-      panorama: media.original,
+      panorama: media.viewerPanorama,
+      previewPanorama: media.previewPanorama,
+      mobilePanorama: media.mobilePanorama,
       thumbnail: media.thumbnail || media.original,
       editorPanorama: media.editorPreview,
       initialYaw: 0,
       initialPitch: 0,
+      initialFov: 75,
       defaultCameraEnabled: false,
       panoramaRotation: 0,
       showOnMap: false,
@@ -992,10 +1017,10 @@ async function deleteCurrentScene() {
 
     // Only uploader-owned files are accepted by this endpoint. Bundled source
     // images under /images are intentionally left untouched.
-    const mediaPaths = [removed.panorama, removed.thumbnail, removed.editorPanorama].filter((path, index, all): path is string => (
+    const mediaPaths = [removed.panorama, removed.mobilePanorama, removed.previewPanorama, removed.thumbnail, removed.editorPanorama].filter((path, index, all): path is string => (
       Boolean(path) && all.indexOf(path) === index
     ));
-    const stillReferenced = new Set(tour.value.scenes.flatMap((scene) => [scene.panorama, scene.thumbnail, scene.editorPanorama]));
+    const stillReferenced = new Set(tour.value.scenes.flatMap((scene) => [scene.panorama, scene.mobilePanorama, scene.previewPanorama, scene.thumbnail, scene.editorPanorama]));
     const orphanedMedia = mediaPaths.filter((path) => !stillReferenced.has(path));
     let mediaDeleteWarning = false;
     if (orphanedMedia.length) {
@@ -1101,8 +1126,9 @@ function createHotspot(type: 'navigation' | 'video' | 'panel') {
       rotZ: 0,
       rotX: Math.PI / 3,
       rotY: 0,
-      scaleX: 2,
+      scaleX: 1.6,
       scaleY: 1,
+      sphereRadius: 520,
     } as NavigationMarker);
   } else if (type === 'panel') {
     currentScene.value.markers.push({
@@ -1463,7 +1489,9 @@ onMounted(() => {
             Lấy góc hiện tại
           </button>
           <output v-if="currentScene.defaultCameraEnabled">
-            {{ Math.round(currentScene.initialYaw * RAD_TO_DEG) }}° / {{ Math.round(currentScene.initialPitch * RAD_TO_DEG) }}°
+            {{ Math.round(currentScene.initialYaw * RAD_TO_DEG) }}° /
+            {{ Math.round(currentScene.initialPitch * RAD_TO_DEG) }}° /
+            Zoom {{ (Math.tan(75 * Math.PI / 360) / Math.tan((currentScene.initialFov ?? 75) * Math.PI / 360)).toFixed(2) }}×
           </output>
         </div>
         <button
@@ -1528,7 +1556,13 @@ onMounted(() => {
           <span class="preview-info-badge">CẢNH {{ currentSceneIdx + 1 }}/{{ tour?.scenes.length ?? 1 }}</span>
           <span class="preview-info-title" id="infoTitle">{{ currentScene?.title }}</span>
           <span class="preview-info-coord" id="infoCoord">
-            {{ isPlacingHotspot ? 'Nhấn vị trí bất kỳ để đặt' : 'Vị trí xem panorama' }}
+            <template v-if="isPlacingHotspot">Nhấn vị trí bất kỳ để đặt</template>
+            <template v-else>
+              Yaw {{ (cameraYaw * RAD_TO_DEG).toFixed(1) }}° ·
+              Pitch {{ (cameraPitch * RAD_TO_DEG).toFixed(1) }}° ·
+              Zoom {{ (Math.tan(75 * Math.PI / 360) / Math.tan(cameraFov * Math.PI / 360)).toFixed(2) }}× ·
+              FOV {{ cameraFov.toFixed(1) }}°
+            </template>
           </span>
         </div>
       </div>
@@ -1821,7 +1855,7 @@ onMounted(() => {
                       (selectedHotspot as NavigationMarker).rotZ ??= 0;
                       (selectedHotspot as NavigationMarker).rotX ??= Math.PI / 3;
                       (selectedHotspot as NavigationMarker).rotY ??= 0;
-                      (selectedHotspot as NavigationMarker).scaleX ??= 2;
+                      (selectedHotspot as NavigationMarker).scaleX ??= 1.6;
                       (selectedHotspot as NavigationMarker).scaleY ??= 1;
                       refreshMarkers?.(currentScene); markDirty();
                     }"
@@ -1833,21 +1867,25 @@ onMounted(() => {
                   </button>
                   <button
                     type="button"
-                    :class="['nav-mode-btn', { active: ['location-1', 'pin'].includes((selectedHotspot as NavigationMarker).icon ?? '') }]"
+                    :class="['nav-mode-btn', { active: ['local', 'location-1', 'pin'].includes((selectedHotspot as NavigationMarker).icon ?? '') }]"
                     @click="() => {
-                      (selectedHotspot as NavigationMarker).icon = 'location-1';
+                      (selectedHotspot as NavigationMarker).icon = 'local';
+                      (selectedHotspot as NavigationMarker).scaleX = 1;
+                      (selectedHotspot as NavigationMarker).scaleY = 0.8;
                       if (!(selectedHotspot as NavigationMarker).pinColor) (selectedHotspot as NavigationMarker).pinColor = '#171717';
                       refreshMarkers?.(currentScene); markDirty();
                     }"
                   >
-                    <img src="/icons/navigation/location-1.svg" alt="" style="width:16px;height:20px;object-fit:contain">
-                    Vị trí 1
+                    <svg viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:20px">
+                      <path d="M12 26S3 17.2 3 10a9 9 0 1 1 18 0c0 7.2-9 16-9 16Z"/><circle cx="12" cy="10" r="3.5"/>
+                    </svg>
+                    Local
                   </button>
                   <button
                     type="button"
-                    :class="['nav-mode-btn', { active: ['location-2', 'pin-top', 'anchor'].includes((selectedHotspot as NavigationMarker).icon ?? '') }]"
+                    :class="['nav-mode-btn', { active: ['drone', 'location-2', 'pin-top', 'anchor'].includes((selectedHotspot as NavigationMarker).icon ?? '') }]"
                     @click="() => {
-                      (selectedHotspot as NavigationMarker).icon = 'location-2';
+                      (selectedHotspot as NavigationMarker).icon = 'drone';
                       if (!(selectedHotspot as NavigationMarker).pinColor) {
                         (selectedHotspot as NavigationMarker).pinColor = '#171717';
                       }
@@ -1859,14 +1897,34 @@ onMounted(() => {
                       refreshMarkers?.(currentScene); markDirty();
                     }"
                   >
-                    <img src="/icons/navigation/location-2.svg" alt="" style="width:15px;height:21px;object-fit:contain">
-                    Vị trí 2
+                    <svg viewBox="0 0 24 30" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:21px">
+                      <path d="M12 28C10.5 21 4 17 4 9.5a8 8 0 1 1 16 0C20 17 13.5 21 12 28Z"/><circle cx="12" cy="9.5" r="3"/>
+                    </svg>
+                    Drone
                   </button>
                 </div>
               </div>
 
+              <div v-if="!navigationIsArrow(selectedHotspot as NavigationMarker)" class="field">
+                <label>Font tiêu đề trên View</label>
+                <select
+                  :value="(selectedHotspot as NavigationMarker).labelFont ?? 'be-vietnam-pro'"
+                  @change="(event: any) => {
+                    (selectedHotspot as NavigationMarker).labelFont = event.target.value;
+                    refreshMarkers?.(currentScene);
+                    markDirty();
+                  }"
+                >
+                  <option value="be-vietnam-pro">Be Vietnam Pro</option>
+                  <option value="outfit">Outfit</option>
+                  <option value="montserrat">Montserrat</option>
+                  <option value="serif">Serif nghệ thuật</option>
+                </select>
+                <div class="hint-text">Font chỉ áp dụng cho tiêu đề đi kèm leader line ở trang View.</div>
+              </div>
+
               <!-- Pin settings (only when pin mode) -->
-              <template v-if="['location-1', 'location-2', 'pin', 'pin-top', 'anchor'].includes((selectedHotspot as NavigationMarker).icon ?? '')">
+              <template v-if="['local', 'drone', 'location-1', 'location-2', 'pin', 'pin-top', 'anchor'].includes((selectedHotspot as NavigationMarker).icon ?? '')">
                 <!-- Pin color -->
                 <div class="field">
                   <label>Màu pin</label>
@@ -1956,6 +2014,23 @@ onMounted(() => {
               </template>
             </template>
 
+            <template v-if="selectedHotspot.plugin === 'navigation'">
+              <div class="field">
+                <label>
+                  Độ sâu trên mặt cầu 3D
+                  <span class="field-badge">{{ Math.round((selectedHotspot as NavigationMarker).sphereRadius ?? 520) }}</span>
+                </label>
+                <div class="rotation-control">
+                  <input type="range" min="120" max="580" step="5"
+                    :value="(selectedHotspot as NavigationMarker).sphereRadius ?? 520"
+                    @input="(e:any) => setNavigationSphereRadius(e.target.value)"
+                  >
+                  <button class="reset-btn" type="button" title="Về mặt cầu mặc định" @click="setNavigationSphereRadius(520)">↺</button>
+                </div>
+                <div class="hint-text">120 = gần camera; 520 = mặc định; 580 = sát bề mặt panorama.</div>
+              </div>
+            </template>
+
             <!-- Navigation arrow 3D rotation — 3 axes (location pins do not use parallax) -->
             <template v-if="selectedHotspot.plugin === 'navigation' && ['arrow', 'arrow-1', 'arrow-2'].includes((selectedHotspot as NavigationMarker).icon ?? 'arrow')">
               <!-- rotZ: spin around normal (former single rotation) -->
@@ -2029,7 +2104,7 @@ onMounted(() => {
                     :value="planeMarkerScale(selectedHotspot as NavigationMarker | VideoMarker, 'scaleX')"
                     @input="(e:any) => setPlaneMarkerScale('scaleX', e.target.value)"
                   >
-                  <button class="reset-btn" type="button" :title="selectedHotspot.plugin === 'navigation' && navigationIsArrow(selectedHotspot as NavigationMarker) ? 'Về 200%' : 'Về 100%'" @click="setPlaneMarkerScale('scaleX', selectedHotspot.plugin === 'navigation' && navigationIsArrow(selectedHotspot as NavigationMarker) ? 2 : 1)">↺</button>
+                  <button class="reset-btn" type="button" :title="selectedHotspot.plugin === 'navigation' && navigationIsArrow(selectedHotspot as NavigationMarker) ? 'Về 160%' : 'Về 100%'" @click="setPlaneMarkerScale('scaleX', selectedHotspot.plugin === 'navigation' && navigationIsArrow(selectedHotspot as NavigationMarker) ? 1.6 : 1)">↺</button>
                 </div>
               </div>
               <div class="field">
@@ -2042,7 +2117,7 @@ onMounted(() => {
                     :value="planeMarkerScale(selectedHotspot as NavigationMarker | VideoMarker, 'scaleY')"
                     @input="(e:any) => setPlaneMarkerScale('scaleY', e.target.value)"
                   >
-                  <button class="reset-btn" type="button" title="Về 100%" @click="setPlaneMarkerScale('scaleY', 1)">↺</button>
+                  <button class="reset-btn" type="button" :title="selectedHotspot.plugin === 'navigation' && navigationIsLocal(selectedHotspot as NavigationMarker) ? 'Về 80%' : 'Về 100%'" @click="setPlaneMarkerScale('scaleY', selectedHotspot.plugin === 'navigation' && navigationIsLocal(selectedHotspot as NavigationMarker) ? 0.8 : 1)">↺</button>
                 </div>
                 <div class="hint-text">X và Y thay đổi độc lập; marker mặt phẳng không sử dụng chiều sâu Z.</div>
               </div>
@@ -2491,7 +2566,7 @@ onMounted(() => {
             <div class="field">
               <label>Vị trí</label>
               <select
-                :value="tour.map?.position ?? 'bottom-right'"
+                :value="tour.map?.position ?? 'bottom-left'"
                 @change="(e: any) => { if (tour.value?.map) tour.value.map.position = e.target.value; markDirty(); }"
               >
                 <option value="bottom-right">Dưới phải</option>

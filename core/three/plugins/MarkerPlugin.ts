@@ -2,6 +2,9 @@ import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { PluginBase } from './PluginBase';
 import { NavigationMarker } from './markers/NavigationMarker';
+import { ArrowNavigationMarker } from './markers/ArrowNavigationMarker';
+import { LocalNavigationMarker } from './markers/LocalNavigationMarker';
+import { DroneNavigationMarker } from './markers/DroneNavigationMarker';
 import { VideoMarker } from './markers/VideoMarker';
 import type { MarkerBase } from './markers/MarkerBase';
 import { PanelMarker } from './markers/PanelMarker';
@@ -37,6 +40,7 @@ export class MarkerPlugin extends PluginBase {
   private draggingObject: THREE.Object3D | null = null;
   private dragStarted = false;
   private pointerDown = { x: 0, y: 0 };
+  private navigationPending = false;
 
   private readonly pulseSpeed: number;
   private readonly pulseAmplitude: number;
@@ -52,7 +56,13 @@ export class MarkerPlugin extends PluginBase {
 
     const panelMarker = new PanelMarker();
     const builtIns: MarkerBase[] = [
-      new NavigationMarker(),
+      // View và Admin dùng cùng một hình thức hiển thị để thiết kế WYSIWYG.
+      // Title không raycast nên vẫn không cản thao tác chọn/kéo chính icon.
+      new NavigationMarker(undefined, true, [
+        new ArrowNavigationMarker(true),
+        new LocalNavigationMarker(true),
+        new DroneNavigationMarker(true),
+      ]),
       panelMarker,
       new VideoMarker(),
     ];
@@ -104,7 +114,8 @@ export class MarkerPlugin extends PluginBase {
   protected override onUpdate(delta: number): void {
     const pulse = 1 + Math.sin(performance.now() * this.pulseSpeed) * this.pulseAmplitude;
     this.group.children.forEach((object) => {
-      this.markerTypeForObject(object)?.updateObject(
+      const markerType = this.markerTypeForObject(object);
+      markerType?.updateObject(
         object,
         delta,
         object === this.hovered,
@@ -112,6 +123,7 @@ export class MarkerPlugin extends PluginBase {
         this.hoverScale,
         this.ctx.camera.camera,
       );
+      markerType?.updateProjection(object, this.ctx.camera.camera);
     });
     const width = this.ctx.container.clientWidth;
     const height = this.ctx.container.clientHeight;
@@ -175,9 +187,7 @@ export class MarkerPlugin extends PluginBase {
 
   private bindPointerEvents(): void {
     const element = this.ctx.renderer.domElement;
-    const onMouseMove = (event: MouseEvent) => {
-      if (this.draggingObject) return;
-      const hit = this.hitTest(event);
+    const setHovered = (hit: THREE.Object3D | null) => {
       if (hit === this.hovered) return;
       this.hovered = hit;
       this.ctx.container.style.cursor = hit ? (this.draggable ? 'grab' : 'pointer') : 'grab';
@@ -185,7 +195,12 @@ export class MarkerPlugin extends PluginBase {
         marker: (hit?.userData.marker as TourMarker | undefined) ?? null,
       });
     };
-    const onClick = (event: MouseEvent) => {
+    const onPointerMove = (event: PointerEvent) => {
+      if (this.draggingObject) return;
+      setHovered(this.hitTest(event));
+    };
+    const onPointerLeave = () => setHovered(null);
+    const onClick = async (event: MouseEvent) => {
       if (this.draggingObject || this.dragStarted) return;
       const object = this.hitTest(event);
       const marker = object?.userData.marker as TourMarker | undefined;
@@ -194,24 +209,35 @@ export class MarkerPlugin extends PluginBase {
         // when toggled from their marker, replaced, or camera motion begins.
         return;
       }
+      if (this.navigationPending) return;
       this.ctx.bus.emit('marker:click', { marker });
       if (marker.plugin === 'navigation' && marker.targetScene) {
         this.closeAllPanels();
-        // Marker coordinates are panorama-local. Convert yaw to the canonical
-        // world/map direction before handing it to the transition engine.
-        this.ctx.bus.emit('navigate', {
-          sceneId: marker.targetScene,
-          yaw: marker.yaw + this.group.rotation.y,
-          pitch: marker.pitch,
-        });
+        this.navigationPending = true;
+        this.ctx.bus.emit('interaction:lock');
+        try {
+          await this.markerTypeForObject(object)?.playActivationAnimation(object);
+          // Marker coordinates are panorama-local. Convert yaw to the canonical
+          // world/map direction before handing it to the transition engine.
+          this.ctx.bus.emit('navigate', {
+            sceneId: marker.targetScene,
+            yaw: marker.yaw + this.group.rotation.y,
+            pitch: marker.pitch,
+          });
+        } finally {
+          this.navigationPending = false;
+          this.ctx.bus.emit('interaction:unlock');
+        }
       } else {
         this.openPanel(marker, object);
       }
     };
-    element.addEventListener('mousemove', onMouseMove);
+    element.addEventListener('pointermove', onPointerMove, { passive: true });
+    element.addEventListener('pointerleave', onPointerLeave);
     element.addEventListener('click', onClick);
     this.unsubs.push(
-      () => element.removeEventListener('mousemove', onMouseMove),
+      () => element.removeEventListener('pointermove', onPointerMove),
+      () => element.removeEventListener('pointerleave', onPointerLeave),
       () => element.removeEventListener('click', onClick),
     );
     if (this.draggable) this.bindDragEvents();
@@ -342,6 +368,12 @@ export class MarkerPlugin extends PluginBase {
   protected materialOf(object: THREE.Object3D): THREE.SpriteMaterial | THREE.MeshBasicMaterial | null {
     if (object instanceof THREE.Sprite) return object.material;
     if (object instanceof THREE.Mesh) return object.material as THREE.MeshBasicMaterial;
+    // Một marker có thể là Group gồm nhiều object độc lập (ví dụ arrow + title).
+    // Fade theo material tương tác chính; marker tự đồng bộ opacity cho phần phụ.
+    for (const child of object.children) {
+      const material = this.materialOf(child);
+      if (material) return material;
+    }
     return null;
   }
 

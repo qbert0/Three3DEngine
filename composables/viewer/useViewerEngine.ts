@@ -87,10 +87,12 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     try {
       const e = new View360Engine({
         container,
+        antialias: false,
         introDelay: options.introDelay ?? 0,
         pano: {
           defaultTransition: tour?.transition ?? options.transition ?? 'crossfade',
           transitionDuration: tour?.transitionDuration ?? 1200,
+          maxCachedTextures: 2,
         },
       });
 
@@ -232,10 +234,15 @@ export function useViewerEngine(options: ViewerEngineOptions) {
       engine.value = e;
 
       // ── Load first scene ──
-      await e.loadScene(initialScene, true);
+      const viewerInitialScene = forViewer(initialScene);
+      await e.loadScene(viewerInitialScene, true);
 
-      // ── Background-preload neighbours ──
-      if (tour) preloadNeighbours(initialScene, tour.scenes);
+      const viewerScenes = tour?.scenes.map(forViewer);
+      if (viewerInitialScene.previewPanorama) {
+        scheduleCurrentSceneUpgrade(viewerInitialScene, viewerScenes);
+      } else if (viewerScenes) {
+        preloadNeighbours(viewerInitialScene, viewerScenes);
+      }
     } catch (err) {
       errorMessage.value =
         err instanceof Error ? err.message : 'Không thể khởi động viewer.';
@@ -256,8 +263,14 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
     isTransitioning.value = true;
     try {
-      await engine.value.navigateTo(scene, undefined, flyYaw, flyPitch);
-      if (allScenes) preloadNeighbours(scene, allScenes);
+      const viewerScene = forViewer(scene);
+      await engine.value.navigateTo(viewerScene, undefined, flyYaw, flyPitch);
+      const viewerScenes = allScenes?.map(forViewer);
+      if (viewerScene.previewPanorama) {
+        scheduleCurrentSceneUpgrade(viewerScene, viewerScenes);
+      } else if (viewerScenes) {
+        preloadNeighbours(viewerScene, viewerScenes);
+      }
     } catch (err) {
       errorMessage.value =
         err instanceof Error ? err.message : 'Lỗi chuyển cảnh.';
@@ -283,10 +296,42 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     );
 
     const targets = [...new Set([...navTargets, ...adjacent])].slice(0, 3);
-    const pending = targets.filter(target => !preloaded.has(target.panorama));
+    const pending = targets.filter(target => !preloaded.has(target.previewPanorama ?? target.panorama));
     const generation = ++preloadGeneration;
     lastUserInteractionAt = performance.now();
     scheduleNextPreload(pending, 0, generation);
+  }
+
+  function forViewer(scene: TourScene): TourScene {
+    if (typeof window === 'undefined') return scene;
+    const preferMobile = window.innerWidth <= 900
+      || window.matchMedia('(pointer: coarse)').matches;
+    return {
+      ...scene,
+      panorama: preferMobile && scene.mobilePanorama
+        ? scene.mobilePanorama
+        : scene.panorama,
+    };
+  }
+
+  /** Upgrade the active 2K preview only after camera input has gone idle. */
+  function scheduleCurrentSceneUpgrade(scene: TourScene, allScenes?: TourScene[]): void {
+    const generation = ++preloadGeneration;
+    lastUserInteractionAt = performance.now();
+    const attempt = () => {
+      if (generation !== preloadGeneration || !engine.value) return;
+      const idleFor = performance.now() - lastUserInteractionAt;
+      if (isUserDragging || idleFor < 1200) {
+        preloadTimer = setTimeout(attempt, 250);
+        return;
+      }
+      preloadTimer = null;
+      void engine.value.upgradeCurrentPanorama(scene.id, scene.panorama).then(() => {
+        if (generation !== preloadGeneration) return;
+        if (allScenes) preloadNeighbours(scene, allScenes);
+      }).catch(() => {});
+    };
+    preloadTimer = setTimeout(attempt, 250);
   }
 
   /**
@@ -314,11 +359,12 @@ export function useViewerEngine(options: ViewerEngineOptions) {
       const target = targets[index];
       const pano = engine.value?.pano;
       if (!target || !pano) return;
-      preloaded.add(target.panorama);
+      const targetUrl = target.previewPanorama ?? target.panorama;
+      preloaded.add(targetUrl);
       try {
-        await pano.preload(target.panorama);
+        await pano.preload(targetUrl);
       } catch {
-        preloaded.delete(target.panorama);
+        preloaded.delete(targetUrl);
       }
       // Leave breathing room between GPU uploads as well.
       lastUserInteractionAt = performance.now() - 700;

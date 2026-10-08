@@ -15,6 +15,7 @@ const props = defineProps<{
   setQualityMode: (mode: QualityMode) => void;
   currentQuality: QualityMode;
   panoramaUrl: string;
+  embedded?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -23,7 +24,7 @@ const emit = defineEmits<{
 }>();
 
 // ── State ──────────────────────────────────────────────────────
-const isOpen   = ref(false);
+const isOpen   = ref(Boolean(props.embedded));
 const diag     = ref<EngineDiagnostics | null>(null);
 let   interval: ReturnType<typeof setInterval> | null = null;
 
@@ -42,11 +43,12 @@ function toggle() {
 
 onMounted(() => {
   interval = setInterval(refresh, 500);
-  window.addEventListener('keydown', onKey);
+  if (!props.embedded) window.addEventListener('keydown', onKey);
+  if (props.embedded) diag.value = props.getDiagnostics();
 });
 onBeforeUnmount(() => {
   if (interval) clearInterval(interval);
-  window.removeEventListener('keydown', onKey);
+  if (!props.embedded) window.removeEventListener('keydown', onKey);
 });
 
 function onKey(e: KeyboardEvent) {
@@ -96,6 +98,7 @@ function setCompare(mode: 'panorama' | 'flat-100' | 'fit-screen') {
 <template>
   <!-- Toggle button (always visible in dev) -->
   <button
+    v-if="!embedded"
     id="dev-diag-toggle"
     class="diag-toggle"
     :class="{ 'is-open': isOpen }"
@@ -111,6 +114,7 @@ function setCompare(mode: 'panorama' | 'flat-100' | 'fit-screen') {
     <div
       v-if="isOpen"
       class="diag-panel"
+      :class="{ 'is-embedded': embedded }"
       role="region"
       aria-label="Bảng chẩn đoán GPU"
     >
@@ -269,6 +273,19 @@ function setCompare(mode: 'panorama' | 'flat-100' | 'fit-screen') {
   color: rgba(255,255,255,0.75);
   backdrop-filter: blur(16px);
   box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+
+.diag-panel.is-embedded {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  border-color: rgba(100,180,255,0.14);
+  background: rgba(255,255,255,0.025);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .diag-header {

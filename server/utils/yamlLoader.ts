@@ -1,16 +1,15 @@
 import { readFileSync, readdirSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import type { TourConfig, TourEntry } from '../../types/tour';
-import trangBayGenerated from '../data/tours/trang-bay.generated.json';
+import generatedTours from '../data/tours/all.generated.json';
 import { parseYaml, dumpYaml } from '../content/parser';
 import { compileTour } from '../content/compiler';
 import { resolveMediaUrls } from '../content/resolver';
 
-// Generated from the canonical YAML by predev/prebuild. This makes the exact
-// same marker coordinates available when Vercel cannot read process.cwd()/tours.
-const staticTours: Record<string, TourConfig> = {
-  'trang-bay': trangBayGenerated as TourConfig,
-};
+// Generated from every canonical YAML file by predev/prebuild. Vercel's
+// serverless bundle cannot reliably enumerate process.cwd()/tours at runtime,
+// so the complete catalog must be imported statically into the server bundle.
+const staticTours: Record<string, TourConfig> = generatedTours as Record<string, TourConfig>;
 
 const TOURS_DIR = resolve(process.cwd(), 'tours');
 

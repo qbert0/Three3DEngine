@@ -131,7 +131,7 @@ export function generateAutoMap(scenes: TourScene[]): MapConfig {
   return {
     floors,
     defaultFloorId: floors[0]?.id,
-    position: 'bottom-right',
+    position: 'bottom-left',
     width: 280,
     height: 200,
     showConnections: true,

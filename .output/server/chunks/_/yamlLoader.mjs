@@ -4,847 +4,1432 @@ import * as yaml from 'js-yaml';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 
-var slug = "trang-bay";
-var title = "Tour 360° Sông Vân Art Space";
-var location = "Nam Hoa Lư, Ninh Bình";
-var summary = "Khám phá Sông Vân Art Space giữa làng nghề đá Ninh Vân. Dạo qua không gian sống, xưởng sáng tác và những khoảng trưng bày điêu khắc đá đương đại bằng trải nghiệm panorama 360°.";
-var duration = "Tự do";
-var theme = "minimal";
-var initialSceneId = "scene-c7";
-var plugins = [
-	"navigation",
-	"info"
-];
-var transition = "forward";
-var map = {
-	position: "bottom-right",
-	width: 300,
-	height: 220,
-	showConnections: true,
-	showCameraArrow: true,
-	clickToNavigate: true,
-	showFloorTabs: true,
-	autoSwitchFloor: true,
-	defaultFloorId: "outdoor",
-	floors: [
+const generatedTours = {
+	"tour-moi-muoy6j08": {
+	slug: "tour-moi-muoy6j08",
+	title: "Tour mới",
+	location: "Chưa cập nhật",
+	summary: "Tour mới chưa có nội dung.",
+	theme: "nature",
+	initialSceneId: "scene-muy28efw",
+	plugins: [
+	],
+	mode: "free",
+	autoRotate: false,
+	showMinimap: false,
+	map: {
+		floors: [
+		],
+		visible: false,
+		position: "bottom-left"
+	},
+	scenes: [
 		{
-			id: "outdoor",
-			name: "Ngoài trời",
-			shortName: "Sân",
-			imageUrl: "",
-			imageWidth: 800,
-			imageHeight: 600,
-			nodes: [
+			id: "scene-muxvt079",
+			title: "Sông vân",
+			subtitle: "",
+			panorama: "/panoramas/1791363884550-otcz1232qvm-c7d26b3ac3.webp",
+			previewPanorama: "/panorama-previews/1791363884550-otcz1232qvm-c7d26b3ac3.webp",
+			mobilePanorama: "/panoramas-mobile/1791363884550-otcz1232qvm-c7d26b3ac3.webp",
+			thumbnail: "/thumbnails/1791363884550-otcz1232qvm.webp",
+			initialYaw: 13.156679695098585,
+			initialPitch: 0.12742673763635304,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: 0.3359999999999985,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95346741378309,
+				20.20822096283133
+			],
+			showOnMap: false,
+			markers: [
 				{
-					id: "scene-c7",
-					name: "Cổng chính",
-					x: 700,
-					y: 520,
-					neighbors: [
-						"scene-c5"
+					id: "h1791363976191",
+					label: "Sông Vân Art space",
+					yaw: -0.5513,
+					pitch: 0.0406,
+					plugin: "panel",
+					placement: "horizontal",
+					contents: [
+						{
+							id: "h1791363976191-text",
+							type: "text",
+							content: "Sông Vân Art space…\nKhông gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của Lương Trịnh.",
+							presentation: "text-and-audio"
+						}
 					]
 				},
 				{
-					id: "scene-c5",
-					name: "Bên sông",
-					x: 580,
-					y: 420,
-					neighbors: [
-						"scene-c7",
-						"scene-c4"
-					]
-				},
-				{
-					id: "scene-c4",
-					name: "Trưng bày mở",
-					x: 400,
-					y: 340,
-					neighbors: [
-						"scene-c5",
-						"scene-c2",
-						"scene-c3"
-					]
-				},
-				{
-					id: "scene-c2",
-					name: "Vườn tượng",
-					x: 240,
-					y: 300,
-					neighbors: [
-						"scene-c4",
-						"scene-c1"
-					],
-					exitTo: {
-						floorId: "tb1",
-						nodeId: "scene-tb1-5"
-					}
-				},
-				{
-					id: "scene-c1",
-					name: "Xưởng đá",
-					x: 120,
-					y: 240,
-					neighbors: [
-						"scene-c2"
-					]
-				},
-				{
-					id: "scene-c3",
-					name: "Sảnh tân gia",
-					x: 400,
-					y: 180,
-					neighbors: [
-						"scene-c4"
-					],
-					exitTo: {
-						floorId: "tb2",
-						nodeId: "scene-tb2-3"
-					}
-				},
-				{
-					id: "scene-c6",
-					name: "Vườn đá",
-					x: 100,
-					y: 440,
-					neighbors: [
-					]
-				},
-				{
-					id: "s1790786479857",
-					name: "Cảnh mới",
-					x: 520,
-					y: 130,
-					neighbors: [
-						"scene-c3"
-					]
+					id: "h1791364572700",
+					label: "Lối vào",
+					yaw: 0.1396,
+					pitch: -0.31,
+					plugin: "navigation",
+					targetScene: "scene-muxvs1p9",
+					rotX: 1.0995574287564276,
+					scaleX: 1.6,
+					scaleY: 1
 				}
 			]
 		},
 		{
-			id: "tb1",
-			name: "Khu Xưởng & TB1",
-			shortName: "Xưởng",
-			imageUrl: "",
-			imageWidth: 800,
-			imageHeight: 300,
-			nodes: [
+			id: "scene-muxvs1p9",
+			title: "Bờ sông Vân",
+			subtitle: "",
+			panorama: "/panoramas/1791363839591-afu6f9tqbxn-f767b43b82.webp",
+			previewPanorama: "/panorama-previews/1791363839591-afu6f9tqbxn-f767b43b82.webp",
+			mobilePanorama: "/panoramas-mobile/1791363839591-afu6f9tqbxn-f767b43b82.webp",
+			thumbnail: "/thumbnails/1791363839591-afu6f9tqbxn.webp",
+			initialYaw: 0,
+			initialPitch: 0,
+			initialFov: 75,
+			defaultCameraEnabled: false,
+			panoramaRotation: -2.443185307179588,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95339365303519,
+				20.20837319121125
+			],
+			showOnMap: false,
+			markers: [
 				{
-					id: "scene-tb1-1",
-					name: "Lối vào xưởng",
-					x: 80,
-					y: 150,
-					neighbors: [
-						"scene-tb1-2"
-					]
+					id: "h1791364668908",
+					label: "Lối ra",
+					yaw: -0.2559,
+					pitch: -0.3225,
+					plugin: "navigation",
+					targetScene: "scene-muxvt079",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
 				},
 				{
-					id: "scene-tb1-2",
-					name: "Sân tập kết",
-					x: 230,
-					y: 150,
-					neighbors: [
-						"scene-tb1-1",
-						"scene-tb1-3"
-					]
-				},
-				{
-					id: "scene-tb1-3",
-					name: "Góc chế tác",
-					x: 400,
-					y: 150,
-					neighbors: [
-						"scene-tb1-2",
-						"scene-tb1-4"
-					]
-				},
-				{
-					id: "scene-tb1-4",
-					name: "Trung tâm xưởng",
-					x: 570,
-					y: 150,
-					neighbors: [
-						"scene-tb1-3",
-						"scene-tb1-5"
-					]
-				},
-				{
-					id: "scene-tb1-5",
-					name: "Cổng trưng bày",
-					x: 720,
-					y: 150,
-					neighbors: [
-						"scene-tb1-4"
-					],
-					exitTo: {
-						floorId: "outdoor",
-						nodeId: "scene-c2"
-					}
+					id: "h1791364735195",
+					label: "Ngã ba dinh thự",
+					yaw: 3.007,
+					pitch: -0.2662,
+					plugin: "navigation",
+					targetScene: "scene-muxvrkpl",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1,
+					rotZ: 0,
+					rotY: 0.10471975511965977
 				}
 			]
 		},
 		{
-			id: "tb2",
-			name: "Khu Trưng Bày 2",
-			shortName: "TB2",
-			imageUrl: "",
-			imageWidth: 800,
-			imageHeight: 300,
-			nodes: [
+			id: "scene-muxvrkpl",
+			title: "Ngã ba dinh thự",
+			subtitle: "",
+			panorama: "/panoramas/1791363817761-8md8wy2v15q-3bf1c26c2c.webp",
+			previewPanorama: "/panorama-previews/1791363817761-8md8wy2v15q-3bf1c26c2c.webp",
+			mobilePanorama: "/panoramas-mobile/1791363817761-8md8wy2v15q-3bf1c26c2c.webp",
+			thumbnail: "/thumbnails/1791363817761-8md8wy2v15q.webp",
+			initialYaw: 52.42350433648388,
+			initialPitch: 0.07821308284518984,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: 1.9380000000000006,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.9533400088549,
+				20.208432396391295
+			],
+			showOnMap: false,
+			markers: [
 				{
-					id: "scene-tb2-1",
-					name: "Lối vào",
-					x: 100,
-					y: 150,
-					neighbors: [
-						"scene-tb2-2"
-					]
+					id: "h1791364794679",
+					label: "Bờ sông Vân",
+					yaw: 1.8474,
+					pitch: -0.3505,
+					plugin: "navigation",
+					targetScene: "scene-muxvs1p9",
+					rotX: 1.064650843716541,
+					scaleX: 1.6,
+					scaleY: 1
 				},
 				{
-					id: "scene-tb2-2",
-					name: "Hành lang",
-					x: 300,
-					y: 150,
-					neighbors: [
-						"scene-tb2-1",
-						"scene-tb2-3"
-					]
+					id: "h1791364818593",
+					label: "Sảnh tân gia",
+					yaw: 0.1073,
+					pitch: -0.3095,
+					plugin: "navigation",
+					targetScene: "scene-muxvzikj",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1,
+					rotY: -0.17453292519943295
 				},
 				{
-					id: "scene-tb2-3",
-					name: "Trưng bày 2",
-					x: 500,
-					y: 150,
-					neighbors: [
-						"scene-tb2-2",
-						"scene-tb2-4"
-					],
-					exitTo: {
-						floorId: "outdoor",
-						nodeId: "scene-c3"
-					}
+					id: "h1791364851805",
+					label: "Vườn đá",
+					yaw: -1.2337,
+					pitch: -0.3883,
+					plugin: "navigation",
+					targetScene: "scene-muxwtgdv",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxvzikj",
+			title: "Sảnh tân gia",
+			subtitle: "",
+			panorama: "/panoramas/1791364188155-3d3emmjckkg-ce98279577.webp",
+			previewPanorama: "/panorama-previews/1791364188155-3d3emmjckkg-ce98279577.webp",
+			mobilePanorama: "/panoramas-mobile/1791364188155-3d3emmjckkg-ce98279577.webp",
+			thumbnail: "/thumbnails/1791364188155-3d3emmjckkg.webp",
+			initialYaw: 52.39940184251776,
+			initialPitch: 0.09930865576602246,
+			initialFov: 99.95498728952235,
+			defaultCameraEnabled: true,
+			panoramaRotation: 1.9200000000000017,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95323607325554,
+				20.208378274063932
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791365890729",
+					label: "Ngã ba dinh thự",
+					yaw: -2.0682,
+					pitch: -0.3816,
+					plugin: "navigation",
+					targetScene: "scene-muxvrkpl",
+					rotX: 1.064650843716541,
+					scaleX: 1.6,
+					scaleY: 1,
+					rotY: -0.24434609527920614
 				},
 				{
-					id: "scene-tb2-4",
-					name: "Kết hành trình",
-					x: 700,
-					y: 150,
-					neighbors: [
-						"scene-tb2-3"
-					]
+					id: "h1791365961588",
+					label: "Khu triển lãm 2",
+					yaw: 0.971,
+					pitch: -0.175,
+					plugin: "navigation",
+					targetScene: "scene-muxvnnpk",
+					rotX: 1.0297442586766543,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791365983533",
+					label: "Khu triển lãm 3",
+					yaw: 1.9895,
+					pitch: -0.2254,
+					plugin: "navigation",
+					targetScene: "scene-muxyfx7u",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1,
+					rotY: -0.3490658503988659
+				},
+				{
+					id: "h1791372602964",
+					label: "Sảnh tiếp khách",
+					yaw: -1.2332,
+					pitch: -0.3761,
+					plugin: "navigation",
+					targetScene: "scene-muxzz1f4",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxvnnpk",
+			title: "Khu triển lãm 2",
+			subtitle: "",
+			panorama: "/panoramas/1791363635779-44yjura05ei-a516f33b3d.webp",
+			previewPanorama: "/panorama-previews/1791363635779-44yjura05ei-a516f33b3d.webp",
+			mobilePanorama: "/panoramas-mobile/1791363635779-44yjura05ei-a516f33b3d.webp",
+			thumbnail: "/thumbnails/1791363635779-44yjura05ei.webp",
+			initialYaw: -3.265301191822448,
+			initialPitch: -0.07772321397523375,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: 0,
+			brightness: 1.25,
+			highlightCompression: 0,
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791366051697",
+					label: "Sảnh tân gia",
+					yaw: 0.0374,
+					pitch: -0.5153,
+					plugin: "navigation",
+					targetScene: "scene-muxvzikj",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1,
+					rotY: 0.5759586531581288
+				},
+				{
+					id: "h1791366118997",
+					label: "Khu triển lãm 3 ",
+					yaw: -0.3431,
+					pitch: -0.5123,
+					plugin: "navigation",
+					targetScene: "scene-muxyetn4",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxwnmgu",
+			title: "Trung tâm vườn đá",
+			subtitle: "",
+			panorama: "/panoramas/1791365312935-jxwx0865xya-cdf76ad3c8.webp",
+			previewPanorama: "/panorama-previews/1791365312935-jxwx0865xya-cdf76ad3c8.webp",
+			mobilePanorama: "/panoramas-mobile/1791365312935-jxwx0865xya-cdf76ad3c8.webp",
+			thumbnail: "/thumbnails/1791365312935-jxwx0865xya.webp",
+			initialYaw: 0,
+			initialPitch: 0,
+			initialFov: 75,
+			defaultCameraEnabled: false,
+			panoramaRotation: -0.6600000000000001,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95312744379045,
+				20.208530556594823
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791366286027",
+					label: "Ngoài vườn đá",
+					yaw: 0.0815,
+					pitch: -0.33,
+					plugin: "navigation",
+					targetScene: "scene-muxwtgdv",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxwnvwr",
+			title: "Xưởng chế tác",
+			subtitle: "",
+			panorama: "/panoramas/1791365325140-3hi8ecj0hj9-40f20f752c.webp",
+			previewPanorama: "/panorama-previews/1791365325140-3hi8ecj0hj9-40f20f752c.webp",
+			mobilePanorama: "/panoramas-mobile/1791365325140-3hi8ecj0hj9-40f20f752c.webp",
+			thumbnail: "/thumbnails/1791365325140-3hi8ecj0hj9.webp",
+			initialYaw: 26.724650860755446,
+			initialPitch: 0.07807083650312939,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: -1.2750000000000004,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95312241464853,
+				20.20866896639382
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791366229657",
+					label: "Vườn đá",
+					yaw: -0.561,
+					pitch: -0.3229,
+					plugin: "navigation",
+					targetScene: "scene-muxwtgdv",
+					scaleX: 1.6,
+					scaleY: 1,
+					rotX: 1.0471975511965976
+				},
+				{
+					id: "h1791369872912",
+					label: "Khu chế tác",
+					yaw: -3.1156,
+					pitch: -0.2976,
+					plugin: "navigation",
+					targetScene: "scene-muxz694t",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791371567758",
+					label: "Bên hổng xưởng",
+					yaw: -1.4096,
+					pitch: -0.4545,
+					plugin: "navigation",
+					targetScene: "scene-muxzy2ve",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxwtgdv",
+			title: "Vườn đá",
+			subtitle: "",
+			panorama: "/panoramas/1791365584178-n40gdw9885d-722be813bb.webp",
+			previewPanorama: "/panorama-previews/1791365584178-n40gdw9885d-722be813bb.webp",
+			mobilePanorama: "/panoramas-mobile/1791365584178-n40gdw9885d-722be813bb.webp",
+			thumbnail: "/thumbnails/1791365584178-n40gdw9885d.webp",
+			initialYaw: 2.0801121351232523,
+			initialPitch: -0.16816511895858297,
+			initialFov: 99.95245094594205,
+			defaultCameraEnabled: true,
+			panoramaRotation: -1.029,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95320388674739,
+				20.208567046328746
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791365672086",
+					label: "Chuyển cảnh",
+					yaw: -0.9948,
+					pitch: -0.3254,
+					plugin: "navigation",
+					targetScene: "scene-muxvrkpl",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791366164920",
+					label: "Trung tâm vườn đá",
+					yaw: -3.1409,
+					pitch: -0.3698,
+					plugin: "navigation",
+					targetScene: "scene-muxwnmgu",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791366181890",
+					label: "Xưởng chế tác",
+					yaw: 1.7409,
+					pitch: -0.3223,
+					plugin: "navigation",
+					targetScene: "scene-muxwnvwr",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxyetn4",
+			title: "Khu triển lãm 1 (2)",
+			subtitle: "",
+			panorama: "/panoramas/1791368261710-snm5n8lytlr-4b0043f6f0.webp",
+			previewPanorama: "/panorama-previews/1791368261710-snm5n8lytlr-4b0043f6f0.webp",
+			mobilePanorama: "/panoramas-mobile/1791368261710-snm5n8lytlr-4b0043f6f0.webp",
+			thumbnail: "/thumbnails/1791368261710-snm5n8lytlr.webp",
+			initialYaw: -6.748261840359677,
+			initialPitch: -0.19174011311765304,
+			initialFov: 94.15024443925522,
+			defaultCameraEnabled: true,
+			panoramaRotation: 0.3539999999999992,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95323909074071,
+				20.20828797530887
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791368542115",
+					label: "Khu triển lãm 2",
+					yaw: 1.568,
+					pitch: -0.572,
+					plugin: "navigation",
+					targetScene: "scene-muxvnnpk",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791368570816",
+					label: "Sảnh tân gia",
+					yaw: -1.0013,
+					pitch: -0.478,
+					plugin: "navigation",
+					targetScene: "scene-muxvzikj",
+					rotX: 1.0471975511965976,
+					scaleX: 1.6,
+					scaleY: 1,
+					rotY: 0.12217304763960307,
+					rotZ: 0.017453292519943295
+				},
+				{
+					id: "h1791368626921",
+					label: "Khu trong",
+					yaw: -1.5597,
+					pitch: -0.3834,
+					plugin: "navigation",
+					targetScene: "scene-muxyfx7u",
+					rotX: 1.0297442586766543,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxyfx7u",
+			title: "Khu triển lãm 1 (1)",
+			subtitle: "",
+			panorama: "/panoramas/1791368312299-zfdxc5svjsj-cd51d4e70d.webp",
+			previewPanorama: "/panorama-previews/1791368312299-zfdxc5svjsj-cd51d4e70d.webp",
+			mobilePanorama: "/panoramas-mobile/1791368312299-zfdxc5svjsj-cd51d4e70d.webp",
+			thumbnail: "/thumbnails/1791368312299-zfdxc5svjsj.webp",
+			initialYaw: 1.7192766604636136,
+			initialPitch: -0.07202059655838072,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: -1.08,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95330111682416,
+				20.20829081175536
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791368763417",
+					label: "Cổng khu",
+					yaw: 2.8545,
+					pitch: -0.3624,
+					plugin: "navigation",
+					targetScene: "scene-muxyetn4",
+					rotX: 1.0297442586766543,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxz5hlz",
+			title: "Khu quan sát",
+			subtitle: "",
+			panorama: "/panoramas/1791369505710-lftwo6im5ii-1af6b97344.webp",
+			previewPanorama: "/panorama-previews/1791369505710-lftwo6im5ii-1af6b97344.webp",
+			mobilePanorama: "/panoramas-mobile/1791369505710-lftwo6im5ii-1af6b97344.webp",
+			thumbnail: "/thumbnails/1791369505710-lftwo6im5ii.webp",
+			initialYaw: 14.84873616518403,
+			initialPitch: -0.2881826233572302,
+			initialFov: 99.95378379419382,
+			defaultCameraEnabled: true,
+			panoramaRotation: -0.8550000000000004,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95302551984788,
+				20.208707591534562
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791369993534",
+					label: "Khu chế tác",
+					yaw: -2.3215,
+					pitch: -0.3455,
+					plugin: "navigation",
+					targetScene: "scene-muxz694t",
+					scaleX: 1,
+					scaleY: 0.8,
+					icon: "location-1",
+					pinColor: "#171717"
+				}
+			]
+		},
+		{
+			id: "scene-muxz694t",
+			title: "Khu chế tác",
+			subtitle: "",
+			panorama: "/panoramas/1791369541302-k5x54val0l-2f7a69d79c.webp",
+			previewPanorama: "/panorama-previews/1791369541302-k5x54val0l-2f7a69d79c.webp",
+			mobilePanorama: "/panoramas-mobile/1791369541302-k5x54val0l-2f7a69d79c.webp",
+			thumbnail: "/thumbnails/1791369541302-k5x54val0l.webp",
+			initialYaw: 19.35474816989175,
+			initialPitch: -0.2371280253797157,
+			initialFov: 99.95392443017141,
+			defaultCameraEnabled: true,
+			panoramaRotation: 0.7740000000000009,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95301982015373,
+				20.208694697863965
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791369906847",
+					label: "Không gian xưởng",
+					yaw: -2.6923,
+					pitch: -0.6148,
+					plugin: "navigation",
+					targetScene: "scene-muxwnvwr",
+					rotX: 1.0297442586766543,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791369934532",
+					label: "Góc quan sát",
+					yaw: -1.0298,
+					pitch: 0.1705,
+					plugin: "navigation",
+					targetScene: "scene-muxz5hlz",
+					scaleX: 1,
+					scaleY: 0.8,
+					icon: "location-1",
+					pinColor: "#171717"
+				}
+			]
+		},
+		{
+			id: "scene-muxzy2ve",
+			title: "Bên hông xưởng",
+			subtitle: "",
+			panorama: "/panoramas/1791370838724-8dg485jluu8-0c5fd0a1b8.webp",
+			previewPanorama: "/panorama-previews/1791370838724-8dg485jluu8-0c5fd0a1b8.webp",
+			mobilePanorama: "/panoramas-mobile/1791370838724-8dg485jluu8-0c5fd0a1b8.webp",
+			thumbnail: "/thumbnails/1791370838724-8dg485jluu8.webp",
+			editorPanorama: "/editor-previews/1791370838724-8dg485jluu8.webp",
+			initialYaw: 22.453654331421575,
+			initialPitch: -0.045225309180050986,
+			initialFov: 99.95392443017141,
+			defaultCameraEnabled: true,
+			panoramaRotation: 0.48900000000000077,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95302719622852,
+				20.208639998147703
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791371623078",
+					label: "Xưởng chế tác",
+					yaw: -1.121,
+					pitch: -0.661,
+					plugin: "navigation",
+					targetScene: "scene-muxwnvwr",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791371636547",
+					label: "Hành lang triển lãm",
+					yaw: -3.0951,
+					pitch: -0.5054,
+					plugin: "navigation",
+					targetScene: "scene-muxzynnf",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxzynnf",
+			title: "Hành lang triển lãm",
+			subtitle: "",
+			panorama: "/panoramas/1791370865551-z0836imf9m-a0c65fa688.webp",
+			previewPanorama: "/panorama-previews/1791370865551-z0836imf9m-a0c65fa688.webp",
+			mobilePanorama: "/panoramas-mobile/1791370865551-z0836imf9m-a0c65fa688.webp",
+			thumbnail: "/thumbnails/1791370865551-z0836imf9m.webp",
+			editorPanorama: "/editor-previews/1791370865551-z0836imf9m.webp",
+			initialYaw: 52.351316457476635,
+			initialPitch: 0.05710375261822427,
+			initialFov: 99.9522068354564,
+			defaultCameraEnabled: true,
+			panoramaRotation: -0.9089999999999989,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.9530456364155,
+				20.208592506967904
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791371655152",
+					label: "bên hổng xưởng",
+					yaw: 1.492,
+					pitch: -0.624,
+					plugin: "navigation",
+					targetScene: "scene-muxzy2ve",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791371669948",
+					label: "Góc tân gia",
+					yaw: -1.6307,
+					pitch: -0.7129,
+					plugin: "navigation",
+					targetScene: "scene-muxzyu0r",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791373488676",
+					label: "Khu triển lãm 1",
+					yaw: 3.0909,
+					pitch: -0.4417,
+					plugin: "navigation",
+					targetScene: "scene-muy12wxo",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxzyu0r",
+			title: "Góc tân gia",
+			subtitle: "",
+			panorama: "/panoramas/1791370873981-zy2t135moj-6eae97d826.webp",
+			previewPanorama: "/panorama-previews/1791370873981-zy2t135moj-6eae97d826.webp",
+			mobilePanorama: "/panoramas-mobile/1791370873981-zy2t135moj-6eae97d826.webp",
+			thumbnail: "/thumbnails/1791370873981-zy2t135moj.webp",
+			editorPanorama: "/editor-previews/1791370873981-zy2t135moj.webp",
+			initialYaw: 50.27841075639732,
+			initialPitch: -0.20985118285612583,
+			initialFov: 99.9522068354564,
+			defaultCameraEnabled: true,
+			panoramaRotation: -1.2029999999999994,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95305670052768,
+				20.208564832726324
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791371685866",
+					label: "Sảnh tiếp khách ",
+					yaw: 0.096,
+					pitch: -0.607,
+					plugin: "navigation",
+					targetScene: "scene-muxzz1f4",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791371691814",
+					label: "Hành lang triển lãm",
+					yaw: 1.9863,
+					pitch: -0.7391,
+					plugin: "navigation",
+					targetScene: "scene-muxzynnf",
+					icon: "arrow",
+					rotZ: -0.29670597283903605,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muxzz1f4",
+			title: "Sảnh tiếp khách",
+			subtitle: "",
+			panorama: "/panoramas/1791370883431-47q760webjq-e2cb9e4246.webp",
+			previewPanorama: "/panorama-previews/1791370883431-47q760webjq-e2cb9e4246.webp",
+			mobilePanorama: "/panoramas-mobile/1791370883431-47q760webjq-e2cb9e4246.webp",
+			thumbnail: "/thumbnails/1791370883431-47q760webjq.webp",
+			editorPanorama: "/editor-previews/1791370883431-47q760webjq.webp",
+			initialYaw: 49.339315956125795,
+			initialPitch: -0.12882682501107923,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: -0.9390000000000001,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95309861004353,
+				20.208575786635297
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791372545343",
+					label: "Góc tân gia",
+					yaw: 2.7804,
+					pitch: -0.3001,
+					plugin: "navigation",
+					targetScene: "scene-muxzyu0r",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791372567902",
+					label: "Sảnh tân gia",
+					yaw: -1.7165,
+					pitch: -0.5184,
+					plugin: "navigation",
+					targetScene: "scene-muxvzikj",
+					icon: "arrow",
+					rotZ: 0.19198621771937624,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muy12wxo",
+			title: "Triển lãm 3 (1)",
+			subtitle: "",
+			panorama: "/panoramas/1791372743999-mc9nfi1vhz-41729234a2.webp",
+			previewPanorama: "/panorama-previews/1791372743999-mc9nfi1vhz-41729234a2.webp",
+			mobilePanorama: "/panoramas-mobile/1791372743999-mc9nfi1vhz-41729234a2.webp",
+			thumbnail: "/thumbnails/1791372743999-mc9nfi1vhz.webp",
+			editorPanorama: "/editor-previews/1791372743999-mc9nfi1vhz.webp",
+			initialYaw: 47.61711907070574,
+			initialPitch: -0.02077987475944819,
+			initialFov: 94.15410045323439,
+			defaultCameraEnabled: true,
+			panoramaRotation: -2.6771853071795864,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95301378518344,
+				20.208579851489965
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791372892485",
+					label: "Hành lang triển lãm",
+					yaw: 1.6843,
+					pitch: -0.6659,
+					plugin: "navigation",
+					targetScene: "scene-muxzynnf",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791372911158",
+					label: "Bia đá",
+					yaw: -2.5868,
+					pitch: -0.459,
+					plugin: "navigation",
+					targetScene: "scene-muy13pai",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791372913863",
+					label: "Ghế đá nghệ thuật",
+					yaw: 3.0827,
+					pitch: -0.4353,
+					plugin: "navigation",
+					targetScene: "scene-muy138jo",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muy138jo",
+			title: "Triển lãm 3 (3)",
+			subtitle: "",
+			panorama: "/panoramas/1791372759191-pm63036bo4h-42459c569a.webp",
+			previewPanorama: "/panorama-previews/1791372759191-pm63036bo4h-42459c569a.webp",
+			mobilePanorama: "/panoramas-mobile/1791372759191-pm63036bo4h-42459c569a.webp",
+			thumbnail: "/thumbnails/1791372759191-pm63036bo4h.webp",
+			editorPanorama: "/editor-previews/1791372759191-pm63036bo4h.webp",
+			initialYaw: 49.066119646681706,
+			initialPitch: -0.0029099633479634326,
+			initialFov: 99.95451159878264,
+			defaultCameraEnabled: true,
+			panoramaRotation: 1.9379999999999988,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95301009714605,
+				20.208602808529424
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791373107882",
+					label: "Bia đá",
+					yaw: 0.8689,
+					pitch: -0.4688,
+					plugin: "navigation",
+					targetScene: "scene-muy13pai",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791373110230",
+					label: "Đá tảng",
+					yaw: 1.5513,
+					pitch: -0.3362,
+					plugin: "navigation",
+					targetScene: "scene-muy12wxo",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791373138343",
+					label: "Phiến đá",
+					yaw: -1.593,
+					pitch: -0.404,
+					plugin: "navigation",
+					targetScene: "scene-muy13e1t",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muy13e1t",
+			title: "triển lãm 3 (4)",
+			subtitle: "",
+			panorama: "/panoramas/1791372766244-yirii93ny8e-a89669515a.webp",
+			previewPanorama: "/panorama-previews/1791372766244-yirii93ny8e-a89669515a.webp",
+			mobilePanorama: "/panoramas-mobile/1791372766244-yirii93ny8e-a89669515a.webp",
+			thumbnail: "/thumbnails/1791372766244-yirii93ny8e.webp",
+			editorPanorama: "/editor-previews/1791372766244-yirii93ny8e.webp",
+			initialYaw: 52.30957163204661,
+			initialPitch: -0.0027850746746205936,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: 2.1270000000000007,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95299165695907,
+				20.20861884700705
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791373029443",
+					label: "Ghế đá nghệ thuật",
+					yaw: 1.6676,
+					pitch: -0.4057,
+					plugin: "navigation",
+					targetScene: "scene-muy138jo",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791373036059",
+					label: "Tảng đá",
+					yaw: 1.1771,
+					pitch: -0.2398,
+					plugin: "navigation",
+					targetScene: "scene-muy13pai",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muy13pai",
+			title: "Triển lãm 3 (2)",
+			subtitle: "",
+			panorama: "/panoramas/1791372780871-9ozia4yzmfj-90c291d8c3.webp",
+			previewPanorama: "/panorama-previews/1791372780871-9ozia4yzmfj-90c291d8c3.webp",
+			mobilePanorama: "/panoramas-mobile/1791372780871-9ozia4yzmfj-90c291d8c3.webp",
+			thumbnail: "/thumbnails/1791372780871-9ozia4yzmfj.webp",
+			editorPanorama: "/editor-previews/1791372780871-9ozia4yzmfj.webp",
+			initialYaw: 52.327589826048715,
+			initialPitch: -0.0025318258504717257,
+			initialFov: 99.9500338171303,
+			defaultCameraEnabled: true,
+			panoramaRotation: 2.2170000000000005,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.9529846161604,
+				20.208595261009986
+			],
+			showOnMap: false,
+			markers: [
+				{
+					id: "h1791372955268",
+					label: "Ghế đá nghệ thuật",
+					yaw: -2.4229,
+					pitch: -0.4815,
+					plugin: "navigation",
+					targetScene: "scene-muy138jo",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791372958286",
+					label: "Khúc đá",
+					yaw: -1.8459,
+					pitch: -0.4969,
+					plugin: "navigation",
+					targetScene: "scene-muy13e1t",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				},
+				{
+					id: "h1791372967532",
+					label: "Đá tảng",
+					yaw: 1.8288,
+					pitch: -0.5265,
+					plugin: "navigation",
+					targetScene: "scene-muy12wxo",
+					icon: "arrow",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1.6,
+					scaleY: 1
+				}
+			]
+		},
+		{
+			id: "scene-muy28efw",
+			title: "Không gian trước",
+			subtitle: "",
+			panorama: "/panoramas/1791374679999-qb06gn55i3r-c99a7d39d1.webp",
+			previewPanorama: "/panorama-previews/1791374679999-qb06gn55i3r-c99a7d39d1.webp",
+			mobilePanorama: "/panoramas-mobile/1791374679999-qb06gn55i3r-c99a7d39d1.webp",
+			thumbnail: "/thumbnails/1791374679999-qb06gn55i3r.webp",
+			editorPanorama: "/editor-previews/1791374679999-qb06gn55i3r.webp",
+			initialYaw: 19.516842360065187,
+			initialPitch: -0.29684906854110565,
+			initialFov: 75,
+			defaultCameraEnabled: true,
+			panoramaRotation: -2.4941853071795865,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95351636409761,
+				20.208171874321298
+			],
+			showOnMap: true,
+			markers: [
+				{
+					id: "h1791383593701",
+					label: "Cổng vào",
+					yaw: 3.1079,
+					pitch: -0.7424,
+					plugin: "navigation",
+					targetScene: "scene-muxvt079",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791363884550-otcz1232qvm.webp"
+				},
+				{
+					id: "h1791384047895",
+					label: "Không gian sông Vân",
+					yaw: 2.7057,
+					pitch: -0.3026,
+					plugin: "navigation",
+					targetScene: "scene-muy28jkw",
+					icon: "location-2",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 1,
+					pinColor: "#ef4444",
+					iconUrl: "/thumbnails/1791374687320-qp74k2s456.webp"
+				},
+				{
+					id: "h1791387598748",
+					label: "Khu triển lãm 1",
+					yaw: -3.0261,
+					pitch: -0.472,
+					plugin: "navigation",
+					targetScene: "scene-muxyfx7u",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791363884550-otcz1232qvm.webp"
+				},
+				{
+					id: "h1791387630961",
+					label: "Khu triển lãm 2",
+					yaw: -2.8014,
+					pitch: -0.3345,
+					plugin: "navigation",
+					targetScene: "scene-muxvnnpk",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791363635779-44yjura05ei.webp"
+				},
+				{
+					id: "h1791387680963",
+					label: "Khu triển lãm 3",
+					yaw: -3.0804,
+					pitch: -0.2442,
+					plugin: "navigation",
+					targetScene: "scene-muy12wxo",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791372743999-mc9nfi1vhz.webp"
+				},
+				{
+					id: "h1791388042656",
+					label: "Xưởng sản xuất",
+					yaw: 3.1094,
+					pitch: -0.145,
+					plugin: "navigation",
+					targetScene: "scene-muxz5hlz",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791369505710-lftwo6im5ii.webp"
+				}
+			]
+		},
+		{
+			id: "scene-muy28jkw",
+			title: "Không gian sông Vân",
+			subtitle: "",
+			panorama: "/panoramas/1791374687320-qp74k2s456-67987efee1.webp",
+			previewPanorama: "/panorama-previews/1791374687320-qp74k2s456-67987efee1.webp",
+			mobilePanorama: "/panoramas-mobile/1791374687320-qp74k2s456-67987efee1.webp",
+			thumbnail: "/thumbnails/1791374687320-qp74k2s456.webp",
+			editorPanorama: "/editor-previews/1791374687320-qp74k2s456.webp",
+			initialYaw: 3.8860991649163608,
+			initialPitch: -0.2905629619153496,
+			initialFov: 90.44699611509506,
+			defaultCameraEnabled: true,
+			panoramaRotation: 0.8339999999999996,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95347076654436,
+				20.20848081212994
+			],
+			showOnMap: true,
+			markers: [
+				{
+					id: "h1791383747256",
+					label: "Sảnh tân gia ",
+					yaw: 3.1359,
+					pitch: -0.4008,
+					plugin: "navigation",
+					targetScene: "scene-muxvzikj",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717"
+				},
+				{
+					id: "h1791383769204",
+					label: "Vườn đá",
+					yaw: 2.2541,
+					pitch: -0.2855,
+					plugin: "navigation",
+					targetScene: "scene-muxwtgdv",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717"
+				},
+				{
+					id: "h1791384078480",
+					label: "Không gian xưởng",
+					yaw: 1.8525,
+					pitch: -0.0145,
+					plugin: "navigation",
+					targetScene: "scene-muy29vy6",
+					icon: "location-2",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 2,
+					scaleY: 1,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791374750110-9o5fa6w6uhl.webp"
+				},
+				{
+					id: "h1791384094609",
+					label: "Không gian trước",
+					yaw: -1.675,
+					pitch: 0.0561,
+					plugin: "navigation",
+					targetScene: "scene-muy28efw",
+					icon: "location-2",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 2,
+					scaleY: 1,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791374679999-qb06gn55i3r.webp"
+				},
+				{
+					id: "h1791445732791",
+					label: "Không gian triển lãm 1",
+					yaw: -2.588,
+					pitch: -0.2517,
+					plugin: "navigation",
+					targetScene: "scene-muxyfx7u",
+					icon: "local",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					sphereRadius: 520,
+					pinColor: "#171717"
+				},
+				{
+					id: "h1791452418729",
+					label: "Không gian triển lãm 2",
+					yaw: -2.866,
+					pitch: -0.026,
+					plugin: "navigation",
+					targetScene: "scene-muxvnnpk",
+					icon: "local",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					sphereRadius: 520,
+					pinColor: "#171717"
+				},
+				{
+					id: "h1791452440656",
+					label: "Không gian triển lãm 3",
+					yaw: 2.623,
+					pitch: -0.081,
+					plugin: "navigation",
+					targetScene: "scene-muy12wxo",
+					icon: "local",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					sphereRadius: 520,
+					pinColor: "#171717"
+				}
+			]
+		},
+		{
+			id: "scene-muy29vy6",
+			title: "Không gian xưởng",
+			subtitle: "",
+			panorama: "/panoramas/1791374750110-9o5fa6w6uhl-7f201ca019.webp",
+			previewPanorama: "/panorama-previews/1791374750110-9o5fa6w6uhl-7f201ca019.webp",
+			mobilePanorama: "/panoramas-mobile/1791374750110-9o5fa6w6uhl-7f201ca019.webp",
+			thumbnail: "/thumbnails/1791374750110-9o5fa6w6uhl.webp",
+			editorPanorama: "/editor-previews/1791374750110-9o5fa6w6uhl.webp",
+			initialYaw: 3.9520157497962205,
+			initialPitch: -0.1681468293430674,
+			initialFov: 89.35182338391104,
+			defaultCameraEnabled: true,
+			panoramaRotation: 1.7339999999999982,
+			brightness: 1.25,
+			highlightCompression: 0,
+			coordinates: [
+				105.95315158367158,
+				20.20880787121085
+			],
+			showOnMap: true,
+			markers: [
+				{
+					id: "h1791383841326",
+					label: "Khu quan sát",
+					yaw: 1.766,
+					pitch: -0.207,
+					plugin: "navigation",
+					targetScene: "scene-muxz5hlz",
+					icon: "location-1",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					pinColor: "#171717"
+				},
+				{
+					id: "h1791384113346",
+					label: "Không gian sông Vân",
+					yaw: -2.1145,
+					pitch: 0.1158,
+					plugin: "navigation",
+					targetScene: "scene-muy28jkw",
+					icon: "location-2",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 2,
+					scaleY: 1,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791374687320-qp74k2s456.webp"
+				},
+				{
+					id: "h1791446010013",
+					label: "Vườn đá",
+					yaw: -2.766,
+					pitch: -0.326,
+					plugin: "navigation",
+					targetScene: "scene-muxwtgdv",
+					icon: "local",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					sphereRadius: 520,
+					pinColor: "#171717",
+					iconUrl: "/thumbnails/1791363884550-otcz1232qvm.webp"
+				},
+				{
+					id: "h1791452470656",
+					label: "Không gian triển lãm 3",
+					yaw: 3.0137,
+					pitch: -0.0621,
+					plugin: "navigation",
+					targetScene: "scene-muy12wxo",
+					icon: "local",
+					rotZ: 0,
+					rotX: 1.0471975511965976,
+					rotY: 0,
+					scaleX: 1,
+					scaleY: 0.8,
+					sphereRadius: 520,
+					pinColor: "#171717"
 				}
 			]
 		}
 	]
-};
-var scenes = [
-	{
-		id: "scene-c7",
-		title: "Cổng Sông Vân Art Space",
-		subtitle: "Điểm đón khách và cửa ngõ bước vào hành trình khám phá nghệ thuật.",
-		panorama: "/images/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-		thumbnail: "/thumbnails/trang-bay/_storage_emulated_0_Pictures_AdobeLightroom_1788771876194.jpg",
-		initialYaw: 3.16509577797931,
-		initialPitch: -0.06799836111822648,
-		panoramaRotation: -2.39200153826361,
-		brightness: 1.3,
-		highlightCompression: 0,
-		coordinates: [
-			105.95356464385529,
-			20.208159298343244
-		],
-		markers: [
-			{
-				id: "marker-navigation-1789273190758",
-				plugin: "navigation",
-				label: "Lối vào",
-				yaw: -3.0244,
-				pitch: -0.4339,
-				targetScene: "scene-c5",
-				rotZ: -0.47123889803846897,
-				rotX: 0.8552113334772214,
-				rotY: 0,
-				icon: "arrow"
-			},
-			{
-				id: "marker-info-1789274132769",
-				plugin: "panel",
-				label: "Cổng chính",
-				yaw: 2.627,
-				pitch: -0.0173,
-				contents: [
-					{
-						id: "marker-info-1789274132769-text",
-						type: "text",
-						content: "Sông Vân Art space…\nKhông gian nghệ thuật cũng là tư gia của gia đình nghệ sỹ Lương Trịnh mang tên Lương gia Art space đã là nơi khởi động những hoạt động nghệ thuật điêu khắc đá đương đại từ năm 2018 với workshop đầu tiên mang tên ‘Về với đá’, năm 2021 workshop và triển lãm điêu khắc đá Biến Chuyển. Mong muốn mở rộng và tạo lập một không gian trưng bày hoàn chỉnh hơn. Vừa tìm đến sự mới mẻ, hoà đồng với không gian sống, vừa tạo nên sự hấp dẫn của một điểm đến giữa lòng làng nghề đá. Lương gia Art space đã quyết định đổi tên thành Sông Vân Art space.  Triển lãm của hai tác giả cũng là sự khai mở cho một không gian mới, một khát vọng tạo dựng không gian cho đá của Lương Trịnh.",
-						presentation: "text-and-audio",
-						speech: {
-							lang: "vi-VN",
-							rate: 1,
-							pitch: 1,
-							src: "/uploads/audio/1790759242766-58jae6uqv0h.wav"
-						}
-					},
-					{
-						id: "block-1790753456844",
-						type: "image3d",
-						image: "",
-						caption: ""
-					},
-					{
-						id: "block-1790753465322",
-						type: "ai-chat",
-						context: ""
-					}
-				],
-				placement: "horizontal"
-			}
-		]
-	},
-	{
-		id: "scene-c1",
-		title: "Xưởng đá",
-		subtitle: "Điểm nhìn mở đầu, nơi tác phẩm đá gặp ánh sáng và cảnh quan Sông Vân.",
-		panorama: "/images/1788771876123.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876123.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: -0.21000000000000085,
-		brightness: 1.3,
-		highlightCompression: 0,
-		coordinates: [
-			105.95325686037542,
-			20.20851687272049
-		],
-		markers: [
-			{
-				id: "h1790007426579",
-				label: "Cảnh mới",
-				yaw: -2.9193,
-				pitch: -0.3541,
-				plugin: "navigation",
-				targetScene: "scene-c2",
-				rotation: 0.05235987755982988,
-				rotZ: 0,
-				rotX: 0.890117918517108,
-				rotY: 0
-			}
-		]
-	},
-	{
-		id: "scene-c2",
-		title: "Vườn Tượng",
-		subtitle: "Khoảng trưng bày ngoài trời kết nối cây xanh, mặt nước và điêu khắc.",
-		panorama: "/images/1788771876132.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876132.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0.9116921905584121,
-		brightness: 1.3,
-		highlightCompression: 0,
-		coordinates: [
-			105.95330312848093,
-			20.20845397804675
-		],
-		markers: [
-			{
-				id: "h1790007374178",
-				label: "Khoảng trưng bày mở",
-				yaw: 2.3537,
-				pitch: -0.3399,
-				plugin: "navigation",
-				targetScene: "scene-c4",
-				rotX: 0.890117918517108
-			},
-			{
-				id: "h1790589811645",
-				label: "Xưởng đá",
-				yaw: -0.7323,
-				pitch: -0.3948,
-				plugin: "navigation",
-				targetScene: "scene-c1",
-				rotX: 0.8726646259971648,
-				rotZ: 0,
-				rotY: 0
-			},
-			{
-				id: "h1790592598215",
-				label: "Cổng trừng bày 1",
-				yaw: 0.3657,
-				pitch: -0.3879,
-				plugin: "navigation",
-				targetScene: "scene-tb1-5",
-				rotX: 0.8726646259971648
-			}
-		]
-	},
-	{
-		id: "scene-c3",
-		title: "Sảnh tân gia",
-		subtitle: "Sân trước khu nhà tân gia",
-		panorama: "/images/1788771876143.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876143.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 2.2286784082777906,
-		brightness: 1.3,
-		highlightCompression: 0,
-		coordinates: [
-			105.95325317233804,
-			20.208376303089604
-		],
-		markers: [
-			{
-				id: "h1790007786937",
-				label: "Không gian trừng bày mở",
-				yaw: -2.7305,
-				pitch: -0.3725,
-				plugin: "navigation",
-				targetScene: "scene-c4",
-				rotX: 0.8726646259971648,
-				rotZ: -0.6981317007977318,
-				rotY: 0.6457718232379019
-			},
-			{
-				id: "h1790007866785",
-				label: "Khu trưng bày 2",
-				yaw: 0.542,
-				pitch: -0.4688,
-				plugin: "navigation",
-				targetScene: "scene-tb2-3",
-				rotX: 0.8726646259971648
-			},
-			{
-				id: "h1790587903930",
-				plugin: "panel",
-				label: "Nhà tân gia",
-				yaw: -0.5243,
-				pitch: 0.4021,
-				contents: [
-					{
-						id: "h1790587903930-text",
-						type: "text",
-						content: "Khung sảnh chính của tân gia. "
-					}
-				]
-			},
-			{
-				id: "h1790786542380",
-				label: "Chuyển cảnh",
-				yaw: 0.9424,
-				pitch: -0.4937,
-				plugin: "navigation",
-				targetScene: "s1790786479857",
-				rotY: 0,
-				rotX: 0.8552113334772214
-			}
-		]
-	},
-	{
-		id: "scene-c4",
-		title: "Khoảng Trưng Bày Mở",
-		subtitle: "Không gian ngoài trời với tầm nhìn rộng dành cho các tác phẩm điêu khắc.",
-		panorama: "/images/1788771876162.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876162.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 1.294598775598299,
-		brightness: 1.3,
-		highlightCompression: 0,
-		coordinates: [
-			105.95333464443684,
-			20.208403976762998
-		],
-		markers: [
-			{
-				id: "c4-next",
-				plugin: "navigation",
-				label: "Không Gian Bên Sông",
-				yaw: 1.9112,
-				pitch: -0.3851,
-				targetScene: "scene-c5",
-				rotX: 0.8726646259971648
-			},
-			{
-				id: "marker-navigation-1789271121754",
-				plugin: "navigation",
-				label: "Vườn tượng",
-				yaw: -0.928,
-				pitch: -0.2786,
-				targetScene: "scene-c2",
-				rotZ: 0.017453292519943295,
-				rotX: 0.8726646259971648
-			},
-			{
-				id: "marker-navigation-1789271195387",
-				plugin: "navigation",
-				label: "Sảnh tân gia",
-				yaw: -0.5325,
-				pitch: -0.2259,
-				targetScene: "scene-c3",
-				rotX: 0.890117918517108,
-				rotY: 0.03490658503988659,
-				rotZ: 0.20943951023931953
-			}
-		]
-	},
-	{
-		id: "scene-c5",
-		title: "Không Gian Bên Sông",
-		subtitle: "Nơi cảnh quan Ninh Bình trở thành một phần của trải nghiệm nghệ thuật.",
-		panorama: "/images/1788771876173.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876173.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 1.0723047484373343,
-		brightness: 1.3,
-		highlightCompression: 0,
-		coordinates: [
-			105.95340371131168,
-			20.208310372092086
-		],
-		markers: [
-			{
-				id: "c5-next",
-				plugin: "navigation",
-				label: "Lỗi ra",
-				yaw: 1.467,
-				pitch: -0.2778,
-				targetScene: "scene-c7",
-				rotation: 0.5759586531581288,
-				rotZ: 0.715584993317675,
-				rotX: 0.8726646259971648,
-				rotY: -0.47123889803846897
-			},
-			{
-				id: "marker-navigation-1789273292044",
-				plugin: "navigation",
-				label: "Điểm đến mới",
-				yaw: -0.1823,
-				pitch: -0.3903,
-				targetScene: "scene-c4",
-				rotation: -0.9599310885968813,
-				rotX: 0.890117918517108,
-				rotZ: -1.2566370614359172,
-				rotY: 0.6457718232379019
-			}
-		]
-	},
-	{
-		id: "scene-c6",
-		title: "Vườn Đá",
-		subtitle: "Những hình khối đá hiện diện giữa cây xanh và nhịp sống thường nhật.",
-		panorama: "/images/1788771876183.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876183.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-		]
-	},
-	{
-		id: "scene-tb1-1",
-		title: "Lối Vào Xưởng Đá",
-		subtitle: "Bắt đầu hành trình tìm hiểu quá trình vật liệu đá trở thành tác phẩm.",
-		panorama: "/images/trbay1/1788771876074.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876074.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "h1790007757751",
-				label: "Cảnh mới",
-				yaw: -0.5348,
-				pitch: -0.3802,
-				plugin: "navigation",
-				targetScene: "scene-tb1-2",
-				rotX: 0.8726646259971648
-			}
-		]
-	},
-	{
-		id: "scene-tb1-2",
-		title: "Sân Tập Kết Đá",
-		subtitle: "Không gian lưu giữ vật liệu và những hình khối đang chờ được đánh thức.",
-		panorama: "/images/trbay1/1788771876090.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876090.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "h1790007718913",
-				label: "Góc chế tác",
-				yaw: -0.6099,
-				pitch: -0.3349,
-				plugin: "navigation",
-				targetScene: "scene-tb1-3",
-				rotX: 0.8726646259971648
-			},
-			{
-				id: "h1790593075340",
-				label: "Lối",
-				yaw: 2.3084,
-				pitch: -0.3378,
-				plugin: "navigation",
-				targetScene: "scene-tb1-1",
-				rotX: 0.8726646259971648
-			}
-		]
-	},
-	{
-		id: "scene-tb1-3",
-		title: "Góc Chế Tác",
-		subtitle: "Nơi có thể quan sát dấu vết lao động và kỹ thuật của làng nghề đá.",
-		panorama: "/images/trbay1/1788771876098.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876098.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "h1790007660078",
-				plugin: "panel",
-				label: "Thông tin",
-				yaw: -2.3588,
-				pitch: -96e-4,
-				contents: [
-					{
-						id: "h1790007660078-text",
-						type: "text",
-						content: "Là một cái gì đó mà dùng để đựng đồ vật"
-					}
-				]
-			},
-			{
-				id: "h1790007689339",
-				label: "Trung tâm trừng bày 1",
-				yaw: 1.0567,
-				pitch: -0.4643,
-				plugin: "navigation",
-				targetScene: "scene-tb1-2",
-				rotX: 0.8726646259971648
-			},
-			{
-				id: "h1790592920728",
-				label: "Trung tâm xưởng",
-				yaw: -0.7255,
-				pitch: -0.5227,
-				plugin: "navigation",
-				targetScene: "scene-tb1-4",
-				rotX: 0.8726646259971648
-			}
-		]
-	},
-	{
-		id: "scene-tb1-4",
-		title: "Trung Tâm Xưởng",
-		subtitle: "Điểm nhìn bao quát khu vực sáng tác và hoàn thiện tác phẩm.",
-		panorama: "/images/trbay1/1788771876106.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876106.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "h1790007619346",
-				label: "Cảnh mới",
-				yaw: 1.1279,
-				pitch: -0.2731,
-				plugin: "navigation",
-				targetScene: "scene-tb1-5",
-				rotX: 0.8726646259971648,
-				rotZ: -0.12217304763960307
-			},
-			{
-				id: "h1790592823753",
-				label: "Chuyển cảnh",
-				yaw: 2.585,
-				pitch: -0.266,
-				plugin: "navigation",
-				targetScene: "scene-tb1-3",
-				rotX: 0.8726646259971648
-			}
-		]
-	},
-	{
-		id: "scene-tb1-5",
-		title: "Cổng trưng bày 1",
-		subtitle: "Khoảng nối giữa quá trình chế tác và không gian trưng bày hoàn chỉnh.",
-		panorama: "/images/trbay1/1788771876114.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876114.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "h1790007511095",
-				label: "Vườn tượng",
-				yaw: -1.3068,
-				pitch: -0.3872,
-				plugin: "navigation",
-				targetScene: "scene-c2",
-				rotX: 0.8726646259971648
-			},
-			{
-				id: "h1790592743906",
-				label: "Chuyển cảnh",
-				yaw: -3.11,
-				pitch: -0.171,
-				plugin: "navigation",
-				targetScene: "scene-tb1-4",
-				rotX: 0.8726646259971648
-			}
-		]
-	},
-	{
-		id: "scene-tb2-1",
-		title: "Lối Vào Khu Trưng Bày",
-		subtitle: "Cửa ngõ dẫn vào nhóm không gian trưng bày phía trong.",
-		panorama: "/images/trbay2/1788771876042.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876042.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-		]
-	},
-	{
-		id: "scene-tb2-2",
-		title: "Hành Lang Tác Phẩm",
-		subtitle: "Một nhịp chuyển chậm để quan sát hình khối, bề mặt và bóng đổ.",
-		panorama: "/images/trbay2/1788771876050.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876050.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-		]
-	},
-	{
-		id: "scene-tb2-3",
-		title: "Không gian trừng bày 2",
-		subtitle: "Góc thưởng lãm yên tĩnh, nơi ánh sáng làm thay đổi cảm nhận về đá.",
-		panorama: "/images/trbay2/1788771876058.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876058.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "h1790007893330",
-				label: "Cảnh mới",
-				yaw: 0.4073,
-				pitch: -0.6937,
-				plugin: "navigation",
-				targetScene: "scene-c3",
-				rotX: 0.890117918517108
-			},
-			{
-				id: "h1790838747657",
-				label: "Chuyển cảnh",
-				yaw: -0.3165,
-				pitch: -0.8018,
-				plugin: "navigation",
-				targetScene: "s1790786479857",
-				scaleX: 1.45
-			}
-		]
-	},
-	{
-		id: "scene-tb2-4",
-		title: "Điểm Kết Hành Trình",
-		subtitle: "Điểm nhìn cuối để nhìn lại mối liên hệ giữa tác phẩm, làng nghề và cảnh quan.",
-		panorama: "/images/trbay2/1788771876067.jpg",
-		thumbnail: "/thumbnails/trang-bay/1788771876067.jpg",
-		initialYaw: 0,
-		initialPitch: -0.05,
-		panoramaRotation: 0,
-		brightness: 1.3,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "tb2-4-prev",
-				plugin: "navigation",
-				label: "Khoảng Tĩnh",
-				yaw: 3.14,
-				pitch: -0.35,
-				targetScene: "scene-tb2-3"
-			},
-			{
-				id: "tb2-4-home",
-				plugin: "navigation",
-				label: "Sân Điêu Khắc Bên Sông",
-				yaw: 1.57,
-				pitch: -0.3,
-				targetScene: "scene-c1"
-			}
-		]
-	},
-	{
-		id: "s1790786479857",
-		title: "Cảnh mới",
-		subtitle: "Mô tả cảnh mới",
-		panorama: "/uploads/1790786504095-y04xqsn9269.jpg",
-		thumbnail: "/thumbnails/1790786504095-y04xqsn9269.webp",
-		initialYaw: 0,
-		initialPitch: 0,
-		panoramaRotation: 0,
-		brightness: 1.25,
-		highlightCompression: 0,
-		markers: [
-			{
-				id: "h1790838679145",
-				label: "Chuyển cảnh",
-				yaw: 2.9684,
-				pitch: -0.8937,
-				plugin: "navigation",
-				targetScene: "scene-c3",
-				scaleX: 2.45,
-				scaleY: 1.45
-			},
-			{
-				id: "h1790838716073",
-				label: "Chuyển cảnh",
-				yaw: -1.305,
-				pitch: -0.6048,
-				plugin: "navigation",
-				targetScene: "scene-tb2-3",
-				rotZ: -0.12217304763960307
-			}
-		]
-	}
-];
-const trangBayGenerated = {
-	slug: slug,
-	title: title,
-	location: location,
-	summary: summary,
-	duration: duration,
-	theme: theme,
-	initialSceneId: initialSceneId,
-	plugins: plugins,
-	transition: transition,
-	map: map,
-	scenes: scenes
+}
 };
 
 function parseYaml(raw) {
@@ -956,7 +1541,7 @@ function generateAutoMap(scenes) {
   return {
     floors,
     defaultFloorId: (_c = floors[0]) == null ? void 0 : _c.id,
-    position: "bottom-right",
+    position: "bottom-left",
     width: 280,
     height: 200,
     showConnections: true,
@@ -1102,10 +1687,13 @@ function getValidator() {
             title: { type: "string", minLength: 1 },
             subtitle: { type: "string", default: "" },
             panorama: { type: "string", minLength: 1 },
+            previewPanorama: { type: "string", minLength: 1 },
+            mobilePanorama: { type: "string", minLength: 1 },
             thumbnail: { type: "string", minLength: 1 },
             editorPanorama: { type: "string", minLength: 1 },
             initialYaw: { type: "number", default: 0 },
             initialPitch: { type: "number", default: 0 },
+            initialFov: { type: "number", minimum: 30, maximum: 120, default: 75 },
             defaultCameraEnabled: { type: "boolean", default: false },
             panoramaRotation: { type: "number", default: 0 },
             brightness: { type: "number", minimum: 0.5, maximum: 2, default: 1.25 },
@@ -1139,7 +1727,7 @@ function compileTour(raw) {
   const data = raw;
   const warnings = [];
   const scenes = data.scenes.map((s, i) => {
-    var _a2, _b2, _c2, _d2, _e, _f, _g, _h, _i;
+    var _a2, _b2, _c2, _d2, _e, _f, _g, _h, _i, _j, _k;
     const markers = ((_a2 = s.markers) != null ? _a2 : []).map((m) => {
       if (!m.id || !m.plugin || !m.label) {
         warnings.push(`Scene[${i}].markers: marker thi\u1EBFu id/plugin/label \u2014 b\u1ECB b\u1ECF qua.`);
@@ -1152,16 +1740,21 @@ function compileTour(raw) {
       title: s.title,
       subtitle: (_b2 = s.subtitle) != null ? _b2 : "",
       panorama: s.panorama,
+      // Existing uploaded scenes already have a 2K editor panorama. Reuse it
+      // as the progressive viewer preview until the tour is uploaded again.
+      previewPanorama: (_c2 = s.previewPanorama) != null ? _c2 : s.editorPanorama,
+      mobilePanorama: s.mobilePanorama,
       thumbnail: s.thumbnail,
       editorPanorama: s.editorPanorama,
-      initialYaw: (_c2 = s.initialYaw) != null ? _c2 : 0,
-      initialPitch: (_d2 = s.initialPitch) != null ? _d2 : 0,
-      defaultCameraEnabled: (_e = s.defaultCameraEnabled) != null ? _e : false,
-      panoramaRotation: (_f = s.panoramaRotation) != null ? _f : 0,
-      brightness: (_g = s.brightness) != null ? _g : 1.25,
-      highlightCompression: (_h = s.highlightCompression) != null ? _h : 0,
+      initialYaw: (_d2 = s.initialYaw) != null ? _d2 : 0,
+      initialPitch: (_e = s.initialPitch) != null ? _e : 0,
+      initialFov: (_f = s.initialFov) != null ? _f : 75,
+      defaultCameraEnabled: (_g = s.defaultCameraEnabled) != null ? _g : false,
+      panoramaRotation: (_h = s.panoramaRotation) != null ? _h : 0,
+      brightness: (_i = s.brightness) != null ? _i : 1.25,
+      highlightCompression: (_j = s.highlightCompression) != null ? _j : 0,
       coordinates: s.coordinates,
-      showOnMap: (_i = s.showOnMap) != null ? _i : false,
+      showOnMap: (_k = s.showOnMap) != null ? _k : false,
       markers
     };
   });
@@ -1197,9 +1790,7 @@ function compileTour(raw) {
   return { ok: true, tour, warnings };
 }
 
-const staticTours = {
-  "trang-bay": trangBayGenerated
-};
+const staticTours = generatedTours;
 const TOURS_DIR = resolve(process.cwd(), "tours");
 function loadTour(slug) {
   try {

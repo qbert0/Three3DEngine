@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import type { TourMarker } from '~/types/tour';
 
 export const MARKER_SPHERE_RADIUS = 520;
+export const MIN_MARKER_SPHERE_RADIUS = 120;
+export const MAX_MARKER_SPHERE_RADIUS = 580;
 const MARKER_CANVAS_SIZE = 256;
 const MARKER_BASE_SIZE = 52;
 
@@ -64,12 +66,25 @@ export abstract class MarkerBase<TMarker extends TourMarker = TourMarker> {
     this.positionOnSphere(object, yaw, pitch);
   }
 
-  protected positionOnSphere(object: THREE.Object3D, yaw: number, pitch: number): void {
-    object.position.set(
-      -MARKER_SPHERE_RADIUS * Math.sin(yaw) * Math.cos(pitch),
-       MARKER_SPHERE_RADIUS * Math.sin(pitch),
-      -MARKER_SPHERE_RADIUS * Math.cos(yaw) * Math.cos(pitch),
+  protected positionOnSphere(object: THREE.Object3D, yaw: number, pitch: number, requestedRadius?: number): void {
+    const radius = THREE.MathUtils.clamp(
+      Number.isFinite(requestedRadius) ? requestedRadius! : MARKER_SPHERE_RADIUS,
+      MIN_MARKER_SPHERE_RADIUS,
+      MAX_MARKER_SPHERE_RADIUS,
     );
+    object.position.set(
+      -radius * Math.sin(yaw) * Math.cos(pitch),
+       radius * Math.sin(pitch),
+      -radius * Math.cos(yaw) * Math.cos(pitch),
+    );
+  }
+
+  /** Hook chạy sau updateObject; Object3DMarker dùng để bù phối cảnh mặt cầu. */
+  updateProjection(_object: THREE.Object3D, _camera: THREE.Camera): void {}
+
+  /** Optional animation played after click and before navigation is emitted. */
+  playActivationAnimation(_object: THREE.Object3D): Promise<void> {
+    return Promise.resolve();
   }
 
   disposeObject(object: THREE.Object3D): void {

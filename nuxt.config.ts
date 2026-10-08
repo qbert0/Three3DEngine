@@ -4,6 +4,13 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@vercel/speed-insights'],
   css: ['~/assets/css/main.css', 'leaflet/dist/leaflet.css'],
 
+  experimental: {
+    // The application does not consume Nuxt's client app-manifest. Disabling
+    // it also prevents Vite from resolving #app-manifest before dev.json has
+    // been generated during a dev-server restart.
+    appManifest: false,
+  },
+
   // Panorama filenames are stable assets (uploads use unique names). Let the
   // browser reuse them across scene changes and repeat visits.
   routeRules: {

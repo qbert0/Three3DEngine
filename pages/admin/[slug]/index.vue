@@ -45,7 +45,7 @@ async function addFirstScene(event: Event) {
     formData.append('file', file);
     const upload = await $fetch<{
       ok: boolean;
-      files: Array<{ original: string; thumbnail: string; editorPreview: string }>;
+      files: Array<{ original: string; thumbnail: string; editorPreview: string; previewPanorama: string; viewerPanorama: string; mobilePanorama: string }>;
     }>('/api/admin/media', { method: 'POST', body: formData });
     const media = upload.files?.[0];
     if (!media) throw new Error('API không trả về ảnh panorama đã tải lên.');
@@ -55,11 +55,14 @@ async function addFirstScene(event: Event) {
       id: sceneId,
       title: 'Cảnh đầu tiên',
       subtitle: '',
-      panorama: media.original,
+      panorama: media.viewerPanorama,
+      previewPanorama: media.previewPanorama,
+      mobilePanorama: media.mobilePanorama,
       thumbnail: media.thumbnail || media.original,
       editorPanorama: media.editorPreview,
       initialYaw: 0,
       initialPitch: 0,
+      initialFov: 75,
       showOnMap: false,
       brightness: 1.25,
       markers: [],

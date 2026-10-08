@@ -180,12 +180,14 @@ export class View360Engine {
     this.pano.setBrightness(scene.brightness ?? 1.25);
     this.pano.setHighlightCompression(scene.highlightCompression ?? 0);
 
-    const panoramaApplied = await this.pano.setImmediate(scene.panorama, scene.panoramaRotation ?? 0);
+    const initialPanorama = scene.previewPanorama ?? scene.panorama;
+    const panoramaApplied = await this.pano.setImmediate(initialPanorama, scene.panoramaRotation ?? 0);
     if (!panoramaApplied) return;
 
     if (playIntro) {
       const targetYaw = useDefaultCamera ? (scene.initialYaw ?? 0) : previousYaw;
       const targetPitch = useDefaultCamera ? (scene.initialPitch ?? 0) : previousPitch;
+      const targetFov = useDefaultCamera ? (scene.initialFov ?? 75) : this.camera.getFov();
 
       // Park camera at start position (looking down, wide FOV)
       this.camera.setRaw(-Math.PI / 2, -Math.PI / 2, 130);
@@ -228,12 +230,16 @@ export class View360Engine {
         this.bus.emit('interaction:unlock');
       }
 
-      await this.playLittlePlanetIntro(targetYaw, targetPitch);
+      await this.playLittlePlanetIntro(targetYaw, targetPitch, targetFov);
     } else {
       // Designer and direct loads obey the same rule as navigation: scenes
       // without a default camera keep the viewer's current world direction.
       if (useDefaultCamera) {
-        this.camera.setOrientation(scene.initialYaw ?? 0, scene.initialPitch ?? 0);
+        this.camera.setOrientation(
+          scene.initialYaw ?? 0,
+          scene.initialPitch ?? 0,
+          scene.initialFov ?? 75,
+        );
       } else {
         this.camera.setOrientation(previousYaw, previousPitch);
       }
@@ -293,18 +299,21 @@ export class View360Engine {
     const useDefaultCamera = scene.defaultCameraEnabled === true;
     const destYaw = useDefaultCamera ? (scene.initialYaw ?? 0) : startYaw;
     const destPitch = useDefaultCamera ? (scene.initialPitch ?? 0) : startPitch;
+    const destFov = useDefaultCamera ? (scene.initialFov ?? 75) : this.camera.getFov();
     // Take the shortest path around the yaw circle.
     const yawDelta = Math.atan2(Math.sin(destYaw - startYaw), Math.cos(destYaw - startYaw));
     const baseFov = this.camera.getFov();
     const travelDistance = this.pano['radius'] * 0.28;
 
     const transitionStyle = transition ?? this.pano.transitionStyle;
-    await this.pano.transition(scene.panorama, transitionStyle, dir, (p) => {
+    const initialPanorama = scene.previewPanorama ?? scene.panorama;
+    await this.pano.transition(initialPanorama, transitionStyle, dir, (p) => {
       const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
       if (useDefaultCamera) {
         this.camera.setRaw(
           startYaw + yawDelta * ease,
           startPitch + (destPitch - startPitch) * ease,
+          baseFov + (destFov - baseFov) * ease,
         );
       }
       if (transitionStyle === 'forward') {
@@ -331,7 +340,7 @@ export class View360Engine {
     this.camera.camera.position.set(0, 0, 0);
     this.camera.camera.fov = baseFov;
     this.camera.camera.updateProjectionMatrix();
-    this.camera.setOrientation(destYaw, destPitch);
+    this.camera.setOrientation(destYaw, destPitch, destFov);
 
     this.currentScene = scene;
     this.isTransitioning = false;
@@ -341,17 +350,29 @@ export class View360Engine {
   }
 
   /**
+   * Replace a scene preview with its selected full-resolution panorama.
+   * The scene-id guard prevents a late decode from overwriting a newer scene.
+   */
+  async upgradeCurrentPanorama(sceneId: string, url: string): Promise<boolean> {
+    if (!url || this.currentScene?.id !== sceneId || this.isTransitioning) return false;
+    const texture = await this.pano.preload(url);
+    if (this.currentScene?.id !== sceneId || this.isTransitioning) return false;
+    this.pano.useTexture(texture);
+    return true;
+  }
+
+  /**
    * 🪐 Little Planet intro — matches PSV animatedValues exactly:
    *   pitch:   -PI/2 → target   (from looking straight down)
    *   yaw:     +PI/2 offset → target
-   *   FOV:     130°  → 75°      (PSV maxFov 130 → 90)
+   *   FOV:     130°  → saved scene FOV (75° by default)
    *   fisheye: 2     → 0        (camera offset = PSV fisheye)
    *   easing:  inOutQuad        (identical to PSV)
    *   duration: 2500ms
    */
-  async playLittlePlanetIntro(targetYaw = 0, targetPitch = 0): Promise<void> {
+  async playLittlePlanetIntro(targetYaw = 0, targetPitch = 0, targetFov = 75): Promise<void> {
     const startFov      = 130;
-    const endFov        = this.camera.getFov() < 80 ? this.camera.getFov() : 75;
+    const endFov        = THREE.MathUtils.clamp(targetFov, 30, 120);
     const startPitch    = -Math.PI / 2;           // straight down
     const startYaw      = targetYaw + Math.PI / 2; // 90° offset (matches PSV yaw.start = PI/2)
     const startFisheye  = 2;

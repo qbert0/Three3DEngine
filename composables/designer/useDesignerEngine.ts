@@ -101,12 +101,16 @@ export function useDesignerEngine() {
       const unsub1 = e.bus.on('camera:move', ({ yaw, pitch }) => {
         cameraYaw.value = yaw;
         cameraPitch.value = pitch;
+        cameraFov.value = e.camera.getFov();
       });
       const unsub2 = e.bus.on('camera:fov', ({ fov }) => {
         cameraFov.value = fov;
       });
       const unsub3 = e.bus.on('scene:loaded', ({ scene }) => {
         currentScene.value = scene;
+        cameraYaw.value = e.camera.getYaw();
+        cameraPitch.value = e.camera.getPitch();
+        cameraFov.value = e.camera.getFov();
         isLoading.value = false;
       });
 
