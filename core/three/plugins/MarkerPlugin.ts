@@ -216,7 +216,10 @@ export class MarkerPlugin extends PluginBase {
         this.navigationPending = true;
         this.ctx.bus.emit('interaction:lock');
         try {
-          await this.markerTypeForObject(object)?.playActivationAnimation(object);
+          // Khởi động animation marker nhưng không chờ nó kết thúc. Việc tải
+          // texture và transition panorama bắt đầu ngay trong cùng frame.
+          const markerAnimation = this.markerTypeForObject(object)
+            ?.playActivationAnimation(object) ?? Promise.resolve();
           // Marker coordinates are panorama-local. Convert yaw to the canonical
           // world/map direction before handing it to the transition engine.
           this.ctx.bus.emit('navigate', {
@@ -224,6 +227,7 @@ export class MarkerPlugin extends PluginBase {
             yaw: marker.yaw + this.group.rotation.y,
             pitch: marker.pitch,
           });
+          await markerAnimation;
         } finally {
           this.navigationPending = false;
           this.ctx.bus.emit('interaction:unlock');

@@ -17,7 +17,7 @@ export interface PanoSphereConfig {
   radius?: number;        // sphere radius. Default 600
   segments?: number;      // lat/lon segments. Default 64/48
   defaultTransition?: TransitionStyle;
-  transitionDuration?: number;  // ms. Default 1200
+  transitionDuration?: number;  // ms. Default 700
   /** Maximum decoded panorama textures retained in memory. 0 disables cache. Default: 4. */
   maxCachedTextures?: number;
 }
@@ -150,7 +150,7 @@ export class PanoSphere {
     });
 
     this.radius = config.radius ?? 600;
-    this.transitionDuration = config.transitionDuration ?? 1200;
+    this.transitionDuration = config.transitionDuration ?? 700;
     this.defaultTransition = config.defaultTransition ?? 'crossfade';
     this.maxCachedTextures = Math.max(0, Math.floor(config.maxCachedTextures ?? 2));
 

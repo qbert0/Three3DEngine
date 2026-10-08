@@ -19,7 +19,7 @@ export class DroneNavigationMarker extends NavigationMarker {
   protected override readonly defaultIconHeight = 65;
   protected override readonly navigationColor = '#2388e8';
   protected override readonly titleFontSize = 64;
-  protected readonly exitDuration = 420;
+  protected readonly exitDuration = 280;
   protected readonly exitDistance = 46;
   private readonly exitAnimations = new WeakMap<THREE.Object3D, DroneExitAnimation>();
 

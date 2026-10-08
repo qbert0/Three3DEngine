@@ -91,7 +91,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
         introDelay: options.introDelay ?? 0,
         pano: {
           defaultTransition: tour?.transition ?? options.transition ?? 'crossfade',
-          transitionDuration: tour?.transitionDuration ?? 1200,
+          transitionDuration: tour?.transitionDuration ?? 700,
           maxCachedTextures: 2,
         },
       });
