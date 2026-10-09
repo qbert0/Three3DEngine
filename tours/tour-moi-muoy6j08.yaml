@@ -72,10 +72,10 @@ scenes:
     previewPanorama: /panorama-previews/1791363839591-afu6f9tqbxn-f767b43b82.webp
     mobilePanorama: /panoramas-mobile/1791363839591-afu6f9tqbxn-f767b43b82.webp
     thumbnail: /thumbnails/1791363839591-afu6f9tqbxn.webp
-    initialYaw: 0
-    initialPitch: 0
-    initialFov: 99.95359584374268
-    defaultCameraEnabled: false
+    initialYaw: 50.883917268567174
+    initialPitch: 0.06321067922563628
+    initialFov: 138.3066035430561
+    defaultCameraEnabled: true
     defaultZoomEnabled: true
     panoramaRotation: -2.443185307179588
     brightness: 1.25
@@ -420,9 +420,9 @@ scenes:
     previewPanorama: /panorama-previews/1791368261710-snm5n8lytlr-4b0043f6f0.webp
     mobilePanorama: /panoramas-mobile/1791368261710-snm5n8lytlr-4b0043f6f0.webp
     thumbnail: /thumbnails/1791368261710-snm5n8lytlr.webp
-    initialYaw: -7.084386352144358
-    initialPitch: 0.00035219629633548386
-    initialFov: 119.15239191494369
+    initialYaw: -7.477484796419154
+    initialPitch: -0.023659337175966036
+    initialFov: 138.30417963409414
     defaultCameraEnabled: true
     defaultZoomEnabled: true
     panoramaRotation: 0.3539999999999992
@@ -472,7 +472,7 @@ scenes:
     thumbnail: /thumbnails/1791368312299-zfdxc5svjsj.webp
     initialYaw: 1.5902036547347946
     initialPitch: 0.008874712765167941
-    initialFov: 130.84631839490007
+    initialFov: 145.24610279542742
     defaultCameraEnabled: true
     defaultZoomEnabled: true
     panoramaRotation: -1.08
@@ -572,11 +572,11 @@ scenes:
     mobilePanorama: /panoramas-mobile/1791370838724-8dg485jluu8-0c5fd0a1b8.webp
     thumbnail: /thumbnails/1791370838724-8dg485jluu8.webp
     editorPanorama: /editor-previews/1791370838724-8dg485jluu8.webp
-    initialYaw: 22.447660265527343
-    initialPitch: 0.032679566689811805
-    initialFov: 99.95392443017141
+    initialYaw: 19.828657269818898
+    initialPitch: 0.06558620017020994
+    initialFov: 140.4498588477686
     defaultCameraEnabled: true
-    defaultZoomEnabled: false
+    defaultZoomEnabled: true
     panoramaRotation: 0.48900000000000077
     brightness: 1.25
     highlightCompression: 0
@@ -678,9 +678,9 @@ scenes:
     editorPanorama: /editor-previews/1791370873981-zy2t135moj.webp
     initialYaw: 50.12835431713641
     initialPitch: 0.012050380482422358
-    initialFov: 99.9522068354564
+    initialFov: 150
     defaultCameraEnabled: true
-    defaultZoomEnabled: false
+    defaultZoomEnabled: true
     panoramaRotation: -1.2029999999999994
     brightness: 1.25
     highlightCompression: 0
@@ -722,11 +722,11 @@ scenes:
     mobilePanorama: /panoramas-mobile/1791370883431-47q760webjq-e2cb9e4246.webp
     thumbnail: /thumbnails/1791370883431-47q760webjq.webp
     editorPanorama: /editor-previews/1791370883431-47q760webjq.webp
-    initialYaw: 49.297413643979624
-    initialPitch: -0.10785707257868
-    initialFov: 99.95327051665711
+    initialYaw: 49.35450706294247
+    initialPitch: -0.1737772020799616
+    initialFov: 150
     defaultCameraEnabled: true
-    defaultZoomEnabled: false
+    defaultZoomEnabled: true
     panoramaRotation: -0.9390000000000001
     brightness: 1.25
     highlightCompression: 0
@@ -768,9 +768,9 @@ scenes:
     mobilePanorama: /panoramas-mobile/1791372743999-mc9nfi1vhz-41729234a2.webp
     thumbnail: /thumbnails/1791372743999-mc9nfi1vhz.webp
     editorPanorama: /editor-previews/1791372743999-mc9nfi1vhz.webp
-    initialYaw: 50.773113964161226
-    initialPitch: 0.06321067919276942
-    initialFov: 128.70785138286666
+    initialYaw: 50.80001679001574
+    initialPitch: 0.060210679225527454
+    initialFov: 143.06127706562737
     defaultCameraEnabled: true
     defaultZoomEnabled: true
     panoramaRotation: -2.6771853071795864
