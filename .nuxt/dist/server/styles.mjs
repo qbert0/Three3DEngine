@@ -4,7 +4,7 @@ export default {
   "pages/index.vue": () => import('./_nuxt/index-styles.C77txiG1.mjs').then(interopDefault),
   "pages/tours/[tourId].vue": () => import('./_nuxt/_tourId_-styles.bdug0q4W.mjs').then(interopDefault),
   "pages/experience/[tourId].vue": () => import('./_nuxt/_tourId_-styles.CzjTUuX0.mjs').then(interopDefault),
-  "pages/admin/[slug]/[sceneId].vue": () => import('./_nuxt/_sceneId_-styles.DX6W40EH.mjs').then(interopDefault),
+  "pages/admin/[slug]/[sceneId].vue": () => import('./_nuxt/_sceneId_-styles.Djy0LME1.mjs').then(interopDefault),
   "components/viewer/DevDiagnosticPanel.vue": () => import('./_nuxt/DevDiagnosticPanel-styles.F312CAa9.mjs').then(interopDefault),
   "components/viewer/DevImageComparison.vue": () => import('./_nuxt/DevImageComparison-styles.ChfjSltu.mjs').then(interopDefault),
   "components/viewer/ViewerHUD.vue": () => import('./_nuxt/ViewerHUD-styles.DaSYzvhE.mjs').then(interopDefault),

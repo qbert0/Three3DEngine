@@ -746,8 +746,17 @@ function setDefaultZoomEnabled(enabled: boolean) {
 
 function captureDefaultZoom() {
   if (!currentScene.value) return;
+  // Saving a zoom must also make the scene use it. Previously it was possible
+  // to persist initialFov while defaultZoomEnabled stayed false, so the viewer
+  // correctly loaded the number but deliberately ignored it.
+  currentScene.value.defaultZoomEnabled = true;
   currentScene.value.initialFov = cameraFov.value;
   markDirty();
+}
+
+async function saveCurrentZoom() {
+  captureDefaultZoom();
+  await saveToServer();
 }
 
 // Engine canvas container
@@ -1722,11 +1731,11 @@ onMounted(() => {
             <span>Zoom vào cảnh</span>
           </label>
           <button
-            v-if="currentScene.defaultZoomEnabled"
             type="button"
-            @click="captureDefaultZoom"
+            :disabled="saving"
+            @click="saveCurrentZoom"
           >
-            Lấy zoom hiện tại
+            {{ saving ? 'Đang lưu zoom...' : 'Lưu zoom hiện tại' }}
           </button>
           <output v-if="currentScene.defaultZoomEnabled">
             {{ (Math.tan(75 * Math.PI / 360) / Math.tan((currentScene.initialFov ?? 75) * Math.PI / 360)).toFixed(2) }}×

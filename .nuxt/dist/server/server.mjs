@@ -540,7 +540,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import("./_nuxt/_sceneId_-t1nOwGuk.js")
+    component: () => import("./_nuxt/_sceneId_-gAE41G1x.js")
   }
 ];
 const _wrapInTransition = (props, children) => {
