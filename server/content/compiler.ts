@@ -62,6 +62,7 @@ function getValidator() {
             initialPitch: { type: 'number', default: 0 },
             initialFov:   { type: 'number', minimum: 30, maximum: 120, default: 75 },
             defaultCameraEnabled: { type: 'boolean', default: false },
+            defaultZoomEnabled: { type: 'boolean', default: false },
             panoramaRotation: { type: 'number', default: 0 },
             brightness:   { type: 'number', minimum: 0.5, maximum: 2, default: 1.25 },
             highlightCompression: { type: 'number', minimum: 0, maximum: 1, default: 0 },
@@ -159,6 +160,9 @@ export function compileTour(raw: unknown): CompileResult {
       initialPitch: s.initialPitch ?? 0,
       initialFov:   s.initialFov ?? 75,
       defaultCameraEnabled: s.defaultCameraEnabled ?? false,
+      // Existing tours historically stored zoom under defaultCameraEnabled.
+      // Preserve that behaviour while allowing new scenes to control it alone.
+      defaultZoomEnabled: s.defaultZoomEnabled ?? s.defaultCameraEnabled ?? false,
       panoramaRotation: s.panoramaRotation ?? 0,
       brightness:   s.brightness ?? 1.25,
       highlightCompression: s.highlightCompression ?? 0,

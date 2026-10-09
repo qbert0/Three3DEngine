@@ -1,5 +1,0 @@
-const index_vue_vue_type_style_index_0_scoped_a10c6f61_lang = ".intro-grid-responsive[data-v-a10c6f61],.tour-module-responsive[data-v-a10c6f61]{display:grid}@media(max-width:900px){.intro-grid-responsive[data-v-a10c6f61],.tour-module-responsive[data-v-a10c6f61]{grid-template-columns:1fr!important}}@keyframes pulse-ring-a10c6f61{0%{box-shadow:0 0 #a0782866}to{box-shadow:0 0 0 20px #a0782800}}";
-export {
-  index_vue_vue_type_style_index_0_scoped_a10c6f61_lang as default
-};
-//# sourceMappingURL=index-styles-1.mjs-Bd2XVtX8.js.map

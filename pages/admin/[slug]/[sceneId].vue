@@ -734,6 +734,18 @@ function captureDefaultCamera() {
   if (!currentScene.value) return;
   currentScene.value.initialYaw = cameraYaw.value;
   currentScene.value.initialPitch = cameraPitch.value;
+  markDirty();
+}
+
+function setDefaultZoomEnabled(enabled: boolean) {
+  if (!currentScene.value) return;
+  currentScene.value.defaultZoomEnabled = enabled;
+  if (enabled) captureDefaultZoom();
+  else markDirty();
+}
+
+function captureDefaultZoom() {
+  if (!currentScene.value) return;
   currentScene.value.initialFov = cameraFov.value;
   markDirty();
 }
@@ -1089,6 +1101,7 @@ async function handleNewSceneImage(event: Event) {
       initialPitch: 0,
       initialFov: 75,
       defaultCameraEnabled: false,
+      defaultZoomEnabled: false,
       panoramaRotation: 0,
       showOnMap: false,
       brightness: 1.25,
@@ -1692,8 +1705,31 @@ onMounted(() => {
           </button>
           <output v-if="currentScene.defaultCameraEnabled">
             {{ Math.round(currentScene.initialYaw * RAD_TO_DEG) }}° /
-            {{ Math.round(currentScene.initialPitch * RAD_TO_DEG) }}° /
-            Zoom {{ (Math.tan(75 * Math.PI / 360) / Math.tan((currentScene.initialFov ?? 75) * Math.PI / 360)).toFixed(2) }}×
+            {{ Math.round(currentScene.initialPitch * RAD_TO_DEG) }}°
+          </output>
+        </div>
+        <div
+          v-if="editorMode === 'panorama' && interactionMode === 'camera' && currentScene"
+          class="default-camera-control"
+          title="Nếu bật, cảnh áp dụng mức zoom này nhưng vẫn giữ nguyên hướng nhìn của người xem"
+        >
+          <label>
+            <input
+              type="checkbox"
+              :checked="currentScene.defaultZoomEnabled === true"
+              @change="setDefaultZoomEnabled(($event.target as HTMLInputElement).checked)"
+            >
+            <span>Zoom vào cảnh</span>
+          </label>
+          <button
+            v-if="currentScene.defaultZoomEnabled"
+            type="button"
+            @click="captureDefaultZoom"
+          >
+            Lấy zoom hiện tại
+          </button>
+          <output v-if="currentScene.defaultZoomEnabled">
+            {{ (Math.tan(75 * Math.PI / 360) / Math.tan((currentScene.initialFov ?? 75) * Math.PI / 360)).toFixed(2) }}×
           </output>
         </div>
         <button

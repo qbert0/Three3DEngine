@@ -74,6 +74,13 @@ export function useViewerEngine(options: ViewerEngineOptions) {
   let preloadGeneration = 0;
   let isUserDragging = false;
   let lastUserInteractionAt = 0;
+  let mobilePerformanceMode = false;
+
+  function shouldUseMobileProfile(): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth <= 900
+      || window.matchMedia('(pointer: coarse)').matches;
+  }
 
   // ── Init ───────────────────────────────────────────────────────
 
@@ -86,14 +93,21 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     errorMessage.value = '';
 
     try {
+      mobilePerformanceMode = shouldUseMobileProfile();
       const e = new View360Engine({
         container,
         antialias: false,
+        // A phone with DPR 3 renders nine framebuffer pixels per CSS pixel.
+        // DevTools mobile emulation does not reproduce that GPU cost.
+        pixelRatio: mobilePerformanceMode
+          ? Math.min(window.devicePixelRatio, 1.25)
+          : Math.min(window.devicePixelRatio, 2),
         introDelay: options.introDelay ?? 0,
         pano: {
           defaultTransition: tour?.transition ?? options.transition ?? 'crossfade',
-          transitionDuration: tour?.transitionDuration ?? 700,
-          maxCachedTextures: 2,
+          transitionDuration: tour?.transitionDuration ?? (mobilePerformanceMode ? 500 : 700),
+          maxCachedTextures: mobilePerformanceMode ? 1 : 2,
+          segments: mobilePerformanceMode ? 64 : 128,
         },
       });
 
@@ -285,6 +299,10 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
   function preloadNeighbours(scene: TourScene, allScenes: TourScene[]): void {
     if (!engine.value) return;
+    // A decoded 4K panorama consumes roughly 32 MiB before other WebGL
+    // resources. On phones, retain only the active scene and load the next
+    // preview on demand instead of competing for memory in the background.
+    if (mobilePerformanceMode) return;
 
     // Preload navigation targets + adjacent scenes
     const navTargets = (scene.markers ?? [])
@@ -306,8 +324,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
   function forViewer(scene: TourScene): TourScene {
     if (typeof window === 'undefined') return scene;
-    const preferMobile = window.innerWidth <= 900
-      || window.matchMedia('(pointer: coarse)').matches;
+    const preferMobile = shouldUseMobileProfile();
     return {
       ...scene,
       panorama: preferMobile && scene.mobilePanorama
@@ -323,7 +340,8 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     const attempt = () => {
       if (generation !== preloadGeneration || !engine.value) return;
       const idleFor = performance.now() - lastUserInteractionAt;
-      if (isUserDragging || idleFor < 1200) {
+      const requiredIdle = mobilePerformanceMode ? 2200 : 1200;
+      if (isUserDragging || idleFor < requiredIdle) {
         preloadTimer = setTimeout(attempt, 250);
         return;
       }

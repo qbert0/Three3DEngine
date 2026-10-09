@@ -211,8 +211,10 @@ export interface TourScene {
   initialPitch: number;
   /** Vertical camera field of view saved with the entry camera. 75° = default zoom. */
   initialFov?: number;
-  /** Apply initialYaw/initialPitch/initialFov whenever the viewer enters this scene. */
+  /** Apply initialYaw/initialPitch whenever the viewer enters this scene. */
   defaultCameraEnabled?: boolean;
+  /** Apply initialFov without forcing the saved yaw/pitch. */
+  defaultZoomEnabled?: boolean;
   /** Rotation of the panorama and its scene markers in world space, radians. */
   panoramaRotation?: number;
   /** Panorama brightness multiplier. 1 = original, recommended range 0.6–1.6. */

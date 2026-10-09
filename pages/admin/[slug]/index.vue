@@ -63,6 +63,7 @@ async function addFirstScene(event: Event) {
       initialYaw: 0,
       initialPitch: 0,
       initialFov: 75,
+      defaultZoomEnabled: false,
       showOnMap: false,
       brightness: 1.25,
       markers: [],

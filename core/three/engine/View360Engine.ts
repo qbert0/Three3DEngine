@@ -175,6 +175,7 @@ export class View360Engine {
     const previousYaw = this.camera.getYaw();
     const previousPitch = this.camera.getPitch();
     const useDefaultCamera = scene.defaultCameraEnabled === true;
+    const useDefaultZoom = scene.defaultZoomEnabled ?? useDefaultCamera;
     this.currentScene = scene;
     this.notifyPluginsSceneLoad(scene);
     this.pano.setBrightness(scene.brightness ?? 1.25);
@@ -187,7 +188,7 @@ export class View360Engine {
     if (playIntro) {
       const targetYaw = useDefaultCamera ? (scene.initialYaw ?? 0) : previousYaw;
       const targetPitch = useDefaultCamera ? (scene.initialPitch ?? 0) : previousPitch;
-      const targetFov = useDefaultCamera ? (scene.initialFov ?? 75) : this.camera.getFov();
+      const targetFov = useDefaultZoom ? (scene.initialFov ?? 75) : this.camera.getFov();
 
       // Park camera at start position (looking down, wide FOV)
       this.camera.setRaw(-Math.PI / 2, -Math.PI / 2, 130);
@@ -234,15 +235,11 @@ export class View360Engine {
     } else {
       // Designer and direct loads obey the same rule as navigation: scenes
       // without a default camera keep the viewer's current world direction.
-      if (useDefaultCamera) {
-        this.camera.setOrientation(
-          scene.initialYaw ?? 0,
-          scene.initialPitch ?? 0,
-          scene.initialFov ?? 75,
-        );
-      } else {
-        this.camera.setOrientation(previousYaw, previousPitch);
-      }
+      this.camera.setOrientation(
+        useDefaultCamera ? (scene.initialYaw ?? 0) : previousYaw,
+        useDefaultCamera ? (scene.initialPitch ?? 0) : previousPitch,
+        useDefaultZoom ? (scene.initialFov ?? 75) : this.camera.getFov(),
+      );
     }
 
     this.bus.emit('scene:loaded', { scene });
@@ -297,9 +294,10 @@ export class View360Engine {
     const startYaw = this.camera.getYaw();
     const startPitch = this.camera.getPitch();
     const useDefaultCamera = scene.defaultCameraEnabled === true;
+    const useDefaultZoom = scene.defaultZoomEnabled ?? useDefaultCamera;
     const destYaw = useDefaultCamera ? (scene.initialYaw ?? 0) : startYaw;
     const destPitch = useDefaultCamera ? (scene.initialPitch ?? 0) : startPitch;
-    const destFov = useDefaultCamera ? (scene.initialFov ?? 75) : this.camera.getFov();
+    const destFov = useDefaultZoom ? (scene.initialFov ?? 75) : this.camera.getFov();
     // Take the shortest path around the yaw circle.
     const yawDelta = Math.atan2(Math.sin(destYaw - startYaw), Math.cos(destYaw - startYaw));
     const baseFov = this.camera.getFov();
@@ -309,7 +307,7 @@ export class View360Engine {
     const initialPanorama = scene.previewPanorama ?? scene.panorama;
     await this.pano.transition(initialPanorama, transitionStyle, dir, (p) => {
       const ease = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-      if (useDefaultCamera) {
+      if (useDefaultCamera || useDefaultZoom) {
         this.camera.setRaw(
           startYaw + yawDelta * ease,
           startPitch + (destPitch - startPitch) * ease,
