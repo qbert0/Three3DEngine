@@ -15,6 +15,7 @@ import type { EngineDiagnostics } from '~/core/three/engine/View360Engine';
 import { MarkerPlugin } from '~/core/three/plugins/MarkerPlugin';
 import { MapPlugin } from '~/core/three/plugins/MapPlugin';
 import { AutorotatePlugin } from '~/core/three/plugins/AutorotatePlugin';
+import { AreaHighlightPlugin } from '~/core/three/plugins/AreaHighlightPlugin';
 import type { TourScene, TourMarker, TourConfig } from '~/types/tour';
 import type { TransitionStyle } from '~/core/three/engine/PanoSphere';
 
@@ -98,6 +99,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
       // ── Register plugins ──
       e.use(new MarkerPlugin());
+      e.use(new AreaHighlightPlugin());
 
       // Map plugin — auto-enabled when tour has map config
       if (tour?.map) {

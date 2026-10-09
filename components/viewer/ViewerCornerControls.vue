@@ -69,7 +69,7 @@ const logoSizeClasses = {
       :class="logoSizeClasses[props.logoSize]"
       aria-label="Memory Group"
     >
-      <img class="block h-auto w-full object-contain" src="/icons/logo/memory group đen.png" alt="Memory Group" />
+      <img class="block h-auto w-full object-contain" src="/icons/logo/memory gruop trắng.png" alt="Memory Group" />
     </div>
   </div>
 </template>

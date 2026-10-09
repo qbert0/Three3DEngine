@@ -72,6 +72,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -119,6 +121,8 @@ const generatedTours = {
 					rotZ: 0,
 					rotY: 0.10471975511965977
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -176,6 +180,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -251,7 +257,37 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1,
 					sphereRadius: 430
+				},
+				{
+					id: "h1791474195474",
+					label: "Xem nội dung",
+					yaw: 1.6709,
+					pitch: 0.0877,
+					plugin: "panel",
+					placement: "horizontal",
+					contents: [
+						{
+							id: "block-1791474202069",
+							type: "image",
+							src: "/uploads/1791475775090-vptl3sa6rd9-panel.webp",
+							alt: "",
+							caption: ""
+						},
+						{
+							id: "block-1791474209766",
+							type: "text",
+							content: "hòn đá triết gia. Tác phẩm điêu khắc đá cẩm thạch trắng với hình khối hình học tối giản, mạnh mẽ. Tảng đá được chế tác thành một khối đặc có dạng như một cánh cổng hoặc mái vòm cách điệu — phần trên là một khối hình thang vát chéo, tạo thành cạnh nghiêng sắc nét, trong khi phần dưới được khoét rỗng một khoảng hình chữ nhật đứng, tạo nên một \"lối đi\" hoặc khung cửa mở giữa hai trụ đá. Bề mặt đá trắng ngà với những vân xám tự nhiên chạy dọc, để lộ rõ chất liệu cẩm thạch nguyên khối. Ánh sáng ban ngày đổ xuống tạo nên sự tương phản rõ rệt giữa mặt phẳng sáng và các cạnh tối, làm nổi bật tính khối và góc cạnh của tác phẩm.",
+							presentation: "text-and-audio",
+							speech: {
+								lang: "vi-VN",
+								rate: 1,
+								pitch: 1
+							}
+						}
+					]
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -294,6 +330,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -328,6 +366,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -387,6 +427,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -412,7 +454,7 @@ const generatedTours = {
 			markers: [
 				{
 					id: "h1791365672086",
-					label: "Chuyển cảnh",
+					label: "Ngã ba dinh thự ",
 					yaw: -0.9948,
 					pitch: -0.3254,
 					plugin: "navigation",
@@ -443,6 +485,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -501,6 +545,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -535,6 +581,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -570,6 +618,8 @@ const generatedTours = {
 					icon: "location-1",
 					pinColor: "#171717"
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -616,6 +666,8 @@ const generatedTours = {
 					icon: "location-1",
 					pinColor: "#171717"
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -668,6 +720,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -734,6 +788,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -786,6 +842,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -838,6 +896,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -904,6 +964,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -970,6 +1032,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -1022,6 +1086,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -1088,6 +1154,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -1099,9 +1167,9 @@ const generatedTours = {
 			mobilePanorama: "/panoramas-mobile/1791374679999-qb06gn55i3r-c99a7d39d1.webp",
 			thumbnail: "/thumbnails/1791374679999-qb06gn55i3r.webp",
 			editorPanorama: "/editor-previews/1791374679999-qb06gn55i3r.webp",
-			initialYaw: 19.516842360065187,
-			initialPitch: -0.29684906854110565,
-			initialFov: 75,
+			initialYaw: 19.555935468590953,
+			initialPitch: -0.326867215533473,
+			initialFov: 84.6474125039102,
 			defaultCameraEnabled: true,
 			panoramaRotation: -2.4941853071795865,
 			brightness: 1.25,
@@ -1224,6 +1292,31 @@ const generatedTours = {
 					sphereRadius: 520,
 					pinColor: "#171717",
 					iconUrl: "/thumbnails/1791363884550-otcz1232qvm.webp"
+				}
+			],
+			areaHighlights: [
+				{
+					id: "area-1791528235657",
+					points: [
+						{
+							yaw: -2.7027417068811217,
+							pitch: -0.4411408414339755
+						},
+						{
+							yaw: 3.0449780571489207,
+							pitch: -0.17973677276696054
+						},
+						{
+							yaw: 2.9151854685989362,
+							pitch: -0.6989168105248231
+						}
+					],
+					color: "#22c55e",
+					outlineColor: "#ffffff",
+					opacity: 0.34,
+					durationMs: 1400,
+					mode: "fill-outline",
+					lineWidth: 5
 				}
 			]
 		},
@@ -1359,6 +1452,8 @@ const generatedTours = {
 					sphereRadius: 520,
 					pinColor: "#171717"
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -1464,6 +1559,8 @@ const generatedTours = {
 					pinColor: "#171717",
 					iconUrl: "/thumbnails/1791363884550-otcz1232qvm.webp"
 				}
+			],
+			areaHighlights: [
 			]
 		}
 	]
@@ -1743,7 +1840,38 @@ function getValidator() {
               items: { type: "number" }
             },
             showOnMap: { type: "boolean", default: false },
-            markers: { type: "array", default: [] }
+            markers: { type: "array", default: [] },
+            areaHighlights: {
+              type: "array",
+              default: [],
+              items: {
+                type: "object",
+                required: ["id", "points"],
+                properties: {
+                  id: { type: "string", minLength: 1 },
+                  points: {
+                    type: "array",
+                    minItems: 3,
+                    items: {
+                      type: "object",
+                      required: ["yaw", "pitch"],
+                      properties: {
+                        yaw: { type: "number" },
+                        pitch: { type: "number", minimum: -1.5708, maximum: 1.5708 }
+                      }
+                    }
+                  },
+                  color: { type: "string" },
+                  outlineColor: { type: "string" },
+                  opacity: { type: "number", minimum: 0, maximum: 1 },
+                  delayMs: { type: "number", minimum: 0 },
+                  durationMs: { type: "number", minimum: 250 },
+                  radius: { type: "number", minimum: 100, maximum: 595 },
+                  mode: { type: "string", enum: ["fill", "outline", "fill-outline"] },
+                  lineWidth: { type: "number", minimum: 1, maximum: 24 }
+                }
+              }
+            }
           }
         }
       }
@@ -1765,7 +1893,7 @@ function compileTour(raw) {
   const data = raw;
   const warnings = [];
   const scenes = data.scenes.map((s, i) => {
-    var _a2, _b2, _c2, _d2, _e, _f, _g, _h, _i, _j, _k;
+    var _a2, _b2, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l;
     const markers = ((_a2 = s.markers) != null ? _a2 : []).map((m) => {
       if (!m.id || !m.plugin || !m.label) {
         warnings.push(`Scene[${i}].markers: marker thi\u1EBFu id/plugin/label \u2014 b\u1ECB b\u1ECF qua.`);
@@ -1793,7 +1921,8 @@ function compileTour(raw) {
       highlightCompression: (_j = s.highlightCompression) != null ? _j : 0,
       coordinates: s.coordinates,
       showOnMap: (_k = s.showOnMap) != null ? _k : false,
-      markers
+      markers,
+      areaHighlights: (_l = s.areaHighlights) != null ? _l : []
     };
   });
   if (data.initialSceneId) {

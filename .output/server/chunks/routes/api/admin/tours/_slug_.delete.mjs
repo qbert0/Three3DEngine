@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/routes/api/admin/tours/_slug_.delete');import { d as defineEventHandler, b as getRouterParam, c as createError } from '../../../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/admin/tours/_slug_.delete');import { d as defineEventHandler, f as getRouterParam, c as createError } from '../../../../nitro/nitro.mjs';
 import { d as deleteTour } from '../../../../_/yamlLoader.mjs';
 import 'node:http';
 import 'node:https';

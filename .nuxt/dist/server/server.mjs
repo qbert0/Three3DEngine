@@ -526,7 +526,7 @@ const _routes = [
     name: "experience-tourId",
     path: "/experience/:tourId()",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import("./_nuxt/_tourId_-BhXYMOEC.js"),
+    component: () => import("./_nuxt/_tourId_-me7Q6Kt1.js"),
     children: [
       {
         name: "experience-tourId-ownerTourId-sceneId",
@@ -540,7 +540,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import("./_nuxt/_sceneId_-DeDD5XUQ.js")
+    component: () => import("./_nuxt/_sceneId_-CpvWyhM0.js")
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1002,7 +1002,7 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import("./_nuxt/default-BB7HqOeE.js").then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import("./_nuxt/default-8lyuoj8D.js").then((m) => m.default || m)),
   editor: defineAsyncComponent(() => import("./_nuxt/editor-Dy2R63vE.js").then((m) => m.default || m)),
   experience: defineAsyncComponent(() => import("./_nuxt/experience-yT0e4bsx.js").then((m) => m.default || m))
 };

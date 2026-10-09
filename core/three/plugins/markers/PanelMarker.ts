@@ -10,7 +10,7 @@ import type {
   Model3DMarker,
   MapMarkerData,
 } from '~/types/tour';
-import { AIChatBlock, AudioBlock, Image3DBlock, TextBlock } from './blocks';
+import { AIChatBlock, AudioBlock, ImageBlock, Image3DBlock, TextBlock } from './blocks';
 import type { BlockBase } from './blocks';
 
 const DEFAULT_PANEL_MIN_WIDTH = 220;
@@ -38,7 +38,7 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
   }>();
   private readonly projectedPosition = new THREE.Vector3();
 
-  constructor(blockTypes: BlockBase[] = [new TextBlock(), new Image3DBlock(), new AudioBlock(), new AIChatBlock()]) {
+  constructor(blockTypes: BlockBase[] = [new TextBlock(), new ImageBlock(), new Image3DBlock(), new AudioBlock(), new AIChatBlock()]) {
     super();
     blockTypes.forEach((blockType) => this.blockTypes.set(blockType.blockType, blockType));
   }
@@ -125,23 +125,22 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
       const markerY = (-ndcY * 0.5 + 0.5) * height;
       const marker = anchor.userData.marker as TourMarker | undefined;
 
-      // On a narrow touch viewport, an anchored panel easily covers its own
-      // marker or leaves the visible area. Match the mobile viewer design by
-      // presenting it as a safe-area-aware bottom sheet. It still closes when
-      // the owning marker leaves the camera frustum.
+      // On a narrow touch viewport, keep the panel as a compact floating card
+      // instead of a full-width bottom sheet. Long content scrolls inside the
+      // card while enough panorama remains visible around it.
       if (width <= 640) {
-        panel.style.left = '0';
-        panel.style.right = '0';
+        panel.style.left = '50%';
+        panel.style.right = 'auto';
         panel.style.top = 'auto';
-        panel.style.bottom = '0';
-        panel.style.width = '100%';
+        panel.style.bottom = 'max(12px, env(safe-area-inset-bottom, 0px))';
+        panel.style.width = 'calc(100% - 24px)';
         panel.style.minWidth = '0';
-        panel.style.maxWidth = 'none';
-        panel.style.maxHeight = '70dvh';
+        panel.style.maxWidth = '360px';
+        panel.style.maxHeight = '55dvh';
         panel.style.overflowY = 'auto';
-        panel.style.paddingBottom = 'calc(18px + env(safe-area-inset-bottom, 0px))';
-        panel.style.borderRadius = '18px 18px 0 0';
-        panel.style.transform = 'none';
+        panel.style.padding = '12px';
+        panel.style.borderRadius = '14px';
+        panel.style.transform = 'translateX(-50%)';
         panel.style.transformOrigin = 'bottom center';
         const arrow = panel.querySelector<HTMLElement>('[data-marker-panel-arrow]');
         if (arrow) arrow.style.display = 'none';
@@ -155,6 +154,7 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
       panel.style.maxWidth = `min(${DEFAULT_PANEL_MAX_WIDTH}px,calc(100% - 32px))`;
       panel.style.maxHeight = 'none';
       panel.style.overflowY = 'visible';
+      panel.style.padding = '16px';
       panel.style.paddingBottom = '16px';
       panel.style.borderRadius = '12px';
       const requestedPlacement = marker?.plugin === 'panel' ? (marker.placement ?? 'vertical') : 'vertical';
@@ -212,14 +212,15 @@ export class PanelMarker extends MarkerBase<CompatiblePanelMarker> {
     style.textContent = `
       @media (max-width:640px) {
         .view360-marker-panel {
-          border-right:0 !important;
-          border-bottom:0 !important;
-          border-left:0 !important;
           overscroll-behavior:contain;
+          scrollbar-width:thin;
+        }
+        .view360-marker-panel img {
+          max-height:32dvh !important;
         }
       }
       @media (max-width:900px) and (orientation:landscape) {
-        .view360-marker-panel { max-height:80dvh !important; }
+        .view360-marker-panel { max-height:60dvh !important; }
       }
     `;
     document.head.appendChild(style);

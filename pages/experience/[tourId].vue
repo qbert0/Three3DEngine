@@ -115,6 +115,79 @@ const showInfoPanel = ref(false);
 const infoPanelTitle = ref('');
 const infoPanelContent = ref('');
 
+type InputProfile = 'desktop' | 'touch' | 'hybrid';
+interface GuideItem {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+const inputProfile = ref<InputProfile>('desktop');
+let inputMediaQueries: MediaQueryList[] = [];
+const inputProfileLabel = computed(() => ({
+  desktop: 'Chuột và bàn phím',
+  touch: 'Màn hình cảm ứng',
+  hybrid: 'Cảm ứng và chuột',
+})[inputProfile.value]);
+
+const guideItems = computed<GuideItem[]>(() => {
+  const touch = inputProfile.value !== 'desktop';
+  const hybrid = inputProfile.value === 'hybrid';
+  const interactionItems: GuideItem[] = touch
+    ? [
+        {
+          icon: '↔',
+          title: 'Thay đổi góc nhìn',
+          description: hybrid
+            ? 'Vuốt trực tiếp trên ảnh hoặc kéo bằng chuột để quan sát toàn bộ không gian.'
+            : 'Vuốt một ngón tay trên ảnh để quan sát toàn bộ không gian 360°.',
+        },
+        {
+          icon: '⌁',
+          title: 'Điều chỉnh tầm nhìn',
+          description: 'Chụm hoặc mở hai ngón tay để thu nhỏ và phóng to góc nhìn.',
+        },
+      ]
+    : [
+        {
+          icon: '↔',
+          title: 'Thay đổi góc nhìn',
+          description: 'Nhấn giữ chuột trái và kéo trên ảnh để quan sát toàn bộ không gian 360°.',
+        },
+        {
+          icon: '⌁',
+          title: 'Điều chỉnh tầm nhìn',
+          description: 'Sử dụng con lăn chuột để thu nhỏ hoặc phóng to góc nhìn.',
+        },
+      ];
+
+  return [
+    ...interactionItems,
+    {
+      icon: '↑',
+      title: 'Di chuyển giữa các cảnh',
+      description: 'Chọn marker mũi tên màu trắng để tiếp tục đến không gian được ghi trên nhãn.',
+    },
+    {
+      icon: 'i',
+      title: 'Khám phá nội dung',
+      description: 'Chọn marker thông tin để mở thuyết minh, âm thanh hoặc nội dung đa phương tiện tại vị trí đó.',
+    },
+    ...(touch ? [] : [{
+      icon: '⌨',
+      title: 'Điều khiển nhanh',
+      description: 'F: toàn màn hình · H: ẩn giao diện · ← →: chuyển cảnh · Esc: đóng bảng đang mở.',
+    }]),
+  ];
+});
+
+function updateInputProfile(): void {
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const hasTouch = navigator.maxTouchPoints > 0;
+  inputProfile.value = hasTouch && fine ? 'hybrid' : coarse || hasTouch ? 'touch' : 'desktop';
+}
+
 const sceneIndex = computed(() =>
   scenes.value.findIndex(s => s.id === activeSceneId.value) + 1,
 );
@@ -211,11 +284,21 @@ function handleKeyDown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  updateInputProfile();
+  inputMediaQueries = [
+    window.matchMedia('(pointer: coarse)'),
+    window.matchMedia('(hover: hover) and (pointer: fine)'),
+  ];
+  inputMediaQueries.forEach(query => query.addEventListener('change', updateInputProfile));
   window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('resize', updateInputProfile, { passive: true });
 });
 
 onBeforeUnmount(() => {
+  inputMediaQueries.forEach(query => query.removeEventListener('change', updateInputProfile));
+  inputMediaQueries = [];
   window.removeEventListener('keydown', handleKeyDown);
+  window.removeEventListener('resize', updateInputProfile);
 });
 </script>
 
@@ -301,7 +384,7 @@ onBeforeUnmount(() => {
             </div>
             <div>
               <div class="text-sm font-semibold text-white">Hướng dẫn sử dụng</div>
-              <div class="mt-0.5 text-[11px] uppercase tracking-[.1em] text-white/40">Điều khiển tour 360°</div>
+              <div class="mt-0.5 text-[11px] uppercase tracking-[.1em] text-white/40">{{ inputProfileLabel }}</div>
             </div>
           </div>
           <button type="button" :class="panelCloseClass" aria-label="Đóng" @click="showHelpPanel = false">
@@ -313,43 +396,11 @@ onBeforeUnmount(() => {
         </div>
         <div :class="panelBodyClass">
           <ul class="grid list-none gap-3">
-            <li :class="guideItemClass">
-              <div :class="guideIconClass">🖱️</div>
+            <li v-for="item in guideItems" :key="item.title" :class="guideItemClass">
+              <div :class="[guideIconClass, 'font-semibold text-[#7ec8e3]']">{{ item.icon }}</div>
               <div>
-                <div :class="guideTitleClass">Kéo để xoay ảnh 360°</div>
-                <div :class="guideDescClass">Nhấn giữ và kéo chuột (hoặc vuốt trên điện thoại) để xoay góc nhìn.</div>
-              </div>
-            </li>
-            <li :class="guideItemClass">
-              <div :class="guideIconClass">🔵</div>
-              <div>
-                <div :class="guideTitleClass">Nút xanh — Di chuyển</div>
-                <div :class="guideDescClass">Nhấn vào marker xanh để di chuyển đến cảnh tiếp theo.</div>
-              </div>
-            </li>
-            <li :class="guideItemClass">
-              <div :class="guideIconClass">🟠</div>
-              <div>
-                <div :class="guideTitleClass">Nút cam — Xem thông tin</div>
-                <div :class="guideDescClass">Nhấn vào marker cam để xem thông tin chi tiết về địa điểm.</div>
-              </div>
-            </li>
-            <li :class="guideItemClass">
-              <div :class="guideIconClass">🔍</div>
-              <div>
-                <div :class="guideTitleClass">Cuộn để zoom</div>
-                <div :class="guideDescClass">Dùng con lăn chuột hoặc chụm 2 ngón để phóng to / thu nhỏ.</div>
-              </div>
-            </li>
-            <li :class="guideItemClass">
-              <div :class="guideIconClass">⌨️</div>
-              <div>
-                <div :class="guideTitleClass">Phím tắt</div>
-                <div :class="guideDescClass">
-                  <strong>F</strong> — Bật/tắt toàn cảnh ·
-                  <strong>H</strong> — Ẩn/hiện giao diện ·
-                  <strong>← →</strong> — Chuyển cảnh
-                </div>
+                <div :class="guideTitleClass">{{ item.title }}</div>
+                <div :class="guideDescClass">{{ item.description }}</div>
               </div>
             </li>
           </ul>

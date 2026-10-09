@@ -71,6 +71,35 @@ function getValidator() {
             },
             showOnMap:    { type: 'boolean', default: false },
             markers:      { type: 'array', default: [] },
+            areaHighlights: {
+              type: 'array',
+              default: [],
+              items: {
+                type: 'object',
+                required: ['id', 'points'],
+                properties: {
+                  id: { type: 'string', minLength: 1 },
+                  points: {
+                    type: 'array', minItems: 3,
+                    items: {
+                      type: 'object', required: ['yaw', 'pitch'],
+                      properties: {
+                        yaw: { type: 'number' },
+                        pitch: { type: 'number', minimum: -1.5708, maximum: 1.5708 },
+                      },
+                    },
+                  },
+                  color: { type: 'string' },
+                  outlineColor: { type: 'string' },
+                  opacity: { type: 'number', minimum: 0, maximum: 1 },
+                  delayMs: { type: 'number', minimum: 0 },
+                  durationMs: { type: 'number', minimum: 250 },
+                  radius: { type: 'number', minimum: 100, maximum: 595 },
+                  mode: { type: 'string', enum: ['fill', 'outline', 'fill-outline'] },
+                  lineWidth: { type: 'number', minimum: 1, maximum: 24 },
+                },
+              },
+            },
           },
         },
       },
@@ -136,6 +165,7 @@ export function compileTour(raw: unknown): CompileResult {
       coordinates:  s.coordinates,
       showOnMap:    s.showOnMap ?? false,
       markers,
+      areaHighlights: s.areaHighlights ?? [],
     } satisfies TourScene;
   });
 

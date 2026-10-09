@@ -42,6 +42,9 @@ export class CameraController {
   // Pointer state
   private isPointerDown = false;
   private activePointerId: number | null = null;
+  private readonly touchPointers = new Map<number, { x: number; y: number }>();
+  private pinchStartDistance: number | null = null;
+  private pinchStartFov = 0;
   private pointerStartX = 0;
   private pointerStartY = 0;
   private startYaw = 0;
@@ -192,6 +195,21 @@ export class CameraController {
       // (video/iframe play buttons, controls, etc.).
       if (e.target !== el) return;
       if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.pointerType === 'touch') {
+        if (this.touchPointers.size >= 2) return;
+        this.touchPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        el.setPointerCapture(e.pointerId);
+        if (this.touchPointers.size === 2) {
+          const points = [...this.touchPointers.values()];
+          const first = points[0]!;
+          const second = points[1]!;
+          this.pinchStartDistance = Math.hypot(second.x - first.x, second.y - first.y);
+          this.pinchStartFov = this.targetFov;
+          this.isPointerDown = false;
+          e.preventDefault();
+          return;
+        }
+      }
       if (this.activePointerId !== null) return;
       e.preventDefault();
       this.isPointerDown = true;
@@ -205,6 +223,23 @@ export class CameraController {
     };
 
     const onMove = (e: PointerEvent) => {
+      if (e.pointerType === 'touch' && this.touchPointers.has(e.pointerId)) {
+        this.touchPointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (this.touchPointers.size >= 2 && this.pinchStartDistance) {
+          e.preventDefault();
+          const points = [...this.touchPointers.values()];
+          const first = points[0]!;
+          const second = points[1]!;
+          const distance = Math.max(1, Math.hypot(second.x - first.x, second.y - first.y));
+          this.targetFov = THREE.MathUtils.clamp(
+            this.pinchStartFov * (this.pinchStartDistance / distance),
+            this.minFov,
+            this.maxFov,
+          );
+          this.bus.emit('camera:fov', { fov: this.targetFov });
+          return;
+        }
+      }
       if (!this.isPointerDown || this.inputLocked || e.pointerId !== this.activePointerId) return;
       e.preventDefault();
       const dx = e.clientX - this.pointerStartX;
@@ -213,13 +248,18 @@ export class CameraController {
       // Keep a full-width swipe perceptually similar on phones and desktops.
       // The FOV factor also makes zoomed-in views more precise instead of
       // rotating by the same large angle as a wide view.
+      const isTouchLikePointer = e.pointerType === 'touch' || e.pointerType === 'pen';
       const viewportWidth = Math.max(320, this.container.clientWidth || window.innerWidth);
       const viewportHeight = Math.max(320, this.container.clientHeight || window.innerHeight);
       const fovFactor = THREE.MathUtils.clamp(this.targetFov / 75, 0.45, 1.35);
-      const sensitivityX = this.usesDefaultDragSensitivity
+      // A mouse has effectively unlimited travel because it can be lifted and
+      // repositioned, so retain the original tuned sensitivity on desktop.
+      // Touch/pen travel is limited by the physical screen and therefore uses
+      // viewport-relative sensitivity.
+      const sensitivityX = this.usesDefaultDragSensitivity && isTouchLikePointer
         ? (Math.PI / viewportWidth) * 0.72 * fovFactor
         : this.dragSensitivity;
-      const sensitivityY = this.usesDefaultDragSensitivity
+      const sensitivityY = this.usesDefaultDragSensitivity && isTouchLikePointer
         ? (Math.PI / viewportHeight) * 0.62 * fovFactor
         : this.dragSensitivity;
 
@@ -234,6 +274,27 @@ export class CameraController {
     };
 
     const onUp = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') {
+        this.touchPointers.delete(e.pointerId);
+        if (this.pinchStartDistance !== null) {
+          this.pinchStartDistance = null;
+          if (this.touchPointers.size === 1) {
+            const [pointerId, point] = [...this.touchPointers.entries()][0]!;
+            this.activePointerId = pointerId;
+            this.isPointerDown = true;
+            this.pointerStartX = point.x;
+            this.pointerStartY = point.y;
+            this.startYaw = this.targetYaw;
+            this.startPitch = this.targetPitch;
+          } else {
+            this.activePointerId = null;
+            this.isPointerDown = false;
+            this.bus.emit('interaction:dragend');
+          }
+          if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+          return;
+        }
+      }
       if (!this.isPointerDown || e.pointerId !== this.activePointerId) return;
       this.isPointerDown = false;
       this.activePointerId = null;

@@ -13,7 +13,8 @@
 import { ref, shallowRef, readonly, computed, onBeforeUnmount } from 'vue';
 import { View360Engine } from '~/core/three/engine/View360Engine';
 import { MarkerPlugin } from '~/core/three/plugins/MarkerPlugin';
-import type { TourScene, TourMarker } from '~/types/tour';
+import { AreaHighlightPlugin } from '~/core/three/plugins/AreaHighlightPlugin';
+import type { AreaHighlight, AreaHighlightPoint, TourScene, TourMarker } from '~/types/tour';
 
 // ── Marker placement state ──────────────────────────────────────
 
@@ -49,6 +50,15 @@ export function useDesignerEngine() {
   // Marker selected directly on the panorama preview.
   const lastMarkerClicked = ref<TourMarker | null>(null);
   const lastPlacement = ref<{ type: Exclude<PlacementMode, 'none'>; yaw: number; pitch: number } | null>(null);
+  const isDrawingArea = ref(false);
+  const areaInteractionMode = ref<'rotate' | 'edit'>('rotate');
+  const areaDraftPoints = ref<AreaHighlightPoint[]>([]);
+  const lastAreaDrawn = ref<AreaHighlight | null>(null);
+  const selectedAreaId = ref<string | null>(null);
+  const selectedAreaPoint = ref<{ areaId: string; pointIndex: number } | null>(null);
+  const lastAreaPointMoved = ref<{ areaId: string; pointIndex: number; yaw: number; pitch: number } | null>(null);
+  const lastAreaPointAdded = ref<{ areaId: string; point: AreaHighlightPoint } | null>(null);
+  const areaPointTargetId = ref<string | null>(null);
 
   // Engine instance
   const engine = shallowRef<View360Engine | null>(null);
@@ -96,6 +106,9 @@ export function useDesignerEngine() {
 
       // Marker preview + drag-to-reposition (designer mode)
       e.use(new MarkerPlugin({ pulseSpeed: 0, pulseAmplitude: 0, draggable: true }));
+      const areaHighlightPlugin = new AreaHighlightPlugin({ preview: true });
+      e.use(areaHighlightPlugin);
+      areaHighlightPlugin.setEditingEnabled(false);
 
       // ── Wire camera pose to reactive refs ──
       const unsub1 = e.bus.on('camera:move', ({ yaw, pitch }) => {
@@ -125,19 +138,34 @@ export function useDesignerEngine() {
         // the designer is waiting for a new marker position.
         if (placementMode.value === 'none') lastMarkerClicked.value = marker;
       });
-      unsubs.push(unsub4, unsub5);
+      const unsub6 = e.bus.on('area:point-moved', payload => {
+        lastAreaPointMoved.value = payload;
+      });
+      const unsub7 = e.bus.on('area:selected', ({ areaId }) => {
+        selectedAreaId.value = areaId;
+      });
+      const unsub8 = e.bus.on('area:point-selected', payload => {
+        selectedAreaPoint.value = payload;
+      });
+      unsubs.push(unsub4, unsub5, unsub6, unsub7, unsub8);
 
       // ── Canvas click → place marker ──
       const canvas = e['renderer'].domElement as HTMLCanvasElement;
       const onClick = (ev: MouseEvent) => {
+        if (isDrawingArea.value || areaPointTargetId.value) {
+          ev.preventDefault();
+          ev.stopImmediatePropagation();
+          handleAreaDrawingClick(ev, canvas, e);
+          return;
+        }
         if (placementMode.value === 'none') return;
         // Use current camera yaw/pitch at click as marker position
         // (the user looks at the spot they want, then clicks the button)
         // For more precision: raycast to sphere surface from mouse position
         handlePlacementClick(ev, canvas, e);
       };
-      canvas.addEventListener('click', onClick);
-      unsubs.push(() => canvas.removeEventListener('click', onClick));
+      canvas.addEventListener('click', onClick, true);
+      unsubs.push(() => canvas.removeEventListener('click', onClick, true));
 
       // Alignment interaction: in panorama mode the camera is frozen and
       // horizontal dragging rotates the panorama + its marker group instead.
@@ -216,6 +244,102 @@ export function useDesignerEngine() {
   /** Cancel placement mode without placing */
   function cancelPlacement(): void {
     placementMode.value = 'none';
+  }
+
+  function startAreaDrawing(): void {
+    setAreaInteractionMode('edit');
+    placementMode.value = 'none';
+    areaPointTargetId.value = null;
+    areaDraftPoints.value = [];
+    isDrawingArea.value = true;
+    refreshAreaHighlights();
+  }
+
+  function finishAreaDrawing(): boolean {
+    if (areaDraftPoints.value.length < 3) return false;
+    lastAreaDrawn.value = {
+      id: `area-${Date.now()}`,
+      points: areaDraftPoints.value.map(point => ({ ...point })),
+      color: '#22c55e',
+      outlineColor: '#ffffff',
+      opacity: 0.34,
+      durationMs: 1400,
+      mode: 'fill-outline',
+      lineWidth: 5,
+    };
+    isDrawingArea.value = false;
+    areaDraftPoints.value = [];
+    return true;
+  }
+
+  function cancelAreaDrawing(): void {
+    isDrawingArea.value = false;
+    areaPointTargetId.value = null;
+    areaDraftPoints.value = [];
+    refreshAreaHighlights();
+  }
+
+  function startAreaPointPlacement(areaId: string): void {
+    setAreaInteractionMode('edit');
+    isDrawingArea.value = false;
+    areaDraftPoints.value = [];
+    areaPointTargetId.value = areaId;
+  }
+
+  function setAreaInteractionMode(mode: 'rotate' | 'edit'): void {
+    areaInteractionMode.value = mode;
+    const currentEngine = engine.value;
+    if (!currentEngine) return;
+    currentEngine.getPlugin<AreaHighlightPlugin>('area-highlight')?.setEditingEnabled(mode === 'edit');
+    currentEngine.bus.emit(mode === 'edit' ? 'interaction:lock' : 'interaction:unlock');
+    currentEngine.renderer.domElement.style.cursor = mode === 'edit' ? 'crosshair' : 'grab';
+  }
+
+  function selectAreaPoint(areaId: string | null, pointIndex: number | null): void {
+    if (areaId !== null && pointIndex !== null) setAreaInteractionMode('edit');
+    selectedAreaPoint.value = areaId !== null && pointIndex !== null ? { areaId, pointIndex } : null;
+    engine.value?.getPlugin<AreaHighlightPlugin>('area-highlight')?.selectPoint(areaId, pointIndex);
+  }
+
+  function handleAreaDrawingClick(
+    ev: MouseEvent,
+    canvas: HTMLCanvasElement,
+    e: View360Engine,
+  ): void {
+    const rect = canvas.getBoundingClientRect();
+    const ndcX = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+    const ndcY = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+    import('three').then(({ Raycaster, Vector2, Vector3 }) => {
+      if (!isDrawingArea.value && !areaPointTargetId.value) return;
+      const raycaster = new Raycaster();
+      raycaster.setFromCamera(new Vector2(ndcX, ndcY), e.camera.camera);
+      const direction = raycaster.ray.direction.clone().normalize();
+      direction.applyAxisAngle(new Vector3(0, 1, 0), -(currentScene.value?.panoramaRotation ?? 0));
+      const point = {
+        yaw: Math.atan2(-direction.x, -direction.z),
+        pitch: Math.asin(THREEClamp(direction.y)),
+      };
+      if (areaPointTargetId.value) {
+        lastAreaPointAdded.value = { areaId: areaPointTargetId.value, point };
+        areaPointTargetId.value = null;
+        return;
+      }
+      areaDraftPoints.value.push(point);
+      refreshAreaHighlights();
+    });
+  }
+
+  function THREEClamp(value: number): number {
+    return Math.max(-1, Math.min(1, value));
+  }
+
+  function refreshAreaHighlights(areas = currentScene.value?.areaHighlights ?? []): void {
+    const plugin = engine.value?.getPlugin<AreaHighlightPlugin>('area-highlight');
+    if (!plugin) return;
+    const draft: AreaHighlight[] = areaDraftPoints.value.length
+      ? [{ id: '__draft__', points: areaDraftPoints.value, color: '#22c55e', outlineColor: '#ffffff', opacity: 0.34 }]
+      : [];
+    plugin.setAreas([...areas, ...draft], currentScene.value?.panoramaRotation ?? 0);
   }
 
   /**
@@ -335,12 +459,28 @@ export function useDesignerEngine() {
     lastMarkerMoved: readonly(lastMarkerMoved),
     lastMarkerClicked: readonly(lastMarkerClicked),
     lastPlacement: readonly(lastPlacement),
+    isDrawingArea: readonly(isDrawingArea),
+    areaInteractionMode: readonly(areaInteractionMode),
+    areaDraftPoints: readonly(areaDraftPoints),
+    lastAreaDrawn: readonly(lastAreaDrawn),
+    selectedAreaId: readonly(selectedAreaId),
+    selectedAreaPoint: readonly(selectedAreaPoint),
+    lastAreaPointMoved: readonly(lastAreaPointMoved),
+    lastAreaPointAdded: readonly(lastAreaPointAdded),
+    areaPointTargetId: readonly(areaPointTargetId),
 
     // Actions
     initEngine,
     loadScene,
     startPlacement,
     cancelPlacement,
+    startAreaDrawing,
+    finishAreaDrawing,
+    cancelAreaDrawing,
+    startAreaPointPlacement,
+    setAreaInteractionMode,
+    selectAreaPoint,
+    refreshAreaHighlights,
     getCameraAim,
     captureSnapshot,
     refreshMarkers,

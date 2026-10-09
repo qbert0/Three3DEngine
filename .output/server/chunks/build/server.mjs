@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_=globalThis._importMeta_||{url:"file:///_entry.js",env:process.env};globalThis.__timing__.logStart('Load chunks/build/server');import { readonly, defineComponent, createElementBlock, hasInjectionContext, getCurrentInstance, inject, ref, shallowRef, provide, cloneVNode, h, defineAsyncComponent, computed, unref, shallowReactive, Suspense, Fragment, useSSRContext, createApp, mergeProps, onErrorCaptured, onServerPrefetch, createVNode, resolveDynamicComponent, reactive, effectScope, getCurrentScope, toRef, withCtx, nextTick, isReadonly, toRaw, isRef, isShallow, isReactive } from 'vue';
-import { c as createError$1, p as parseURL, h as encodePath, o as decodePath, q as hasProtocol, t as isScriptProtocol, v as joinURL, w as withQuery, x as sanitizeStatusCode, y as getContext, $ as $fetch, z as defu, A as createHooks, B as executeAsync, C as createDebugger } from '../nitro/nitro.mjs';
+import { c as createError$1, q as parseURL, k as encodePath, t as decodePath, v as hasProtocol, w as isScriptProtocol, x as joinURL, y as withQuery, z as sanitizeStatusCode, A as getContext, $ as $fetch, B as defu, C as createHooks, D as executeAsync, E as createDebugger } from '../nitro/nitro.mjs';
 import { b as baseURL } from '../routes/renderer.mjs';
 import { setActivePinia, createPinia, shouldHydrate } from 'pinia';
 import { useRoute as useRoute$1, RouterView, createMemoryHistory, createRouter, START_LOCATION } from 'vue-router';
@@ -534,7 +534,7 @@ const _routes = [
     name: "experience-tourId",
     path: "/experience/:tourId()",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import('./_tourId_-BhXYMOEC.mjs'),
+    component: () => import('./_tourId_-me7Q6Kt1.mjs'),
     children: [
       {
         name: "experience-tourId-ownerTourId-sceneId",
@@ -548,7 +548,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import('./_sceneId_-DeDD5XUQ.mjs')
+    component: () => import('./_sceneId_-CpvWyhM0.mjs')
   }
 ];
 const _wrapInTransition = (props, children) => {
@@ -1010,7 +1010,7 @@ const plugins = [
   components_plugin_z4hgvsiddfKkfXTP6M8M4zG5Cb7sGnDhcryKVM45Di4
 ];
 const layouts = {
-  default: defineAsyncComponent(() => import('./default-BB7HqOeE.mjs').then((m) => m.default || m)),
+  default: defineAsyncComponent(() => import('./default-8lyuoj8D.mjs').then((m) => m.default || m)),
   editor: defineAsyncComponent(() => import('./editor-Dy2R63vE.mjs').then((m) => m.default || m)),
   experience: defineAsyncComponent(() => import('./experience-yT0e4bsx.mjs').then((m) => m.default || m))
 };

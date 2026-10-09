@@ -1,0 +1,4 @@
+globalThis.__timing__.logStart('Load chunks/build/_tourId_-styles-4-iOy3nvNi.mjs');const ViewerCornerControls_vue_vue_type_style_index_0_scoped_180d4fba_lang = "@media(max-width:640px){.viewer-corner-buttons[data-v-180d4fba]{bottom:auto!important;top:calc(60px + env(safe-area-inset-top,0px))}.viewer-corner-logo[data-v-180d4fba]{bottom:max(1px,env(safe-area-inset-bottom,0px));right:max(1px,env(safe-area-inset-right,0px))}}@media(max-width:900px)and (orientation:landscape){.viewer-corner-buttons[data-v-180d4fba]{bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;top:auto}}";
+
+export { ViewerCornerControls_vue_vue_type_style_index_0_scoped_180d4fba_lang as V };;globalThis.__timing__.logEnd('Load chunks/build/_tourId_-styles-4-iOy3nvNi.mjs');
+//# sourceMappingURL=_tourId_-styles-4.mjs-iOy3nvNi.mjs.map

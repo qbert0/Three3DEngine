@@ -1,5 +1,5 @@
-import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import './timing.js';globalThis.__timing__.logStart('Nitro Start');import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getHeader, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, getResponseStatusText } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/h3/dist/index.mjs';
+import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, createError, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, getHeader, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, readMultipartFormData, readFormData, getResponseStatusText } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, dirname, join, extname, basename, sep } from 'node:path';
 import crypto$1, { createHash } from 'node:crypto';
@@ -8,7 +8,7 @@ import { escapeHtml } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/vie
 import viteNodeEntry_mjs from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs';
 import { viteNodeFetch } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/@nuxt/vite-builder/dist/vite-node.mjs';
 import { promises, mkdirSync, writeFileSync, existsSync, unlinkSync, readFileSync, readdirSync } from 'node:fs';
-import { readFile, unlink } from 'node:fs/promises';
+import { readFile, unlink, mkdir } from 'node:fs/promises';
 import sharp from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/sharp/dist/index.mjs';
 import * as yaml from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/js-yaml/dist/js-yaml.mjs';
 import Ajv from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ajv/dist/ajv.js';
@@ -17,7 +17,7 @@ import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLin
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, encodePath, joinRelativeURL } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ufo/dist/index.mjs';
 import { renderToString } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/vue/server-renderer/index.mjs';
 import destr, { destr as destr$1 } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/destr/dist/index.mjs';
-import { createDebugger, createHooks } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/hookable/dist/index.mjs';
+import { createHooks } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/hookable/dist/index.mjs';
 import { createFetch, Headers as Headers$1 } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/ofetch/dist/node.mjs';
 import { fetchNodeRequestHandler, callNodeRequestHandler } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/node-mock-http/dist/index.mjs';
 import { createStorage, defineDriver, prefixStorage } from 'file:///run/media/qbert/1C8099B8809998BA/codedao/view360/node_modules/unstorage/dist/index.mjs';
@@ -2214,47 +2214,9 @@ function onConsoleLog(callback) {
 	consola$1.wrapConsole();
 }
 
-function defineNitroPlugin(def) {
-  return def;
-}
-
-const _cxk1U3wNAx6ggC_RyHFm8F53ntKLmIFx7baWVJKPXNM = defineNitroPlugin((nitro) => {
-  createDebugger(nitro.hooks, { tag: "nitro-runtime" });
-});
-
-const globalTiming = globalThis.__timing__ || {
-  start: () => 0,
-  end: () => 0,
-  metrics: []
-};
-const timingMiddleware = eventHandler((event) => {
-  const start = globalTiming.start();
-  const _end = event.node.res.end;
-  event.node.res.end = function(chunk, encoding, cb) {
-    const metrics = [
-      ["Generate", globalTiming.end(start)],
-      ...globalTiming.metrics
-    ];
-    const serverTiming = metrics.map((m) => `-;dur=${m[1]};desc="${encodeURIComponent(m[0])}"`).join(", ");
-    if (!event.node.res.headersSent) {
-      event.node.res.setHeader("Server-Timing", serverTiming);
-    }
-    _end.call(event.node.res, chunk, encoding, cb);
-    return this;
-  }.bind(event.node.res);
-});
-const _6WrNatFVoGm6wUrtUtHtf5oPY97EzBCWE861SnDw = defineNitroPlugin((nitro) => {
-  nitro.h3App.stack.unshift({
-    route: "/",
-    handler: timingMiddleware
-  });
-});
-
 const plugins = [
   _q1ZScfGbj9qCMgFQOe8zWkedPEk9DBJBLIHVGM7K5V8,
 _IUzsoUA93K60YASEe0I2h44TtPPB44dUuxIQoFr5XDQ,
-_cxk1U3wNAx6ggC_RyHFm8F53ntKLmIFx7baWVJKPXNM,
-_6WrNatFVoGm6wUrtUtHtf5oPY97EzBCWE861SnDw,
 _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 ];
 
@@ -2815,6 +2777,7 @@ const _lazy_uLSXPe = () => Promise.resolve().then(function () { return audio_pos
 const _lazy_zdetgu = () => Promise.resolve().then(function () { return media_delete$1; });
 const _lazy_xXCZDw = () => Promise.resolve().then(function () { return media_post$1; });
 const _lazy_UuwSPz = () => Promise.resolve().then(function () { return preview_get$1; });
+const _lazy_szJvC0 = () => Promise.resolve().then(function () { return panelImage_post$1; });
 const _lazy_uaOLQC = () => Promise.resolve().then(function () { return _slug__delete$1; });
 const _lazy_PGQEaE = () => Promise.resolve().then(function () { return _slug__post$1; });
 const _lazy_VypIyW = () => Promise.resolve().then(function () { return markers_post$1; });
@@ -2833,6 +2796,7 @@ const handlers = [
   { route: '/api/admin/media', handler: _lazy_zdetgu, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/media', handler: _lazy_xXCZDw, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/media/preview', handler: _lazy_UuwSPz, lazy: true, middleware: false, method: "get" },
+  { route: '/api/admin/panel-image', handler: _lazy_szJvC0, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/tours/:slug', handler: _lazy_uaOLQC, lazy: true, middleware: false, method: "delete" },
   { route: '/api/admin/tours/:slug', handler: _lazy_PGQEaE, lazy: true, middleware: false, method: "post" },
   { route: '/api/admin/tours/:slug/scenes/:sceneId/markers', handler: _lazy_VypIyW, lazy: true, middleware: false, method: "post" },
@@ -3197,8 +3161,8 @@ const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const AUDIO_DIR = join(process.cwd(), "public", "uploads", "audio");
-const ALLOWED_EXTENSIONS$1 = /* @__PURE__ */ new Set([".wav", ".mp3", ".m4a", ".ogg", ".aac", ".flac"]);
-const MAX_FILE_SIZE$1 = 25 * 1024 * 1024;
+const ALLOWED_EXTENSIONS$2 = /* @__PURE__ */ new Set([".wav", ".mp3", ".m4a", ".ogg", ".aac", ".flac"]);
+const MAX_FILE_SIZE$2 = 25 * 1024 * 1024;
 const audio_post = defineEventHandler(async (event) => {
   var _a;
   const parts = await readMultipartFormData(event);
@@ -3208,10 +3172,10 @@ const audio_post = defineEventHandler(async (event) => {
   }
   const extension = extname(part.filename).toLowerCase();
   const isAudioMime = ((_a = part.type) == null ? void 0 : _a.startsWith("audio/")) || part.type === "application/octet-stream";
-  if (!ALLOWED_EXTENSIONS$1.has(extension) || !isAudioMime) {
+  if (!ALLOWED_EXTENSIONS$2.has(extension) || !isAudioMime) {
     throw createError({ statusCode: 415, statusMessage: "Ch\u1EC9 h\u1ED7 tr\u1EE3 WAV, MP3, M4A, OGG, AAC ho\u1EB7c FLAC." });
   }
-  if (part.data.byteLength > MAX_FILE_SIZE$1) {
+  if (part.data.byteLength > MAX_FILE_SIZE$2) {
     throw createError({ statusCode: 413, statusMessage: "File \xE2m thanh kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 25 MB." });
   }
   mkdirSync(AUDIO_DIR, { recursive: true });
@@ -3274,20 +3238,20 @@ const media_delete$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProp
   default: media_delete
 }, Symbol.toStringTag, { value: 'Module' }));
 
-const UPLOAD_DIR = join(process.cwd(), "public", "uploads");
+const UPLOAD_DIR$1 = join(process.cwd(), "public", "uploads");
 const THUMBNAIL_DIR = join(process.cwd(), "public", "thumbnails");
 const EDITOR_PREVIEW_DIR = join(process.cwd(), "public", "editor-previews");
 const PANORAMA_PREVIEW_DIR = join(process.cwd(), "public", "panorama-previews");
 const PANORAMA_DIR = join(process.cwd(), "public", "panoramas");
 const MOBILE_PANORAMA_DIR = join(process.cwd(), "public", "panoramas-mobile");
-const ALLOWED_EXTENSIONS = /* @__PURE__ */ new Set([".jpg", ".jpeg", ".png", ".webp"]);
-const MAX_FILE_SIZE = 60 * 1024 * 1024;
+const ALLOWED_EXTENSIONS$1 = /* @__PURE__ */ new Set([".jpg", ".jpeg", ".png", ".webp"]);
+const MAX_FILE_SIZE$1 = 60 * 1024 * 1024;
 sharp.cache(false);
 sharp.concurrency(1);
 const media_post = defineEventHandler(async (event) => {
   var _a, _b;
   try {
-    mkdirSync(UPLOAD_DIR, { recursive: true });
+    mkdirSync(UPLOAD_DIR$1, { recursive: true });
   } catch {
   }
   try {
@@ -3318,10 +3282,10 @@ const media_post = defineEventHandler(async (event) => {
   for (const part of body) {
     if (!part.data || !part.filename) continue;
     const ext = extname(part.filename).toLowerCase();
-    if (!ALLOWED_EXTENSIONS.has(ext)) {
+    if (!ALLOWED_EXTENSIONS$1.has(ext)) {
       throw createError({ statusCode: 415, statusMessage: "Ch\u1EC9 h\u1ED7 tr\u1EE3 \u1EA3nh JPG, PNG ho\u1EB7c WebP." });
     }
-    if (part.data.byteLength > MAX_FILE_SIZE) {
+    if (part.data.byteLength > MAX_FILE_SIZE$1) {
       throw createError({ statusCode: 413, statusMessage: "\u1EA2nh kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 60 MB." });
     }
     let meta;
@@ -3340,7 +3304,7 @@ const media_post = defineEventHandler(async (event) => {
     const panoramaPreviewName = `${baseName}.webp`;
     const viewerPanoramaName = `${baseName}.webp`;
     const mobilePanoramaName = `${baseName}.webp`;
-    const inputPath = join(UPLOAD_DIR, fileName);
+    const inputPath = join(UPLOAD_DIR$1, fileName);
     const thumbPath = join(THUMBNAIL_DIR, thumbName);
     const editorPreviewPath = join(EDITOR_PREVIEW_DIR, editorPreviewName);
     const panoramaPreviewPath = join(PANORAMA_PREVIEW_DIR, panoramaPreviewName);
@@ -3402,6 +3366,47 @@ const preview_get = defineEventHandler(async (event) => {
 const preview_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: preview_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const UPLOAD_DIR = join(process.cwd(), "public", "uploads");
+const ALLOWED_EXTENSIONS = /* @__PURE__ */ new Set([".jpg", ".jpeg", ".png", ".webp"]);
+const MAX_FILE_SIZE = 200 * 1024 * 1024;
+const MAX_FILE_SIZE_LABEL = "200 MB";
+const panelImage_post = defineEventHandler(async (event) => {
+  var _a, _b;
+  const contentLength = Number((_a = getRequestHeader(event, "content-length")) != null ? _a : 0);
+  if (contentLength > MAX_FILE_SIZE + 1024 * 1024) {
+    throw createError({ statusCode: 413, statusMessage: `\u1EA2nh 2D kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 ${MAX_FILE_SIZE_LABEL}.` });
+  }
+  const form = await readFormData(event);
+  const uploaded = form.get("file");
+  if (!uploaded || typeof uploaded === "string" || typeof uploaded.arrayBuffer !== "function") {
+    throw createError({ statusCode: 400, statusMessage: "Kh\xF4ng c\xF3 \u1EA3nh n\xE0o \u0111\u01B0\u1EE3c g\u1EEDi l\xEAn." });
+  }
+  const extension = extname(uploaded.name).toLowerCase();
+  if (!ALLOWED_EXTENSIONS.has(extension)) {
+    throw createError({ statusCode: 415, statusMessage: "Ch\u1EC9 h\u1ED7 tr\u1EE3 \u1EA3nh JPG, PNG ho\u1EB7c WebP." });
+  }
+  if (uploaded.size > MAX_FILE_SIZE) {
+    throw createError({ statusCode: 413, statusMessage: `\u1EA2nh 2D kh\xF4ng \u0111\u01B0\u1EE3c v\u01B0\u1EE3t qu\xE1 ${MAX_FILE_SIZE_LABEL}.` });
+  }
+  const imageData = Buffer.from(await uploaded.arrayBuffer());
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}-panel.webp`;
+  await mkdir(UPLOAD_DIR, { recursive: true });
+  try {
+    await sharp(imageData, { failOn: "error", sequentialRead: true }).rotate().resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true }).webp({ quality: 86, effort: 4 }).toFile(join(UPLOAD_DIR, fileName));
+  } catch (error) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: `Kh\xF4ng th\u1EC3 x\u1EED l\xFD \u1EA3nh 2D: ${(_b = error == null ? void 0 : error.message) != null ? _b : String(error)}`
+    });
+  }
+  return { ok: true, file: { url: `/uploads/${fileName}` } };
+});
+
+const panelImage_post$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: panelImage_post
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const generatedTours = {
@@ -3472,6 +3477,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3519,6 +3526,8 @@ const generatedTours = {
 					rotZ: 0,
 					rotY: 0.10471975511965977
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3576,6 +3585,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3651,7 +3662,37 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1,
 					sphereRadius: 430
+				},
+				{
+					id: "h1791474195474",
+					label: "Xem nội dung",
+					yaw: 1.6709,
+					pitch: 0.0877,
+					plugin: "panel",
+					placement: "horizontal",
+					contents: [
+						{
+							id: "block-1791474202069",
+							type: "image",
+							src: "/uploads/1791475775090-vptl3sa6rd9-panel.webp",
+							alt: "",
+							caption: ""
+						},
+						{
+							id: "block-1791474209766",
+							type: "text",
+							content: "hòn đá triết gia. Tác phẩm điêu khắc đá cẩm thạch trắng với hình khối hình học tối giản, mạnh mẽ. Tảng đá được chế tác thành một khối đặc có dạng như một cánh cổng hoặc mái vòm cách điệu — phần trên là một khối hình thang vát chéo, tạo thành cạnh nghiêng sắc nét, trong khi phần dưới được khoét rỗng một khoảng hình chữ nhật đứng, tạo nên một \"lối đi\" hoặc khung cửa mở giữa hai trụ đá. Bề mặt đá trắng ngà với những vân xám tự nhiên chạy dọc, để lộ rõ chất liệu cẩm thạch nguyên khối. Ánh sáng ban ngày đổ xuống tạo nên sự tương phản rõ rệt giữa mặt phẳng sáng và các cạnh tối, làm nổi bật tính khối và góc cạnh của tác phẩm.",
+							presentation: "text-and-audio",
+							speech: {
+								lang: "vi-VN",
+								rate: 1,
+								pitch: 1
+							}
+						}
+					]
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3694,6 +3735,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3728,6 +3771,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3787,6 +3832,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3812,7 +3859,7 @@ const generatedTours = {
 			markers: [
 				{
 					id: "h1791365672086",
-					label: "Chuyển cảnh",
+					label: "Ngã ba dinh thự ",
 					yaw: -0.9948,
 					pitch: -0.3254,
 					plugin: "navigation",
@@ -3843,6 +3890,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3901,6 +3950,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3935,6 +3986,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -3970,6 +4023,8 @@ const generatedTours = {
 					icon: "location-1",
 					pinColor: "#171717"
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4016,6 +4071,8 @@ const generatedTours = {
 					icon: "location-1",
 					pinColor: "#171717"
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4068,6 +4125,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4134,6 +4193,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4186,6 +4247,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4238,6 +4301,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4304,6 +4369,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4370,6 +4437,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4422,6 +4491,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4488,6 +4559,8 @@ const generatedTours = {
 					scaleX: 1.6,
 					scaleY: 1
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4499,9 +4572,9 @@ const generatedTours = {
 			mobilePanorama: "/panoramas-mobile/1791374679999-qb06gn55i3r-c99a7d39d1.webp",
 			thumbnail: "/thumbnails/1791374679999-qb06gn55i3r.webp",
 			editorPanorama: "/editor-previews/1791374679999-qb06gn55i3r.webp",
-			initialYaw: 19.516842360065187,
-			initialPitch: -0.29684906854110565,
-			initialFov: 75,
+			initialYaw: 19.555935468590953,
+			initialPitch: -0.326867215533473,
+			initialFov: 84.6474125039102,
 			defaultCameraEnabled: true,
 			panoramaRotation: -2.4941853071795865,
 			brightness: 1.25,
@@ -4624,6 +4697,31 @@ const generatedTours = {
 					sphereRadius: 520,
 					pinColor: "#171717",
 					iconUrl: "/thumbnails/1791363884550-otcz1232qvm.webp"
+				}
+			],
+			areaHighlights: [
+				{
+					id: "area-1791528235657",
+					points: [
+						{
+							yaw: -2.7027417068811217,
+							pitch: -0.4411408414339755
+						},
+						{
+							yaw: 3.0449780571489207,
+							pitch: -0.17973677276696054
+						},
+						{
+							yaw: 2.9151854685989362,
+							pitch: -0.6989168105248231
+						}
+					],
+					color: "#22c55e",
+					outlineColor: "#ffffff",
+					opacity: 0.34,
+					durationMs: 1400,
+					mode: "fill-outline",
+					lineWidth: 5
 				}
 			]
 		},
@@ -4759,6 +4857,8 @@ const generatedTours = {
 					sphereRadius: 520,
 					pinColor: "#171717"
 				}
+			],
+			areaHighlights: [
 			]
 		},
 		{
@@ -4864,6 +4964,8 @@ const generatedTours = {
 					pinColor: "#171717",
 					iconUrl: "/thumbnails/1791363884550-otcz1232qvm.webp"
 				}
+			],
+			areaHighlights: [
 			]
 		}
 	]
@@ -5143,7 +5245,38 @@ function getValidator() {
               items: { type: "number" }
             },
             showOnMap: { type: "boolean", default: false },
-            markers: { type: "array", default: [] }
+            markers: { type: "array", default: [] },
+            areaHighlights: {
+              type: "array",
+              default: [],
+              items: {
+                type: "object",
+                required: ["id", "points"],
+                properties: {
+                  id: { type: "string", minLength: 1 },
+                  points: {
+                    type: "array",
+                    minItems: 3,
+                    items: {
+                      type: "object",
+                      required: ["yaw", "pitch"],
+                      properties: {
+                        yaw: { type: "number" },
+                        pitch: { type: "number", minimum: -1.5708, maximum: 1.5708 }
+                      }
+                    }
+                  },
+                  color: { type: "string" },
+                  outlineColor: { type: "string" },
+                  opacity: { type: "number", minimum: 0, maximum: 1 },
+                  delayMs: { type: "number", minimum: 0 },
+                  durationMs: { type: "number", minimum: 250 },
+                  radius: { type: "number", minimum: 100, maximum: 595 },
+                  mode: { type: "string", enum: ["fill", "outline", "fill-outline"] },
+                  lineWidth: { type: "number", minimum: 1, maximum: 24 }
+                }
+              }
+            }
           }
         }
       }
@@ -5165,7 +5298,7 @@ function compileTour(raw) {
   const data = raw;
   const warnings = [];
   const scenes = data.scenes.map((s, i) => {
-    var _a2, _b2, _c2, _d2, _e, _f, _g, _h, _i, _j, _k;
+    var _a2, _b2, _c2, _d2, _e, _f, _g, _h, _i, _j, _k, _l;
     const markers = ((_a2 = s.markers) != null ? _a2 : []).map((m) => {
       if (!m.id || !m.plugin || !m.label) {
         warnings.push(`Scene[${i}].markers: marker thi\u1EBFu id/plugin/label \u2014 b\u1ECB b\u1ECF qua.`);
@@ -5193,7 +5326,8 @@ function compileTour(raw) {
       highlightCompression: (_j = s.highlightCompression) != null ? _j : 0,
       coordinates: s.coordinates,
       showOnMap: (_k = s.showOnMap) != null ? _k : false,
-      markers
+      markers,
+      areaHighlights: (_l = s.areaHighlights) != null ? _l : []
     };
   });
   if (data.initialSceneId) {
@@ -6346,5 +6480,5 @@ function renderHTMLDocument(html) {
 const renderer = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: handler
-}, Symbol.toStringTag, { value: 'Module' }));;globalThis.__timing__.logEnd('Nitro Start');
+}, Symbol.toStringTag, { value: 'Module' }));
 //# sourceMappingURL=index.mjs.map

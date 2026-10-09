@@ -1,5 +1,5 @@
 globalThis.__timing__.logStart('Load chunks/build/nuxt-link-AvfA4aCh');import { defineComponent, shallowRef, h, resolveComponent, computed, unref } from 'vue';
-import { D as parseQuery, q as hasProtocol, v as joinURL, t as isScriptProtocol, E as withTrailingSlash, F as withoutTrailingSlash } from '../nitro/nitro.mjs';
+import { F as parseQuery, v as hasProtocol, x as joinURL, w as isScriptProtocol, G as withTrailingSlash, H as withoutTrailingSlash } from '../nitro/nitro.mjs';
 import { b as useRouter, h as encodeRoutePath, r as resolveRouteObject, n as navigateTo, d as useNuxtApp, i as useRuntimeConfig, j as nuxtLinkDefaults } from './server.mjs';
 
 const firstNonUndefined = (...args) => args.find((arg) => arg !== void 0);

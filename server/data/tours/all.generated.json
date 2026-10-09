@@ -64,7 +64,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxvs1p9",
@@ -111,7 +112,8 @@
             "rotZ": 0,
             "rotY": 0.10471975511965977
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxvrkpl",
@@ -168,7 +170,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxvzikj",
@@ -243,8 +246,37 @@
             "scaleX": 1.6,
             "scaleY": 1,
             "sphereRadius": 430
+          },
+          {
+            "id": "h1791474195474",
+            "label": "Xem nội dung",
+            "yaw": 1.6709,
+            "pitch": 0.0877,
+            "plugin": "panel",
+            "placement": "horizontal",
+            "contents": [
+              {
+                "id": "block-1791474202069",
+                "type": "image",
+                "src": "/uploads/1791475775090-vptl3sa6rd9-panel.webp",
+                "alt": "",
+                "caption": ""
+              },
+              {
+                "id": "block-1791474209766",
+                "type": "text",
+                "content": "hòn đá triết gia. Tác phẩm điêu khắc đá cẩm thạch trắng với hình khối hình học tối giản, mạnh mẽ. Tảng đá được chế tác thành một khối đặc có dạng như một cánh cổng hoặc mái vòm cách điệu — phần trên là một khối hình thang vát chéo, tạo thành cạnh nghiêng sắc nét, trong khi phần dưới được khoét rỗng một khoảng hình chữ nhật đứng, tạo nên một \"lối đi\" hoặc khung cửa mở giữa hai trụ đá. Bề mặt đá trắng ngà với những vân xám tự nhiên chạy dọc, để lộ rõ chất liệu cẩm thạch nguyên khối. Ánh sáng ban ngày đổ xuống tạo nên sự tương phản rõ rệt giữa mặt phẳng sáng và các cạnh tối, làm nổi bật tính khối và góc cạnh của tác phẩm.",
+                "presentation": "text-and-audio",
+                "speech": {
+                  "lang": "vi-VN",
+                  "rate": 1,
+                  "pitch": 1
+                }
+              }
+            ]
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxvnnpk",
@@ -286,7 +318,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxwnmgu",
@@ -320,7 +353,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxwnvwr",
@@ -379,7 +413,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxwtgdv",
@@ -404,7 +439,7 @@
         "markers": [
           {
             "id": "h1791365672086",
-            "label": "Chuyển cảnh",
+            "label": "Ngã ba dinh thự ",
             "yaw": -0.9948,
             "pitch": -0.3254,
             "plugin": "navigation",
@@ -435,7 +470,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxyetn4",
@@ -493,7 +529,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxyfx7u",
@@ -527,7 +564,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxz5hlz",
@@ -562,7 +600,8 @@
             "icon": "location-1",
             "pinColor": "#171717"
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxz694t",
@@ -608,7 +647,8 @@
             "icon": "location-1",
             "pinColor": "#171717"
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxzy2ve",
@@ -660,7 +700,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxzynnf",
@@ -726,7 +767,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxzyu0r",
@@ -778,7 +820,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muxzz1f4",
@@ -830,7 +873,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muy12wxo",
@@ -896,7 +940,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muy138jo",
@@ -962,7 +1007,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muy13e1t",
@@ -1014,7 +1060,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muy13pai",
@@ -1080,7 +1127,8 @@
             "scaleX": 1.6,
             "scaleY": 1
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muy28efw",
@@ -1091,9 +1139,9 @@
         "mobilePanorama": "/panoramas-mobile/1791374679999-qb06gn55i3r-c99a7d39d1.webp",
         "thumbnail": "/thumbnails/1791374679999-qb06gn55i3r.webp",
         "editorPanorama": "/editor-previews/1791374679999-qb06gn55i3r.webp",
-        "initialYaw": 19.516842360065187,
-        "initialPitch": -0.29684906854110565,
-        "initialFov": 75,
+        "initialYaw": 19.555935468590953,
+        "initialPitch": -0.326867215533473,
+        "initialFov": 84.6474125039102,
         "defaultCameraEnabled": true,
         "panoramaRotation": -2.4941853071795865,
         "brightness": 1.25,
@@ -1216,6 +1264,31 @@
             "sphereRadius": 520,
             "pinColor": "#171717",
             "iconUrl": "/thumbnails/1791363884550-otcz1232qvm.webp"
+          }
+        ],
+        "areaHighlights": [
+          {
+            "id": "area-1791528235657",
+            "points": [
+              {
+                "yaw": -2.7027417068811217,
+                "pitch": -0.4411408414339755
+              },
+              {
+                "yaw": 3.0449780571489207,
+                "pitch": -0.17973677276696054
+              },
+              {
+                "yaw": 2.9151854685989362,
+                "pitch": -0.6989168105248231
+              }
+            ],
+            "color": "#22c55e",
+            "outlineColor": "#ffffff",
+            "opacity": 0.34,
+            "durationMs": 1400,
+            "mode": "fill-outline",
+            "lineWidth": 5
           }
         ]
       },
@@ -1351,7 +1424,8 @@
             "sphereRadius": 520,
             "pinColor": "#171717"
           }
-        ]
+        ],
+        "areaHighlights": []
       },
       {
         "id": "scene-muy29vy6",
@@ -1456,7 +1530,8 @@
             "pinColor": "#171717",
             "iconUrl": "/thumbnails/1791363884550-otcz1232qvm.webp"
           }
-        ]
+        ],
+        "areaHighlights": []
       }
     ]
   }

@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/routes/api/tours/_slug_.get');import { d as defineEventHandler, b as getRouterParam, c as createError, u as useRuntimeConfig } from '../../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/tours/_slug_.get');import { d as defineEventHandler, f as getRouterParam, c as createError, u as useRuntimeConfig } from '../../../nitro/nitro.mjs';
 import { t as tourService } from '../../../_/tourService.mjs';
 import 'node:http';
 import 'node:https';

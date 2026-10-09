@@ -1,5 +1,5 @@
 globalThis.__timing__.logStart('Load chunks/build/fetch-BTut8LNP');import { computed, toValue, reactive, watch, getCurrentInstance, onServerPrefetch, ref, shallowRef, nextTick, unref, toRef } from 'vue';
-import { G as hash } from '../nitro/nitro.mjs';
+import { I as hash } from '../nitro/nitro.mjs';
 import { isPlainObject } from '@vue/shared';
 import { g as fetchDefaults, d as useNuxtApp, e as asyncDataDefaults, f as createError } from './server.mjs';
 import { debounce } from 'perfect-debounce';

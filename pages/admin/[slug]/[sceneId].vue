@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue';
 import { useDesignerEngine } from '~/composables/designer/useDesignerEngine';
-import type { TourConfig, TourScene, TourMarker, NavigationMarker, InfoMarker, VideoMarker, Model3DMarker, PanelMarkerData, PanelBlock } from '~/types/tour';
+import type { AreaHighlight, TourConfig, TourScene, TourMarker, NavigationMarker, InfoMarker, VideoMarker, Model3DMarker, PanelMarkerData, PanelBlock } from '~/types/tour';
 
 definePageMeta({ layout: false, ssr: false });
 
@@ -137,7 +137,11 @@ const currentScene = computed<TourScene | null>(() => {
 // Inspector tabs & state
 type InspectorTab = 'scene' | 'hotspots' | 'settings';
 const currentTab = ref<InspectorTab>('scene');
-const editorMode = ref<'panorama' | 'map'>('panorama');
+const editorMode = ref<'panorama' | 'highlight' | 'map'>('panorama');
+const selectedAreaId = ref<string | null>(null);
+const selectedArea = computed(() => currentScene.value?.areaHighlights?.find(area => area.id === selectedAreaId.value) ?? null);
+const newAreaMode = ref<NonNullable<AreaHighlight['mode']>>('fill-outline');
+const newAreaLineWidth = ref(5);
 
 // ── Map editor state ──
 const mapEditorCanvas = ref<HTMLCanvasElement | null>(null);
@@ -431,6 +435,13 @@ watch(editorMode, (mode) => {
       mapActiveFloorId.value = tour.value.map.floors[0].id;
     }
     nextTick(() => drawMapEditor());
+  } else if (mode === 'highlight') {
+    selectedAreaId.value ??= currentScene.value?.areaHighlights?.[0]?.id ?? null;
+    engineSetAreaInteractionMode('rotate');
+    nextTick(() => refreshAreaHighlights(currentScene.value?.areaHighlights ?? []));
+  } else {
+    if (isDrawingArea.value || areaPointTargetId.value) engineCancelAreaDrawing();
+    engineSetAreaInteractionMode('rotate');
   }
 });
 
@@ -483,11 +494,14 @@ const selectedHotspot = computed<TourMarker | null>(() => {
 const fileInput = ref<HTMLInputElement | null>(null);
 const newSceneInput = ref<HTMLInputElement | null>(null);
 const modelImageInput = ref<HTMLInputElement | null>(null);
+const panelImageInput = ref<HTMLInputElement | null>(null);
+const panelImageTargetBlockId = ref<string | null>(null);
 const narrationInput = ref<HTMLInputElement | null>(null);
 const narrationTargetBlockId = ref<string | null>(null);
 const uploadingImage = ref(false);
 const addingScene = ref(false);
 const uploadingNarration = ref(false);
+const uploadingPanelImage = ref(false);
 const panoramaPreviewFailed = ref(false);
 
 function triggerImageUpload() {
@@ -558,6 +572,60 @@ async function handleModelImageChange(event: Event) {
     showToast({ message: err?.statusMessage ?? 'Không thể tải ảnh vật thể', variant: 'error' });
   } finally {
     uploadingImage.value = false;
+    target.value = '';
+  }
+}
+
+function triggerPanelImageUpload(blockId: string) {
+  panelImageTargetBlockId.value = blockId;
+  panelImageInput.value?.click();
+}
+
+async function handlePanelImageChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+  const marker = selectedHotspot.value?.plugin === 'panel' ? selectedHotspot.value as PanelMarkerData : null;
+  const block = marker?.contents.find((item) => item.id === panelImageTargetBlockId.value && item.type === 'image');
+  if (!file || !block || block.type !== 'image') {
+    target.value = '';
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  uploadingPanelImage.value = true;
+  try {
+    let uploadedUrl = '';
+    try {
+      const res = await $fetch<{ ok: boolean; file: { url: string } }>('/api/admin/panel-image', {
+        method: 'POST', body: formData,
+      });
+      uploadedUrl = res.ok ? res.file?.url ?? '' : '';
+    } catch (error: any) {
+      // Nitro may not discover a newly added server route until the current
+      // dev process restarts. Keep uploads working through the established
+      // media route in that specific case.
+      const status = error?.statusCode ?? error?.status ?? error?.response?.status;
+      if (status !== 404) throw error;
+      const fallback = await $fetch<{ ok: boolean; files: Array<{ original: string }> }>('/api/admin/media', {
+        method: 'POST', body: formData,
+      });
+      uploadedUrl = fallback.ok ? fallback.files?.[0]?.original ?? '' : '';
+    }
+
+    if (!uploadedUrl) throw new Error('Máy chủ không trả về đường dẫn ảnh 2D.');
+    block.src = uploadedUrl;
+    syncMarkersToViewer();
+    markDirty();
+    showToast({ message: 'Đã tải ảnh 2D lên', variant: 'success' });
+  } catch (err: any) {
+    showToast({
+      message: err?.data?.statusMessage ?? err?.statusMessage ?? err?.message ?? 'Không thể tải ảnh 2D',
+      variant: 'error',
+    });
+  } finally {
+    uploadingPanelImage.value = false;
+    panelImageTargetBlockId.value = null;
     target.value = '';
   }
 }
@@ -686,10 +754,26 @@ const {
   lastMarkerMoved,
   lastMarkerClicked,
   lastPlacement,
+  isDrawingArea,
+  areaInteractionMode,
+  areaDraftPoints,
+  lastAreaDrawn,
+  selectedAreaId: engineSelectedAreaId,
+  selectedAreaPoint,
+  lastAreaPointMoved,
+  lastAreaPointAdded,
+  areaPointTargetId,
   initEngine,
   loadScene: engineLoadScene,
   startPlacement: engineStartPlacement,
   cancelPlacement: engineCancelPlacement,
+  startAreaDrawing: engineStartAreaDrawing,
+  finishAreaDrawing: engineFinishAreaDrawing,
+  cancelAreaDrawing: engineCancelAreaDrawing,
+  startAreaPointPlacement,
+  setAreaInteractionMode: engineSetAreaInteractionMode,
+  selectAreaPoint: engineSelectAreaPoint,
+  refreshAreaHighlights,
   getCameraAim,
   captureSnapshot,
   refreshMarkers,
@@ -909,6 +993,48 @@ watch(lastMarkerClicked, (marker) => {
   if (!previewMode.value) currentTab.value = 'hotspots';
 });
 
+watch(lastAreaDrawn, (area) => {
+  if (!area || !currentScene.value) return;
+  area.mode = newAreaMode.value;
+  area.lineWidth = newAreaLineWidth.value;
+  currentScene.value.areaHighlights ??= [];
+  currentScene.value.areaHighlights.push(area);
+  selectedAreaId.value = area.id;
+  refreshAreaHighlights(currentScene.value.areaHighlights);
+  markDirty();
+  showToast({ message: 'Đã thêm vùng làm nổi bật', variant: 'default' });
+});
+
+watch(engineSelectedAreaId, areaId => {
+  if (areaId) selectedAreaId.value = areaId;
+});
+
+let areaMoveHistoryTimer: ReturnType<typeof setTimeout> | null = null;
+watch(lastAreaPointMoved, (payload) => {
+  if (!payload) return;
+  selectedAreaId.value = payload.areaId;
+  isDirty.value = true;
+  if (areaMoveHistoryTimer) clearTimeout(areaMoveHistoryTimer);
+  areaMoveHistoryTimer = setTimeout(() => markDirty(), 180);
+});
+
+watch(lastAreaPointAdded, (payload) => {
+  if (!payload || !currentScene.value) return;
+  const area = currentScene.value.areaHighlights?.find(item => item.id === payload.areaId);
+  if (!area) return;
+  area.points.push(payload.point);
+  selectedAreaId.value = area.id;
+  refreshAreaHighlights(currentScene.value.areaHighlights ?? []);
+  engineSelectAreaPoint(area.id, area.points.length - 1);
+  markDirty();
+});
+
+watch(
+  () => currentScene.value?.areaHighlights,
+  (areas) => refreshAreaHighlights(areas ?? []),
+  { deep: true },
+);
+
 // ── Scene Navigation ──────────────────────────────────────────────────────────
 async function goToScene(idx: number) {
   if (!tour.value || idx < 0 || idx >= tour.value.scenes.length) return;
@@ -1099,6 +1225,65 @@ function startPlacingHotspot() {
   }
 }
 
+function toggleAreaDrawing() {
+  if (isDrawingArea.value) {
+    if (!engineFinishAreaDrawing()) {
+      showToast({ message: 'Cần chọn ít nhất 3 điểm để tạo vùng', variant: 'warning' });
+    }
+    return;
+  }
+  if (isPlacingHotspot.value) cancelPlacing();
+  engineStartAreaDrawing();
+  showToast({ message: 'Click các điểm bao quanh khu vực, sau đó bấm Hoàn tất vùng', variant: 'default' });
+}
+
+function cancelAreaDrawing() {
+  engineCancelAreaDrawing();
+  showToast({ message: 'Đã hủy vẽ vùng', variant: 'default' });
+}
+
+function setHighlightInteractionMode(mode: 'rotate' | 'edit') {
+  if (mode === 'rotate' && (isDrawingArea.value || areaPointTargetId.value)) {
+    engineCancelAreaDrawing();
+  }
+  engineSetAreaInteractionMode(mode);
+}
+
+function selectArea(area: AreaHighlight) {
+  selectedAreaId.value = area.id;
+  engineSelectAreaPoint(null, null);
+}
+
+function selectAreaNode(areaId: string, pointIndex: number) {
+  selectedAreaId.value = areaId;
+  engineSelectAreaPoint(areaId, pointIndex);
+}
+
+function deleteArea(areaId: string) {
+  if (!currentScene.value?.areaHighlights) return;
+  currentScene.value.areaHighlights = currentScene.value.areaHighlights.filter(area => area.id !== areaId);
+  if (selectedAreaId.value === areaId) selectedAreaId.value = null;
+  engineSelectAreaPoint(null, null);
+  refreshAreaHighlights(currentScene.value.areaHighlights);
+  markDirty();
+}
+
+function removeAreaPoint(area: AreaHighlight, pointIndex: number) {
+  if (area.points.length <= 3) {
+    showToast({ message: 'Một vùng phải có ít nhất 3 node', variant: 'warning' });
+    return;
+  }
+  area.points.splice(pointIndex, 1);
+  engineSelectAreaPoint(null, null);
+  refreshAreaHighlights(currentScene.value?.areaHighlights ?? []);
+  markDirty();
+}
+
+function updateSelectedArea() {
+  refreshAreaHighlights(currentScene.value?.areaHighlights ?? []);
+  markDirty();
+}
+
 function cancelPlacing() {
   isPlacingHotspot.value = false;
   showHotspotModal.value = false;
@@ -1156,6 +1341,8 @@ function addPanelBlock(type: PanelBlock['type']) {
     ? { id, type, content: '', presentation: 'text-only', speech: { lang: 'vi-VN', rate: 1, pitch: 1 } }
     : type === 'audio'
       ? { id, type, src: '' }
+      : type === 'image'
+        ? { id, type, src: '', alt: '', caption: '' }
       : type === 'image3d'
         ? { id, type, image: '', caption: '' }
         : { id, type, context: '' };
@@ -1255,6 +1442,7 @@ onMounted(() => {
     if (e.key === 'Escape') {
       if (showHotspotModal.value) cancelPlacing();
       else if (isPlacingHotspot.value) cancelPlacing();
+      else if (isDrawingArea.value) cancelAreaDrawing();
       else if (selectedHotspotId.value) selectedHotspotId.value = null;
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -1307,6 +1495,7 @@ onMounted(() => {
       @change="handleNewSceneImage"
     >
     <input ref="modelImageInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handleModelImageChange">
+    <input ref="panelImageInput" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" @change="handlePanelImageChange">
     <input
       ref="narrationInput"
       type="file"
@@ -1462,11 +1651,24 @@ onMounted(() => {
       <div class="preview-toolbar">
         <div class="editor-mode-switch">
           <button type="button" :class="{ active: editorMode === 'panorama' }" @click="editorMode = 'panorama'">Panorama</button>
+          <button type="button" :class="{ active: editorMode === 'highlight' }" @click="editorMode = 'highlight'">Vùng sáng</button>
           <button type="button" :class="{ active: editorMode === 'map' }" @click="editorMode = 'map'">Bản đồ</button>
         </div>
         <div v-if="editorMode === 'panorama'" class="editor-mode-switch alignment-mode-switch">
           <button type="button" :class="{ active: interactionMode === 'camera' }" @click="setInteractionMode('camera')">Xoay camera</button>
           <button type="button" :class="{ active: interactionMode === 'panorama' }" @click="setInteractionMode('panorama')">Xoay panorama</button>
+        </div>
+        <div v-if="editorMode === 'highlight'" class="editor-mode-switch alignment-mode-switch">
+          <button
+            type="button"
+            :class="{ active: areaInteractionMode === 'rotate' }"
+            @click="setHighlightInteractionMode('rotate')"
+          >Xoay góc nhìn</button>
+          <button
+            type="button"
+            :class="{ active: areaInteractionMode === 'edit' }"
+            @click="setHighlightInteractionMode('edit')"
+          >Vẽ / chỉnh vùng</button>
         </div>
         <div
           v-if="editorMode === 'panorama' && interactionMode === 'camera' && currentScene"
@@ -1507,6 +1709,7 @@ onMounted(() => {
         </button>
 
         <span v-if="isPlacingHotspot" class="toolbar-hint">Nhấn vào ảnh để chọn vị trí</span>
+        <span v-else-if="isDrawingArea" class="toolbar-hint">Chọn ít nhất 3 điểm · ESC để hủy</span>
 
         <div class="pt-spacer"></div>
 
@@ -1527,7 +1730,7 @@ onMounted(() => {
       </div>
 
       <div class="preview-canvas" id="previewCanvas">
-        <div ref="container" class="h-full w-full" :style="{ visibility: editorMode === 'panorama' ? 'visible' : 'hidden' }" />
+        <div ref="container" class="h-full w-full" :style="{ visibility: editorMode === 'panorama' || editorMode === 'highlight' ? 'visible' : 'hidden' }" />
 
         <AdminRealMapEditor
           v-if="editorMode === 'map' && tour"
@@ -1550,6 +1753,13 @@ onMounted(() => {
 
         <div v-if="editorMode === 'panorama'" class="place-hint" :class="{ active: isPlacingHotspot }" id="placeHint">
           Nhấn lên ảnh để đặt điểm tương tác · ESC để hủy
+        </div>
+
+        <div v-if="editorMode === 'highlight'" class="place-hint active">
+          <template v-if="isDrawingArea">Click để thêm node · Kéo node lớn để chỉnh · Bấm Hoàn tất vùng</template>
+          <template v-else-if="areaPointTargetId">Click vị trí muốn thêm node · ESC để hủy</template>
+          <template v-else-if="areaInteractionMode === 'edit'">Camera đang khóa · Kéo node để chỉnh hình dạng</template>
+          <template v-else>Kéo để xoay góc nhìn · Chế độ này không tạo hoặc kéo node</template>
         </div>
 
         <div v-if="editorMode === 'panorama'" class="preview-info">
@@ -2139,6 +2349,7 @@ onMounted(() => {
                 <label>Nội dung trong panel</label>
                 <div class="video-size-presets">
                   <button type="button" @click="addPanelBlock('text')">+ Văn bản</button>
+                  <button type="button" @click="addPanelBlock('image')">+ Ảnh 2D</button>
                   <button type="button" @click="addPanelBlock('image3d')">+ Ảnh 3D</button>
                   <button type="button" @click="addPanelBlock('audio')">+ Âm thanh</button>
                   <button type="button" @click="addPanelBlock('ai-chat')">+ AI Chat</button>
@@ -2152,7 +2363,7 @@ onMounted(() => {
                 class="field panel-block-editor"
               >
                 <label>
-                  {{ block.type === 'text' ? 'Văn bản' : block.type === 'image3d' ? 'Ảnh 3D' : block.type === 'audio' ? 'Âm thanh' : 'AI Chat' }}
+                  {{ block.type === 'text' ? 'Văn bản' : block.type === 'image' ? 'Ảnh 2D' : block.type === 'image3d' ? 'Ảnh 3D' : block.type === 'audio' ? 'Âm thanh' : 'AI Chat' }}
                   <span class="field-badge">{{ blockIndex + 1 }}</span>
                 </label>
                 <template v-if="block.type === 'text'">
@@ -2200,6 +2411,18 @@ onMounted(() => {
                   <div class="hint-text">Giọng đọc thực tế phụ thuộc vào giọng có sẵn trên thiết bị người xem.</div>
                   </details>
                   </template>
+                </template>
+                <template v-else-if="block.type === 'image'">
+                  <input :value="block.src" type="text" placeholder="/uploads/... hoặc https://..." @input="(e:any) => { block.src = e.target.value; syncMarkersToViewer(); markDirty(); }">
+                  <div class="video-size-presets">
+                    <button type="button" :disabled="uploadingPanelImage" @click="triggerPanelImageUpload(block.id)">
+                      {{ uploadingPanelImage && panelImageTargetBlockId === block.id ? 'Đang tải...' : 'Tải ảnh 2D' }}
+                    </button>
+                    <button v-if="block.src" type="button" @click="block.src = ''; syncMarkersToViewer(); markDirty();">Bỏ ảnh</button>
+                  </div>
+                  <img v-if="block.src" :src="block.src" :alt="block.alt || block.caption || 'Ảnh xem trước'" class="max-h-48 w-full rounded-lg bg-black/20 object-contain">
+                  <input :value="block.alt" type="text" placeholder="Mô tả ảnh cho trợ năng" @input="(e:any) => { block.alt = e.target.value; markDirty(); }">
+                  <input :value="block.caption" type="text" placeholder="Chú thích ảnh (không bắt buộc)" @input="(e:any) => { block.caption = e.target.value; syncMarkersToViewer(); markDirty(); }">
                 </template>
                 <template v-else-if="block.type === 'image3d'">
                   <input :value="block.image" type="text" placeholder="/uploads/... hoặc https://..." @input="(e:any) => { block.image = e.target.value; markDirty(); }">
@@ -2415,6 +2638,134 @@ onMounted(() => {
               />
             </div>
           </div>
+        </template>
+
+        <!-- ── CHẾ ĐỘ VÙNG SÁNG ── -->
+        <template v-else-if="editorMode === 'highlight' && currentScene">
+          <div class="map-mode-heading">
+            <strong>Biên tập vùng sáng</strong>
+            <span>Vẽ và kéo các node trực tiếp trên panorama</span>
+          </div>
+
+          <div class="insp-section">
+            <template v-if="!isDrawingArea">
+              <div class="field">
+                <label>Kiểu vùng mới</label>
+                <select v-model="newAreaMode">
+                  <option value="fill-outline">Tô khu vực và sáng đường viền</option>
+                  <option value="fill">Chỉ tô sáng khu vực</option>
+                  <option value="outline">Chỉ tô sáng đường viền</option>
+                </select>
+              </div>
+              <div v-if="newAreaMode !== 'fill'" class="field">
+                <label>Độ rộng viền ban đầu <span class="field-badge">{{ newAreaLineWidth }} px</span></label>
+                <input v-model.number="newAreaLineWidth" type="range" min="1" max="24" step="1">
+              </div>
+            </template>
+            <button class="btn-block primary" type="button" @click="toggleAreaDrawing">
+              {{ isDrawingArea ? `Hoàn tất và lưu vùng (${areaDraftPoints.length} node)` : '＋ Tạo vùng' }}
+            </button>
+            <button v-if="isDrawingArea" class="btn-block mt-2" type="button" @click="cancelAreaDrawing">Hủy tạo vùng</button>
+            <div class="hint-text">Chọn kiểu trước, sau đó chấm ít nhất 3 node. Sau khi tạo, kéo trực tiếp các node trắng lớn để sửa điểm vẽ sai.</div>
+          </div>
+
+          <div class="insp-section">
+            <div class="insp-section-title">Vùng đã tạo ({{ currentScene.areaHighlights?.length ?? 0 }})</div>
+            <div v-if="!currentScene.areaHighlights?.length" class="empty-state-mini">Chưa có vùng sáng.</div>
+            <div v-else class="area-tree">
+              <div
+                v-for="(area, index) in currentScene.areaHighlights"
+                :key="area.id"
+                class="area-tree-group"
+              >
+                <button
+                  type="button"
+                  class="map-node-item area-list-item"
+                  :class="{ active: area.id === selectedAreaId }"
+                  @click="selectArea(area)"
+                >
+                  <span class="area-tree-chevron">{{ area.id === selectedAreaId ? '▾' : '▸' }}</span>
+                  <span class="map-node-dot" :style="{ background: area.color ?? '#22c55e' }" />
+                  <span class="map-node-name">Vùng {{ index + 1 }}</span>
+                  <span class="map-node-coords">{{ area.points.length }} node</span>
+                </button>
+
+                <div v-if="area.id === selectedAreaId" class="area-tree-nodes">
+                  <button
+                    v-for="(point, pointIndex) in area.points"
+                    :key="pointIndex"
+                    type="button"
+                    class="map-node-item area-node-item"
+                    :class="{ active: selectedAreaPoint?.areaId === area.id && selectedAreaPoint.pointIndex === pointIndex }"
+                    @click="selectAreaNode(area.id, pointIndex)"
+                  >
+                    <span
+                      class="map-node-dot"
+                      :style="selectedAreaPoint?.areaId === area.id && selectedAreaPoint.pointIndex === pointIndex ? { background: '#ff8a00' } : undefined"
+                    />
+                    <span class="map-node-name">Node {{ pointIndex + 1 }}</span>
+                    <span class="map-node-coords">{{ (point.yaw * RAD_TO_DEG).toFixed(1) }}° / {{ (point.pitch * RAD_TO_DEG).toFixed(1) }}°</span>
+                    <span
+                      class="hotspot-row-delete"
+                      role="button"
+                      tabindex="0"
+                      @click.stop="removeAreaPoint(area, pointIndex)"
+                    >×</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <template v-if="selectedArea">
+            <div class="insp-section">
+              <div class="insp-section-title">Kiểu làm nổi bật</div>
+              <div class="field">
+                <label>Thành phần hiển thị</label>
+                <select v-model="selectedArea.mode" @change="updateSelectedArea">
+                  <option value="fill-outline">Tô khu vực và sáng đường viền</option>
+                  <option value="fill">Chỉ tô sáng khu vực</option>
+                  <option value="outline">Chỉ làm sáng đường viền</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <div v-if="selectedArea.mode !== 'outline'" class="field">
+                  <label>Màu khu vực</label>
+                  <input v-model="selectedArea.color" type="color" @input="updateSelectedArea">
+                </div>
+                <div v-if="selectedArea.mode !== 'fill'" class="field">
+                  <label>Màu đường viền</label>
+                  <input v-model="selectedArea.outlineColor" type="color" @input="updateSelectedArea">
+                </div>
+              </div>
+              <div v-if="selectedArea.mode !== 'outline'" class="field">
+                <label>Độ sáng vùng <span class="field-badge">{{ Math.round((selectedArea.opacity ?? 0.34) * 100) }}%</span></label>
+                <input v-model.number="selectedArea.opacity" type="range" min="0.05" max="0.9" step="0.05" @input="updateSelectedArea">
+              </div>
+              <div v-if="selectedArea.mode !== 'fill'" class="field">
+                <label>Độ rộng đường sáng <span class="field-badge">{{ selectedArea.lineWidth ?? 5 }} px</span></label>
+                <input v-model.number="selectedArea.lineWidth" type="range" min="1" max="24" step="1" @input="updateSelectedArea">
+              </div>
+              <div class="field">
+                <label>Thời gian chạy đường sáng <span class="field-badge">{{ selectedArea.durationMs ?? 1400 }} ms</span></label>
+                <input v-model.number="selectedArea.durationMs" type="range" min="400" max="4000" step="100" @input="updateSelectedArea">
+              </div>
+              <div class="hint-text">Đường sáng chạy hết chu vi, sau đó vùng được giữ sáng trong 3 giây rồi tắt hoàn toàn. Trong trình chỉnh sửa, vùng luôn hiện để bạn căn node.</div>
+            </div>
+
+            <div class="insp-section">
+              <div class="insp-section-title">Thao tác node</div>
+              <button
+                class="btn-block"
+                type="button"
+                @click="startAreaPointPlacement(selectedArea.id)"
+              >
+                {{ areaPointTargetId === selectedArea.id ? 'Đang chờ vị trí…' : '＋ Thêm node bằng click' }}
+              </button>
+              <div class="hint-text">Chọn node ngay trong cây “Vùng đã tạo” ở phía trên. Node được chọn sẽ chuyển màu cam trên panorama và có thể kéo.</div>
+              <button class="btn-block danger mt-2" type="button" @click="deleteArea(selectedArea.id)">Xóa vùng này</button>
+            </div>
+          </template>
         </template>
 
         <!-- ── TAB 4: BẢN ĐỒ ── -->
@@ -3580,6 +3931,51 @@ onMounted(() => {
   font-size: 10px;
   opacity: 0.4;
   font-family: monospace;
+}
+.area-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.area-tree-group {
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+}
+.area-list-item,
+.area-node-item {
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  text-align: left;
+}
+.area-list-item {
+  min-height: 38px;
+  border-radius: 0;
+  font-weight: 700;
+}
+.area-tree-chevron {
+  width: 12px;
+  color: rgba(255,255,255,0.48);
+  flex-shrink: 0;
+}
+.area-tree-nodes {
+  padding: 4px 4px 6px 22px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.area-node-item {
+  min-height: 34px;
+  border-radius: 5px;
+}
+.area-node-item .map-node-dot {
+  width: 11px;
+  height: 11px;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.18);
+}
+.area-node-item.active .map-node-dot {
+  box-shadow: 0 0 0 3px rgba(255,138,0,0.25), 0 0 12px rgba(255,138,0,0.8);
 }
 
 /* Badge next to label showing current value */

@@ -105,11 +105,12 @@ export interface TextPanelBlock {
 }
 
 export interface AudioPanelBlock { id: string; type: 'audio'; src: string }
+export interface ImagePanelBlock { id: string; type: 'image'; src: string; alt?: string; caption?: string }
 export interface Image3DPanelBlock { id: string; type: 'image3d'; image: string; caption?: string }
 export interface AIChatPanelBlock { id: string; type: 'ai-chat'; context?: string }
 
 /** Content units rendered and managed by PanelMarker through BlockBase. */
-export type PanelBlock = TextPanelBlock | AudioPanelBlock | Image3DPanelBlock | AIChatPanelBlock;
+export type PanelBlock = TextPanelBlock | AudioPanelBlock | ImagePanelBlock | Image3DPanelBlock | AIChatPanelBlock;
 
 /** Composite panel marker — contents can be mixed and ordered freely. */
 export interface PanelMarkerData {
@@ -170,6 +171,25 @@ export interface MapMarkerData {
   config: MapConfig;
 }
 
+export interface AreaHighlightPoint {
+  yaw: number;
+  pitch: number;
+}
+
+/** A short-lived polygon animation attached to the panorama surface. */
+export interface AreaHighlight {
+  id: string;
+  points: AreaHighlightPoint[];
+  color?: string;
+  outlineColor?: string;
+  opacity?: number;
+  delayMs?: number;
+  durationMs?: number;
+  radius?: number;
+  mode?: 'fill' | 'outline' | 'fill-outline';
+  lineWidth?: number;
+}
+
 /** Union of all marker types */
 export type TourMarker = NavigationMarker | PanelMarkerData | InfoMarker | AudioMarker | AIChatMarker | VideoMarker | Model3DMarker | MapMarkerData;
 
@@ -203,6 +223,8 @@ export interface TourScene {
   /** Persist this scene as a public map point. Current scene is always shown. */
   showOnMap?: boolean;
   markers: TourMarker[];
+  /** Animated areas shown once when this scene becomes ready. */
+  areaHighlights?: AreaHighlight[];
 }
 
 /** Full tour configuration — loaded from YAML */

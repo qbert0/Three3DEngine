@@ -13,6 +13,9 @@ declare module "nitropack/types" {
     '/api/admin/media/preview': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/media/preview.get').default>>>>
     }
+    '/api/admin/panel-image': {
+      'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/panel-image.post').default>>>>
+    }
     '/api/admin/tours/:slug': {
       'delete': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug].delete').default>>>>
       'post': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/admin/tours/[slug].post').default>>>>

@@ -40,6 +40,12 @@ export interface EngineEventMap {
   'navigate': { sceneId: string; yaw?: number; pitch?: number };
   /** Marker dragged to a new position (designer only) */
   'marker:moved': { markerId: string; yaw: number; pitch: number };
+  /** Designer moved one vertex of an area highlight. */
+  'area:point-moved': { areaId: string; pointIndex: number; yaw: number; pitch: number };
+  /** Designer selected an area by pressing one of its vertices. */
+  'area:selected': { areaId: string };
+  /** Designer selected one editable vertex of an area. */
+  'area:point-selected': { areaId: string; pointIndex: number };
   /** Lock camera input (e.g. while dragging a marker) */
   'interaction:lock': void;
   /** Unlock camera input */

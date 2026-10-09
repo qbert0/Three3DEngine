@@ -20,8 +20,8 @@ scenes:
     previewPanorama: /panorama-previews/1791363884550-otcz1232qvm-c7d26b3ac3.webp
     mobilePanorama: /panoramas-mobile/1791363884550-otcz1232qvm-c7d26b3ac3.webp
     thumbnail: /thumbnails/1791363884550-otcz1232qvm.webp
-    initialYaw: 13.156679695098585
-    initialPitch: 0.12742673763635304
+    initialYaw: 13.117775240445686
+    initialPitch: 0.1244269227473088
     initialFov: 75
     defaultCameraEnabled: true
     panoramaRotation: 0.3359999999999985
@@ -61,6 +61,7 @@ scenes:
         rotX: 1.0995574287564276
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxvs1p9
     title: Bờ sông Vân
     subtitle: ''
@@ -100,6 +101,7 @@ scenes:
         scaleY: 1
         rotZ: 0
         rotY: 0.10471975511965977
+    areaHighlights: []
   - id: scene-muxvrkpl
     title: Ngã ba dinh thự
     subtitle: ''
@@ -147,6 +149,7 @@ scenes:
         rotX: 1.0471975511965976
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxvzikj
     title: Sảnh tân gia
     subtitle: ''
@@ -211,6 +214,33 @@ scenes:
         scaleX: 1.6
         scaleY: 1
         sphereRadius: 430
+      - id: h1791474195474
+        label: Xem nội dung
+        yaw: 1.6709
+        pitch: 0.0877
+        plugin: panel
+        placement: horizontal
+        contents:
+          - id: block-1791474202069
+            type: image
+            src: /uploads/1791475775090-vptl3sa6rd9-panel.webp
+            alt: ''
+            caption: ''
+          - id: block-1791474209766
+            type: text
+            content: >-
+              hòn đá triết gia. Tác phẩm điêu khắc đá cẩm thạch trắng với hình khối hình học tối giản, mạnh mẽ. Tảng đá
+              được chế tác thành một khối đặc có dạng như một cánh cổng hoặc mái vòm cách điệu — phần trên là một khối
+              hình thang vát chéo, tạo thành cạnh nghiêng sắc nét, trong khi phần dưới được khoét rỗng một khoảng hình
+              chữ nhật đứng, tạo nên một "lối đi" hoặc khung cửa mở giữa hai trụ đá. Bề mặt đá trắng ngà với những vân
+              xám tự nhiên chạy dọc, để lộ rõ chất liệu cẩm thạch nguyên khối. Ánh sáng ban ngày đổ xuống tạo nên sự
+              tương phản rõ rệt giữa mặt phẳng sáng và các cạnh tối, làm nổi bật tính khối và góc cạnh của tác phẩm.
+            presentation: text-and-audio
+            speech:
+              lang: vi-VN
+              rate: 1
+              pitch: 1
+    areaHighlights: []
   - id: scene-muxvnnpk
     title: Khu triển lãm 2
     subtitle: ''
@@ -246,6 +276,7 @@ scenes:
         rotX: 1.0471975511965976
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxwnmgu
     title: Trung tâm vườn đá
     subtitle: ''
@@ -274,6 +305,7 @@ scenes:
         rotX: 1.0471975511965976
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxwnvwr
     title: Xưởng chế tác
     subtitle: ''
@@ -323,6 +355,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxwtgdv
     title: Vườn đá
     subtitle: ''
@@ -343,7 +376,7 @@ scenes:
     showOnMap: false
     markers:
       - id: h1791365672086
-        label: Chuyển cảnh
+        label: 'Ngã ba dinh thự '
         yaw: -0.9948
         pitch: -0.3254
         plugin: navigation
@@ -369,6 +402,7 @@ scenes:
         rotX: 1.0471975511965976
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxyetn4
     title: Khu triển lãm 1 (2)
     subtitle: ''
@@ -417,6 +451,7 @@ scenes:
         rotX: 1.0297442586766543
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxyfx7u
     title: Khu triển lãm 1 (1)
     subtitle: ''
@@ -445,6 +480,7 @@ scenes:
         rotX: 1.0297442586766543
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxz5hlz
     title: Khu quan sát
     subtitle: ''
@@ -474,6 +510,7 @@ scenes:
         scaleY: 0.8
         icon: location-1
         pinColor: '#171717'
+    areaHighlights: []
   - id: scene-muxz694t
     title: Khu chế tác
     subtitle: ''
@@ -512,6 +549,7 @@ scenes:
         scaleY: 0.8
         icon: location-1
         pinColor: '#171717'
+    areaHighlights: []
   - id: scene-muxzy2ve
     title: Bên hông xưởng
     subtitle: ''
@@ -556,6 +594,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxzynnf
     title: Hành lang triển lãm
     subtitle: ''
@@ -612,6 +651,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxzyu0r
     title: Góc tân gia
     subtitle: ''
@@ -656,6 +696,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muxzz1f4
     title: Sảnh tiếp khách
     subtitle: ''
@@ -700,6 +741,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muy12wxo
     title: Triển lãm 3 (1)
     subtitle: ''
@@ -756,6 +798,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muy138jo
     title: Triển lãm 3 (3)
     subtitle: ''
@@ -812,6 +855,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muy13e1t
     title: triển lãm 3 (4)
     subtitle: ''
@@ -856,6 +900,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muy13pai
     title: Triển lãm 3 (2)
     subtitle: ''
@@ -912,6 +957,7 @@ scenes:
         rotY: 0
         scaleX: 1.6
         scaleY: 1
+    areaHighlights: []
   - id: scene-muy28efw
     title: Không gian trước
     subtitle: ''
@@ -920,9 +966,9 @@ scenes:
     mobilePanorama: /panoramas-mobile/1791374679999-qb06gn55i3r-c99a7d39d1.webp
     thumbnail: /thumbnails/1791374679999-qb06gn55i3r.webp
     editorPanorama: /editor-previews/1791374679999-qb06gn55i3r.webp
-    initialYaw: 19.516842360065187
-    initialPitch: -0.29684906854110565
-    initialFov: 75
+    initialYaw: 19.555935468590953
+    initialPitch: -0.326867215533473
+    initialFov: 84.6474125039102
     defaultCameraEnabled: true
     panoramaRotation: -2.4941853071795865
     brightness: 1.25
@@ -1031,6 +1077,21 @@ scenes:
         sphereRadius: 520
         pinColor: '#171717'
         iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp
+    areaHighlights:
+      - id: area-1791528235657
+        points:
+          - yaw: -2.6772625269263033
+            pitch: -0.38480532301817083
+          - yaw: 3.056904010810601
+            pitch: -0.15595691722627555
+          - yaw: 2.874861084506308
+            pitch: -0.6919305498691725
+        color: '#21c4c2'
+        outlineColor: '#7aaea1'
+        opacity: 0.34
+        durationMs: 2000
+        mode: fill-outline
+        lineWidth: 8
   - id: scene-muy28jkw
     title: Không gian sông Vân
     subtitle: ''
@@ -1147,6 +1208,7 @@ scenes:
         scaleY: 0.8
         sphereRadius: 520
         pinColor: '#171717'
+    areaHighlights: []
   - id: scene-muy29vy6
     title: Không gian xưởng
     subtitle: ''
@@ -1238,3 +1300,4 @@ scenes:
         sphereRadius: 520
         pinColor: '#171717'
         iconUrl: /thumbnails/1791363884550-otcz1232qvm.webp
+    areaHighlights: []

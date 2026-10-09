@@ -1,4 +1,4 @@
-globalThis.__timing__.logStart('Load chunks/routes/api/admin/index.post');import { d as defineEventHandler, c as createError, e as setResponseStatus } from '../../../nitro/nitro.mjs';
+globalThis.__timing__.logStart('Load chunks/routes/api/admin/index.post');import { d as defineEventHandler, c as createError, h as setResponseStatus } from '../../../nitro/nitro.mjs';
 import { s as saveTour, l as loadTour } from '../../../_/yamlLoader.mjs';
 import 'node:http';
 import 'node:https';
