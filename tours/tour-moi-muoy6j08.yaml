@@ -22,9 +22,9 @@ scenes:
     thumbnail: /thumbnails/1791363884550-otcz1232qvm.webp
     initialYaw: 13.102584589524053
     initialPitch: 0.11842820794221985
-    initialFov: 99.95058220101286
+    initialFov: 99.95359496357116
     defaultCameraEnabled: true
-    defaultZoomEnabled: false
+    defaultZoomEnabled: true
     panoramaRotation: 0.3359999999999985
     brightness: 1.25
     highlightCompression: 0
