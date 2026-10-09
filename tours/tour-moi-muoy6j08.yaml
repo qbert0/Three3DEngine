@@ -20,9 +20,9 @@ scenes:
     previewPanorama: /panorama-previews/1791363884550-otcz1232qvm-c7d26b3ac3.webp
     mobilePanorama: /panoramas-mobile/1791363884550-otcz1232qvm-c7d26b3ac3.webp
     thumbnail: /thumbnails/1791363884550-otcz1232qvm.webp
-    initialYaw: 13.102584589524053
-    initialPitch: 0.11842820794221985
-    initialFov: 99.95359496357116
+    initialYaw: 13.024674788096178
+    initialPitch: 0.11242820871134585
+    initialFov: 130.84903038219016
     defaultCameraEnabled: true
     defaultZoomEnabled: true
     panoramaRotation: 0.3359999999999985

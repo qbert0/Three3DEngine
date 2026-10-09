@@ -60,7 +60,7 @@ function getValidator() {
             editorPanorama: { type: 'string', minLength: 1 },
             initialYaw:   { type: 'number', default: 0 },
             initialPitch: { type: 'number', default: 0 },
-            initialFov:   { type: 'number', minimum: 30, maximum: 120, default: 75 },
+            initialFov:   { type: 'number', minimum: 30, maximum: 150, default: 75 },
             defaultCameraEnabled: { type: 'boolean', default: false },
             defaultZoomEnabled: { type: 'boolean', default: false },
             panoramaRotation: { type: 'number', default: 0 },

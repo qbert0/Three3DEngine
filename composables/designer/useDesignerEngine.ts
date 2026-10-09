@@ -389,13 +389,13 @@ export function useDesignerEngine() {
     markerPlugin.onSceneReady?.(scene);
   }
 
-  /** Set camera FOV (for zoom slider). Clamped to [30, 120]. */
+  /** Set camera FOV (for zoom slider). Clamped to [30, 150]. */
   function setFov(fov: number): void {
     if (!engine.value) return;
     engine.value.camera.setTarget(
       engine.value.camera.getTargetYaw(),
       engine.value.camera.getTargetPitch(),
-      Math.max(30, Math.min(120, fov)),
+      Math.max(30, Math.min(150, fov)),
     );
   }
 

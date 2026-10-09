@@ -70,7 +70,8 @@ export class CameraController {
     this.fov = config.fov ?? 75;
     this.targetFov = this.fov;
     this.minFov = config.minFov ?? 30;
-    this.maxFov = config.maxFov ?? 100;
+    // Keep this aligned with the designer's zoom range and tour schema.
+    this.maxFov = config.maxFov ?? 150;
     this.damping = config.dampingFactor ?? 0.12;
     this.pitchLimit = config.pitchLimit ?? Math.PI / 2.2;
     this.usesDefaultDragSensitivity = config.dragSensitivity === undefined;

@@ -798,7 +798,7 @@ const {
 
 watch(cameraFov, (fov) => {
   // Keep the toolbar percentage aligned with wheel zoom and restored scene FOV.
-  zoom.value = Math.round(50 + ((120 - fov) / 90) * 150);
+  zoom.value = Math.round(50 + ((150 - fov) / 120) * 150);
 });
 
 watch(lastPanoramaRotation, (rotation) => {
@@ -1418,8 +1418,8 @@ function stopGuidedMode() {
 // ── Zoom controls ─────────────────────────────────────────────────────────────
 function changeZoom(delta: number) {
   zoom.value = Math.max(50, Math.min(200, zoom.value + delta));
-  // zoom% 50→200 mapped to FOV 120→30 (inverse: more zoom = lower FOV)
-  const fov = 120 - ((zoom.value - 50) / 150) * 90;
+  // zoom% 50→200 mapped to FOV 150→30 (inverse: more zoom = lower FOV)
+  const fov = 150 - ((zoom.value - 50) / 150) * 120;
   setFov(fov);
 }
 
