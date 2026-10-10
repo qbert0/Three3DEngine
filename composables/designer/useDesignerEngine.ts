@@ -91,6 +91,7 @@ export function useDesignerEngine() {
         // neighbour caches here quickly exhausts memory.
         pixelRatio: 1,
         antialias: false,
+        enableTiling: false,
         // No autorotate in designer — camera must stay where user puts it
         camera: {
           dampingFactor: 0.1,

@@ -9,12 +9,14 @@
  */
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import type { EngineDiagnostics, QualityMode } from '~/composables/viewer/useViewerEngine';
+import type { Ktx2BenchmarkResult } from '~/core/three/engine/PanoSphere';
 
 const props = defineProps<{
   getDiagnostics: () => EngineDiagnostics | null;
   setQualityMode: (mode: QualityMode) => void;
   currentQuality: QualityMode;
   panoramaUrl: string;
+  benchmarkKtx2?: () => Promise<Ktx2BenchmarkResult>;
   embedded?: boolean;
 }>();
 
@@ -29,6 +31,23 @@ const diag     = ref<EngineDiagnostics | null>(null);
 let   interval: ReturnType<typeof setInterval> | null = null;
 
 const compareMode = ref<'panorama' | 'flat-100' | 'fit-screen'>('panorama');
+const ktxBenchmark = ref<Ktx2BenchmarkResult | null>(null);
+const ktxBenchmarkError = ref('');
+const isBenchmarkingKtx = ref(false);
+
+async function runKtxBenchmark() {
+  if (!props.benchmarkKtx2 || isBenchmarkingKtx.value) return;
+  isBenchmarkingKtx.value = true;
+  ktxBenchmark.value = null;
+  ktxBenchmarkError.value = '';
+  try {
+    ktxBenchmark.value = await props.benchmarkKtx2();
+  } catch (error) {
+    ktxBenchmarkError.value = error instanceof Error ? error.message : 'Không thể benchmark KTX2.';
+  } finally {
+    isBenchmarkingKtx.value = false;
+  }
+}
 
 // ── Auto-refresh diagnostics every 500ms while open ────────────
 function refresh() {
@@ -152,6 +171,28 @@ function setCompare(mode: 'panorama' | 'flat-100' | 'fit-screen') {
             {{ diag.isCapped ? '(bị cắt!)' : '' }}
           </span>
         </div>
+        <div class="diag-row">
+          <span>Định dạng</span>
+          <span>{{ diag.textureFormat.toUpperCase() }}{{ diag.gpuCompressed ? ' · GPU compressed' : '' }}</span>
+        </div>
+        <div class="diag-row">
+          <span>Load gần nhất</span>
+          <span>{{ diag.textureLoadMs.toFixed(0) }} ms</span>
+        </div>
+        <div class="diag-row">
+          <span>Multi-resolution</span>
+          <span :class="diag.tilingEnabled ? 'ok' : ''">
+            {{ diag.tilingEnabled ? `Level ${diag.tileLevel} · ${diag.loadedTiles} tile (${diag.pendingTiles} đang tải)` : 'Tắt' }}
+          </span>
+        </div>
+        <div v-if="diag.tilingEnabled" class="diag-row">
+          <span>Tile queue/decode</span>
+          <span>{{ diag.queuedTiles }} / {{ diag.decodedTiles }}</span>
+        </div>
+        <div v-if="diag.tilingEnabled" class="diag-row">
+          <span>Tile cache</span>
+          <span>{{ (diag.tileCacheBytes / 1048576).toFixed(1) }} / {{ (diag.tileCacheBudgetBytes / 1048576).toFixed(0) }} MB</span>
+        </div>
 
         <!-- Canvas -->
         <div class="diag-section-title">Canvas / Renderer</div>
@@ -196,6 +237,19 @@ function setCompare(mode: 'panorama' | 'flat-100' | 'fit-screen') {
       </div>
 
       <div v-else class="diag-empty">Engine chưa sẵn sàng</div>
+
+      <template v-if="benchmarkKtx2">
+        <div class="diag-section-title" style="margin-top:10px">KTX2 A/B benchmark</div>
+        <button class="quality-btn ktx-benchmark-btn" :disabled="isBenchmarkingKtx" @click="runKtxBenchmark">
+          {{ isBenchmarkingKtx ? 'Đang tải và đo…' : 'Đo WebP ↔ KTX2' }}
+        </button>
+        <div v-if="ktxBenchmark" class="diag-warnings ktx-result">
+          <p>WebP: {{ ktxBenchmark.bitmap.durationMs.toFixed(0) }} ms · {{ (ktxBenchmark.bitmap.transferBytes / 1048576).toFixed(2) }} MB</p>
+          <p>KTX2: {{ ktxBenchmark.ktx2.durationMs.toFixed(0) }} ms · {{ (ktxBenchmark.ktx2.transferBytes / 1048576).toFixed(2) }} MB</p>
+          <p :class="ktxBenchmark.recommended ? 'ok' : 'warn-yellow'">{{ ktxBenchmark.reason }}</p>
+        </div>
+        <p v-if="ktxBenchmarkError" class="warn-item warn-red">{{ ktxBenchmarkError }}</p>
+      </template>
 
       <!-- Quality mode selector -->
       <div class="diag-section-title" style="margin-top:10px">Quality Mode</div>

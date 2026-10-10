@@ -10,6 +10,8 @@
     "pregenerate": "node scripts/sync-tour-data.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview --host 0.0.0.0",
+    "tiles:generate": "node scripts/generate-panorama-tiles.mjs",
+    "tiles:validate": "node scripts/validate-panorama-tiles.mjs",
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
@@ -40,6 +42,7 @@
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
+    "basisu": "^1.16.3",
     "typescript": "^5.7.0",
     "vite": "^7.3.6",
     "vue-tsc": "^2.2.0"

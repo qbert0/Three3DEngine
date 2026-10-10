@@ -25,8 +25,13 @@ export function resolveMediaUrls(tour: TourConfig, baseUrl: string): TourConfig 
     scenes: tour.scenes.map(scene => ({
       ...scene,
       panorama:  resolve(scene.panorama),
+      sourcePanorama: scene.sourcePanorama ? resolve(scene.sourcePanorama) : undefined,
       previewPanorama: scene.previewPanorama ? resolve(scene.previewPanorama) : undefined,
       mobilePanorama: scene.mobilePanorama ? resolve(scene.mobilePanorama) : undefined,
+      ktx2Panorama: scene.ktx2Panorama ? resolve(scene.ktx2Panorama) : undefined,
+      multiRes: scene.multiRes
+        ? { ...scene.multiRes, urlTemplate: resolve(scene.multiRes.urlTemplate) }
+        : undefined,
       editorPanorama: scene.editorPanorama ? resolve(scene.editorPanorama) : undefined,
       thumbnail: resolve(scene.thumbnail),
     })),

@@ -6,6 +6,36 @@
  */
 
 import * as THREE from 'three';
+import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+import { EquirectangularTilesAdapter } from './EquirectangularTilesAdapter';
+import type {
+  MultiResolutionPanorama,
+  PanoramaAdapter,
+  TileStreamingOptions,
+} from './PanoramaAdapter';
+
+export type PanoramaTextureFormat = 'bitmap' | 'ktx2';
+
+export interface TextureLoadMetrics {
+  url: string;
+  format: PanoramaTextureFormat;
+  width: number;
+  height: number;
+  durationMs: number;
+  transferBytes: number;
+  gpuCompressed: boolean;
+}
+
+export interface Ktx2BenchmarkResult {
+  bitmap: TextureLoadMetrics;
+  ktx2: TextureLoadMetrics;
+  /** Positive means KTX2 used fewer transfer bytes. */
+  transferSavingPercent: number;
+  /** Positive means KTX2 loaded/transcoded/uploaded faster. */
+  timeSavingPercent: number;
+  recommended: boolean;
+  reason: string;
+}
 
 export type TransitionStyle =
   | 'crossfade'         // simple opacity crossfade
@@ -20,6 +50,8 @@ export interface PanoSphereConfig {
   transitionDuration?: number;  // ms. Default 700
   /** Maximum decoded panorama textures retained in memory. 0 disables cache. Default: 4. */
   maxCachedTextures?: number;
+  /** Viewer-only tile scheduler/cache tuning. */
+  tileStreaming?: TileStreamingOptions;
 }
 
 // ── GLSL Shaders (PSV-compatible raycast approach) ────────────────────────
@@ -52,6 +84,9 @@ const FRAGMENT_SHADER = /* glsl */`
   uniform float radius;
   uniform float brightness;
   uniform float highlightCompression;
+  uniform float cameraFov;
+  uniform float cameraAspect;
+  uniform mat3 localToWorldRotation;
 
   const float PI = 3.14159265358979323846;
 
@@ -64,6 +99,45 @@ const FRAGMENT_SHADER = /* glsl */`
     float c = dot(vLocalCam, vLocalCam) - radius * radius;
     float t = (-b + sqrt(max(b * b - a * c, 0.0))) / a;
     vec3 dir = normalize(vLocalCam + t * rayDir);
+
+    // Apply only a restrained hybrid correction at extreme FOV. A full linear
+    // angular (cylindrical) remap reduces edge stretching but makes horizontal
+    // architecture visibly bow, which feels more curved instead of flatter.
+    // Keeping 82% of the original perspective preserves the spherical/3D feel.
+    float flatten = smoothstep(125.0, 150.0, cameraFov) * 0.18;
+    // Offset-camera transition effects need the physical sphere ray unchanged.
+    flatten *= 1.0 - smoothstep(0.01, 1.0, length(vLocalCam));
+    if (flatten > 0.0001) {
+      vec3 worldDir = normalize(localToWorldRotation * dir);
+      vec3 cameraDir = normalize(mat3(viewMatrix) * worldDir);
+      float verticalHalfFov = radians(min(cameraFov, 175.0)) * 0.5;
+      float horizontalHalfFov = atan(tan(verticalHalfFov) * cameraAspect);
+      horizontalHalfFov = min(horizontalHalfFov, radians(89.0));
+
+      float rayYaw = atan(cameraDir.x, -cameraDir.z);
+      float ndcX = clamp(
+        tan(rayYaw) / max(tan(horizontalHalfFov), 0.0001),
+        -1.0,
+        1.0
+      );
+      // Blend slightly towards a linear angular distribution. This softens
+      // only the extreme side stretch without turning the panorama into a
+      // visibly cylindrical or flat 2D projection.
+      float flattenedYaw = ndcX * horizontalHalfFov;
+      float targetYaw = mix(rayYaw, flattenedYaw, flatten);
+      float pitch = asin(clamp(cameraDir.y, -1.0, 1.0));
+      vec3 flattenedCameraDir = normalize(vec3(
+        sin(targetYaw) * cos(pitch),
+        sin(pitch),
+        -cos(targetYaw) * cos(pitch)
+      ));
+
+      // For orthonormal camera/model rotations, row-vector multiplication is
+      // the inverse transform and remains compatible with WebGL 1 GLSL.
+      vec3 flattenedWorldDir = flattenedCameraDir * mat3(viewMatrix);
+      vec3 flattenedLocalDir = flattenedWorldDir * localToWorldRotation;
+      dir = normalize(flattenedLocalDir);
+    }
 
     float u = atan(-dir.x, dir.z) / (2.0 * PI) + 0.5;
     float v = asin(clamp(dir.y, -1.0, 1.0)) / PI + 0.5;
@@ -94,6 +168,8 @@ export class PanoSphere {
   private scene: THREE.Scene;
   private renderer: THREE.WebGLRenderer;
   private imageBitmapLoader: THREE.ImageBitmapLoader;
+  private ktx2Loader: KTX2Loader;
+  private panoramaAdapter: PanoramaAdapter;
 
   private sphereA: THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
   private sphereB: THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
@@ -109,9 +185,10 @@ export class PanoSphere {
   private readonly maxCachedTextures: number;
 
   /** Dimensions of the most-recently-loaded source image */
-  private lastTextureInfo: { srcWidth: number; srcHeight: number; url: string } | null = null;
+  private lastTextureInfo: TextureLoadMetrics | null = null;
 
   get textureInfo() { return this.lastTextureInfo; }
+  get tileInfo() { return this.panoramaAdapter.diagnostics; }
 
   /** Blank 1×1 transparent texture — used before first panorama loads */
   private static blankTex = (() => {
@@ -128,6 +205,9 @@ export class PanoSphere {
         radius:  { value: this.radius },
         brightness: { value: 1.25 },
         highlightCompression: { value: 0 },
+        cameraFov: { value: 75 },
+        cameraAspect: { value: 1 },
+        localToWorldRotation: { value: new THREE.Matrix3() },
       },
       vertexShader:   VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
@@ -148,6 +228,10 @@ export class PanoSphere {
       imageOrientation: 'flipY',
       premultiplyAlpha: 'none',
     });
+    this.ktx2Loader = new KTX2Loader()
+      .setTranscoderPath('/basis/')
+      .setWorkerLimit(1)
+      .detectSupport(renderer);
 
     this.radius = config.radius ?? 600;
     this.transitionDuration = config.transitionDuration ?? 700;
@@ -170,6 +254,12 @@ export class PanoSphere {
 
     this.scene.add(this.sphereA);
     this.scene.add(this.sphereB);
+    this.panoramaAdapter = new EquirectangularTilesAdapter(
+      this.scene,
+      this.renderer,
+      this.radius,
+      config.tileStreaming,
+    );
   }
 
   get busy(): boolean { return this.isTransitioning; }
@@ -180,6 +270,7 @@ export class PanoSphere {
     const brightness = Math.max(0.5, Math.min(2, value));
     this.sphereA.material.uniforms.brightness.value = brightness;
     this.sphereB.material.uniforms.brightness.value = brightness;
+    this.panoramaAdapter.setBrightness(brightness);
   }
 
   /** Compress harsh highlights without darkening the complete panorama. */
@@ -187,11 +278,31 @@ export class PanoSphere {
     const compression = Math.max(0, Math.min(1, value));
     this.sphereA.material.uniforms.highlightCompression.value = compression;
     this.sphereB.material.uniforms.highlightCompression.value = compression;
+    this.panoramaAdapter.setHighlightCompression(compression);
+  }
+
+  /** Update the automatic wide-FOV sphere flattening uniforms. */
+  setWideView(fov: number, aspect: number): void {
+    for (const sphere of [this.sphereA, this.sphereB]) {
+      sphere.updateMatrixWorld();
+      sphere.material.uniforms.cameraFov.value = fov;
+      sphere.material.uniforms.cameraAspect.value = aspect;
+      sphere.material.uniforms.localToWorldRotation.value.setFromMatrix4(sphere.matrixWorld);
+    }
   }
 
   /** Rotate the active panorama in world space without moving the camera. */
   setRotation(rotation: number): void {
     this.sphereA.rotation.y = rotation;
+    this.panoramaAdapter.setRotation(rotation);
+  }
+
+  setMultiResolution(config: MultiResolutionPanorama | null, rotation = 0): void {
+    this.panoramaAdapter.configure(config, rotation);
+  }
+
+  updateTiles(camera: THREE.PerspectiveCamera, now?: number): void {
+    this.panoramaAdapter.update(camera, now);
   }
 
   // ── Texture Loading ────────────────────────────────────────────
@@ -331,6 +442,8 @@ export class PanoSphere {
     textures.forEach((texture) => this.disposeTexture(texture));
     this.textureCache.clear();
     this.pendingTextures.clear();
+    this.ktx2Loader.dispose();
+    this.panoramaAdapter.dispose();
     this.sphereA.geometry.dispose();
     this.sphereA.material.dispose();
     this.sphereB.geometry.dispose();
@@ -340,6 +453,13 @@ export class PanoSphere {
   // ── Private ────────────────────────────────────────────────────
 
   private loadTexture(url: string): Promise<THREE.Texture> {
+    return this.isKtx2Url(url)
+      ? this.loadKtx2Texture(url)
+      : this.loadBitmapTexture(url);
+  }
+
+  private loadBitmapTexture(url: string): Promise<THREE.Texture> {
+    const startedAt = performance.now();
     return new Promise((resolve, reject) => {
       this.imageBitmapLoader.load(
         url,
@@ -379,8 +499,12 @@ export class PanoSphere {
           if (img) {
             this.lastTextureInfo = {
               url,
-              srcWidth:  'naturalWidth'  in img ? img.naturalWidth  : (img as ImageBitmap).width,
-              srcHeight: 'naturalHeight' in img ? img.naturalHeight : (img as ImageBitmap).height,
+              format: 'bitmap',
+              width:  'naturalWidth'  in img ? img.naturalWidth  : (img as ImageBitmap).width,
+              height: 'naturalHeight' in img ? img.naturalHeight : (img as ImageBitmap).height,
+              durationMs: performance.now() - startedAt,
+              transferBytes: this.getTransferBytes(url),
+              gpuCompressed: false,
             };
           }
 
@@ -390,6 +514,99 @@ export class PanoSphere {
         reject,
       );
     });
+  }
+
+  private async loadKtx2Texture(url: string): Promise<THREE.Texture> {
+    const startedAt = performance.now();
+    const texture = await this.ktx2Loader.loadAsync(url);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = 1;
+    texture.needsUpdate = true;
+    this.renderer.initTexture(texture);
+
+    if (this.maxCachedTextures > 0) {
+      this.textureCache.set(url, texture);
+      this.trimTextureCache(texture);
+    }
+
+    const image = texture.image as { width?: number; height?: number } | undefined;
+    const mip = (texture as THREE.CompressedTexture).mipmaps?.[0];
+    this.lastTextureInfo = {
+      url,
+      format: 'ktx2',
+      width: image?.width ?? mip?.width ?? 0,
+      height: image?.height ?? mip?.height ?? 0,
+      durationMs: performance.now() - startedAt,
+      transferBytes: this.getTransferBytes(url),
+      gpuCompressed: texture.isCompressedTexture === true,
+    };
+    return texture;
+  }
+
+  /**
+   * Cold-ish A/B measurement for the development diagnostics panel. The
+   * cache-busting query keeps the browser HTTP/decode cache from making the
+   * second candidate look artificially fast. Neither texture becomes active.
+   */
+  async benchmarkKtx2(bitmapUrl: string, ktx2Url: string): Promise<Ktx2BenchmarkResult> {
+    const activeTextureInfo = this.lastTextureInfo;
+    const nonce = `ktx-bench=${Date.now()}`;
+    const appendNonce = (url: string) => `${url}${url.includes('?') ? '&' : '?'}${nonce}`;
+
+    const benchmarkBitmapUrl = appendNonce(bitmapUrl);
+    const bitmapTexture = await this.loadBitmapTexture(benchmarkBitmapUrl);
+    const bitmap = { ...this.lastTextureInfo! };
+    this.textureCache.delete(benchmarkBitmapUrl);
+    this.disposeTexture(bitmapTexture);
+
+    const benchmarkKtx2Url = appendNonce(ktx2Url);
+    const ktx2Texture = await this.loadKtx2Texture(benchmarkKtx2Url);
+    const ktx2 = { ...this.lastTextureInfo! };
+    this.textureCache.delete(benchmarkKtx2Url);
+    this.disposeTexture(ktx2Texture);
+    this.lastTextureInfo = activeTextureInfo;
+
+    const transferSavingPercent = bitmap.transferBytes > 0
+      ? ((bitmap.transferBytes - ktx2.transferBytes) / bitmap.transferBytes) * 100
+      : 0;
+    const timeSavingPercent = bitmap.durationMs > 0
+      ? ((bitmap.durationMs - ktx2.durationMs) / bitmap.durationMs) * 100
+      : 0;
+    // Runtime compression is valuable, but a panorama format should not be
+    // selected when it multiplies bandwidth or substantially delays display.
+    const recommended = ktx2.gpuCompressed
+      && transferSavingPercent >= -10
+      && timeSavingPercent >= -20;
+
+    return {
+      bitmap,
+      ktx2,
+      transferSavingPercent,
+      timeSavingPercent,
+      recommended,
+      reason: recommended
+        ? 'KTX2 giảm áp lực GPU mà không làm tải mạng/chờ hiển thị tệ đáng kể.'
+        : 'Giữ WebP: mẫu KTX2 hiện tại tốn băng thông hoặc thời gian tải nhiều hơn lợi ích GPU.',
+    };
+  }
+
+  private isKtx2Url(url: string): boolean {
+    try {
+      return new URL(url, window.location.href).pathname.toLowerCase().endsWith('.ktx2');
+    } catch {
+      return url.split('?')[0]?.toLowerCase().endsWith('.ktx2') ?? false;
+    }
+  }
+
+  private getTransferBytes(url: string): number {
+    const absoluteUrl = new URL(url, window.location.href).href;
+    const entries = performance.getEntriesByName(absoluteUrl, 'resource') as PerformanceResourceTiming[];
+    const entry = entries.at(-1);
+    return entry?.encodedBodySize || entry?.transferSize || 0;
   }
 
   /** Promote an already decoded/uploaded texture without running a scene transition. */
@@ -560,6 +777,7 @@ export class PanoSphere {
     this.sphereA.material.uniforms.opacity.value = 1;
     this.sphereA.position.set(0, 0, 0);
     this.sphereA.rotation.y = this.sphereB.rotation.y;
+    this.panoramaAdapter.setRotation(this.sphereB.rotation.y);
 
     this.sphereB.visible = false;
     this.sphereB.material.uniforms.map.value = PanoSphere.blankTex;

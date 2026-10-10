@@ -1,0 +1,112 @@
+{
+  "version": 2,
+  "projection": "equirectangular",
+  "format": "webp",
+  "sourceWidth": 8192,
+  "sourceHeight": 4096,
+  "tileSize": 1024,
+  "overlap": 2,
+  "minLevel": 12,
+  "maxLevel": 13,
+  "urlTemplate": "/panorama-tiles/1791374687320-qp74k2s456_files/{level}/{x}_{y}.webp?v=2",
+  "levels": [
+    {
+      "level": 0,
+      "width": 1,
+      "height": 1,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 1,
+      "width": 2,
+      "height": 1,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 2,
+      "width": 4,
+      "height": 2,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 3,
+      "width": 8,
+      "height": 4,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 4,
+      "width": 16,
+      "height": 8,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 5,
+      "width": 32,
+      "height": 16,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 6,
+      "width": 64,
+      "height": 32,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 7,
+      "width": 128,
+      "height": 64,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 8,
+      "width": 256,
+      "height": 128,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 9,
+      "width": 512,
+      "height": 256,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 10,
+      "width": 1024,
+      "height": 512,
+      "cols": 1,
+      "rows": 1
+    },
+    {
+      "level": 11,
+      "width": 2048,
+      "height": 1024,
+      "cols": 2,
+      "rows": 1
+    },
+    {
+      "level": 12,
+      "width": 4096,
+      "height": 2048,
+      "cols": 4,
+      "rows": 2
+    },
+    {
+      "level": 13,
+      "width": 8192,
+      "height": 4096,
+      "cols": 8,
+      "rows": 4
+    }
+  ]
+}

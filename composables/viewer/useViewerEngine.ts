@@ -18,6 +18,7 @@ import { AutorotatePlugin } from '~/core/three/plugins/AutorotatePlugin';
 import { AreaHighlightPlugin } from '~/core/three/plugins/AreaHighlightPlugin';
 import type { TourScene, TourMarker, TourConfig } from '~/types/tour';
 import type { TransitionStyle } from '~/core/three/engine/PanoSphere';
+import type { Ktx2BenchmarkResult } from '~/core/three/engine/PanoSphere';
 
 export type { EngineDiagnostics };
 export type QualityMode = 'performance' | 'balanced' | 'quality' | 'native';
@@ -94,6 +95,8 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
     try {
       mobilePerformanceMode = shouldUseMobileProfile();
+      const deviceMemory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8;
+      const lowMemoryDevice = deviceMemory <= 4;
       const e = new View360Engine({
         container,
         antialias: false,
@@ -108,6 +111,18 @@ export function useViewerEngine(options: ViewerEngineOptions) {
           transitionDuration: tour?.transitionDuration ?? (mobilePerformanceMode ? 500 : 700),
           maxCachedTextures: mobilePerformanceMode ? 1 : 2,
           segments: mobilePerformanceMode ? 64 : 128,
+          tileStreaming: {
+            maxConcurrentRequests: mobilePerformanceMode ? 2 : 4,
+            maxUploadsPerFrame: mobilePerformanceMode ? 1 : 2,
+            maxCacheBytes: lowMemoryDevice
+              ? 48 * 1024 * 1024
+              : mobilePerformanceMode
+                ? 64 * 1024 * 1024
+                : 160 * 1024 * 1024,
+            updateIntervalMs: mobilePerformanceMode ? 120 : 80,
+            evictionGraceMs: mobilePerformanceMode ? 900 : 1400,
+            resolutionScale: mobilePerformanceMode ? 1 : 1.08,
+          },
         },
       });
 
@@ -254,7 +269,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
       await e.loadScene(viewerInitialScene, true);
 
       const viewerScenes = tour?.scenes.map(forViewer);
-      if (viewerInitialScene.previewPanorama) {
+      if (viewerInitialScene.previewPanorama && !viewerInitialScene.multiRes?.enabled) {
         scheduleCurrentSceneUpgrade(viewerInitialScene, viewerScenes);
       } else if (viewerScenes) {
         preloadNeighbours(viewerInitialScene, viewerScenes);
@@ -282,7 +297,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
       const viewerScene = forViewer(scene);
       await engine.value.navigateTo(viewerScene, undefined, flyYaw, flyPitch);
       const viewerScenes = allScenes?.map(forViewer);
-      if (viewerScene.previewPanorama) {
+      if (viewerScene.previewPanorama && !viewerScene.multiRes?.enabled) {
         scheduleCurrentSceneUpgrade(viewerScene, viewerScenes);
       } else if (viewerScenes) {
         preloadNeighbours(viewerScene, viewerScenes);
@@ -407,6 +422,14 @@ export function useViewerEngine(options: ViewerEngineOptions) {
     return engine.value?.getDiagnostics() ?? null;
   }
 
+  function benchmarkCurrentKtx2(): Promise<Ktx2BenchmarkResult> {
+    const scene = currentScene.value;
+    if (!engine.value || !scene?.ktx2Panorama) {
+      return Promise.reject(new Error('Scene hiện tại chưa có ảnh KTX2 để benchmark.'));
+    }
+    return engine.value.benchmarkKtx2(scene.panorama, scene.ktx2Panorama);
+  }
+
   /**
    * Change renderer quality mode.
    * Takes effect immediately without restarting the engine.
@@ -454,6 +477,7 @@ export function useViewerEngine(options: ViewerEngineOptions) {
 
     // Dev tools
     getDiagnostics,
+    benchmarkCurrentKtx2,
     setQualityMode,
     toggleMap,
   };

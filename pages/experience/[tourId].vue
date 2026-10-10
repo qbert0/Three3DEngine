@@ -73,7 +73,7 @@ const canvasContainerRef = ref<HTMLElement | null>(null);
 const { isTransitioning, errorMessage: engineError,
         currentScene: engineScene, mapAvailable, isMapVisible,
         initEngine, navigateTo, toggleMap,
-        getDiagnostics, setQualityMode } = useViewerEngine({
+        getDiagnostics, benchmarkCurrentKtx2, setQualityMode } = useViewerEngine({
   onNavigate: (sceneId, yaw, pitch) => handleNavigate(sceneId, yaw, pitch),
   autorotate: computed(() => tour.value?.autoRotate ?? false).value,
   transition: 'forward',
@@ -416,6 +416,7 @@ onBeforeUnmount(() => {
                 :set-quality-mode="setQualityMode"
                 :current-quality="devQualityMode"
                 :panorama-url="devPanoUrl"
+                :benchmark-ktx2="benchmarkCurrentKtx2"
                 @quality-change="handleDevQualityChange"
                 @compare-mode="handleDevCompareMode"
               />

@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { EventBus } from './EventBus';
 import { CameraController, type CameraConfig } from './CameraController';
-import { PanoSphere, type PanoSphereConfig, type TransitionStyle } from './PanoSphere';
+import { PanoSphere, type Ktx2BenchmarkResult, type PanoSphereConfig, type TransitionStyle } from './PanoSphere';
 import { PluginBase } from '../plugins/PluginBase';
 import type { TourScene } from '~/types/tour';
 
@@ -21,6 +21,8 @@ export interface View360EngineOptions {
   pixelRatio?: number;   // default min(devicePixelRatio, 2)
   antialias?: boolean;   // default true
   toneMappingExposure?: number;  // default 1.0
+  /** Viewer-only high-resolution tile streaming. Disable in the admin designer. */
+  enableTiling?: boolean;
   /**
    * Delay (ms) before the Little Planet intro auto-starts.
    * During the countdown, clicking the canvas skips to the clicked angle.
@@ -57,6 +59,18 @@ export interface EngineDiagnostics {
   pixelDensity: number;
   /** URL of the current panorama */
   textureUrl: string;
+  textureFormat: 'bitmap' | 'ktx2';
+  textureLoadMs: number;
+  textureTransferBytes: number;
+  gpuCompressed: boolean;
+  tilingEnabled: boolean;
+  tileLevel: number;
+  loadedTiles: number;
+  pendingTiles: number;
+  queuedTiles: number;
+  decodedTiles: number;
+  tileCacheBytes: number;
+  tileCacheBudgetBytes: number;
   /** GPU vendor string */
   vendor: string;
   /** GPU renderer string */
@@ -82,9 +96,11 @@ export class View360Engine {
   private _introCountdownTimer: ReturnType<typeof setTimeout> | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private lastContainerSize = { width: 0, height: 0 };
+  private readonly enableTiling: boolean;
 
   constructor(opts: View360EngineOptions) {
     this.container = opts.container;
+    this.enableTiling = opts.enableTiling ?? true;
 
     // ── Scene ──
     this.scene = new THREE.Scene();
@@ -180,6 +196,9 @@ export class View360Engine {
     this.notifyPluginsSceneLoad(scene);
     this.pano.setBrightness(scene.brightness ?? 1.25);
     this.pano.setHighlightCompression(scene.highlightCompression ?? 0);
+    // Remove previous high-resolution patches before the base-sphere crossfade.
+    // Destination tiles are enabled only after the transition completes.
+    this.pano.setMultiResolution(null);
 
     const initialPanorama = scene.previewPanorama ?? scene.panorama;
     const panoramaApplied = await this.pano.setImmediate(initialPanorama, scene.panoramaRotation ?? 0);
@@ -242,6 +261,14 @@ export class View360Engine {
       );
     }
 
+    // Do not decode/upload detail tiles during the Little Planet animation.
+    // The pinned preview is sufficient while the camera is moving quickly;
+    // viewport-driven streaming begins from the settled entry view.
+    this.pano.setMultiResolution(
+      this.enableTiling ? (scene.multiRes ?? null) : null,
+      scene.panoramaRotation ?? 0,
+    );
+
     this.bus.emit('scene:loaded', { scene });
     this.notifyPluginsSceneReady(scene);
   }
@@ -275,6 +302,7 @@ export class View360Engine {
     this.notifyPluginsSceneLoad(scene);
     this.pano.setBrightness(scene.brightness ?? 1.25);
     this.pano.setHighlightCompression(scene.highlightCompression ?? 0);
+    this.pano.setMultiResolution(null);
 
     // Compute fly direction vector from current camera aim
     const yaw = flyYaw ?? this.camera.getYaw();
@@ -341,6 +369,7 @@ export class View360Engine {
     this.camera.setOrientation(destYaw, destPitch, destFov);
 
     this.currentScene = scene;
+    this.pano.setMultiResolution(this.enableTiling ? (scene.multiRes ?? null) : null, scene.panoramaRotation ?? 0);
     this.isTransitioning = false;
 
     this.bus.emit('scene:transition:end', { scene });
@@ -418,6 +447,10 @@ export class View360Engine {
     return this.currentScene;
   }
 
+  benchmarkKtx2(bitmapUrl: string, ktx2Url: string): Promise<Ktx2BenchmarkResult> {
+    return this.pano.benchmarkKtx2(bitmapUrl, ktx2Url);
+  }
+
   // ── Quality Mode ───────────────────────────────────────────────
 
   /** DPR caps per quality level */
@@ -446,21 +479,24 @@ export class View360Engine {
     const caps = this.renderer.capabilities;
     const canvas = this.renderer.domElement;
     const tex = this.pano.textureInfo;
+    const tiles = this.pano.tileInfo;
     const maxTex = caps.maxTextureSize;
 
-    const srcW = tex?.srcWidth ?? 0;
-    const srcH = tex?.srcHeight ?? 0;
+    const srcW = tiles.enabled ? tiles.sourceWidth : (tex?.width ?? 0);
+    const srcH = tiles.enabled ? tiles.sourceHeight : (tex?.height ?? 0);
     const dpr = this.renderer.getPixelRatio();
 
     // Effective texture width after GPU capping
-    const gpuW = Math.min(srcW, maxTex);
-    const gpuH = Math.min(srcH, maxTex);
+    // Multi-resolution panoramas never upload the full source as one texture,
+    // so maxTextureSize does not cap their effective panorama resolution.
+    const gpuW = tiles.enabled ? srcW : Math.min(srcW, maxTex);
+    const gpuH = tiles.enabled ? srcH : Math.min(srcH, maxTex);
 
     // Pixel density: how many source pixels per screen pixel at current FOV
     // (screen pixels at DPR = canvas.width/height)
     const hFovRad = (this.camera.getFov() * Math.PI) / 180;
     const screenWidthPx = canvas.width; // already includes DPR
-    const equiWidthPx = srcW; // full equirect covers 360°
+    const equiWidthPx = tiles.enabled ? tiles.sourceWidth : srcW; // full equirect covers 360°
     const visibleSrcPx = equiWidthPx * (hFovRad / (2 * Math.PI));
     const pixelDensity = visibleSrcPx / screenWidthPx;
 
@@ -470,7 +506,7 @@ export class View360Engine {
       gpuWidth:    gpuW,
       gpuHeight:   gpuH,
       maxTexSize:  maxTex,
-      isCapped:    srcW > maxTex || srcH > maxTex,
+      isCapped:    !tiles.enabled && (srcW > maxTex || srcH > maxTex),
       canvasCssW:  canvas.clientWidth,
       canvasCssH:  canvas.clientHeight,
       canvasGlW:   canvas.width,
@@ -480,6 +516,18 @@ export class View360Engine {
       fov:         this.camera.getFov(),
       pixelDensity: +pixelDensity.toFixed(2),
       textureUrl:  tex?.url ?? '',
+      textureFormat: tex?.format ?? 'bitmap',
+      textureLoadMs: tex?.durationMs ?? 0,
+      textureTransferBytes: tex?.transferBytes ?? 0,
+      gpuCompressed: tex?.gpuCompressed ?? false,
+      tilingEnabled: tiles.enabled,
+      tileLevel: tiles.level,
+      loadedTiles: tiles.loadedTiles,
+      pendingTiles: tiles.pendingTiles,
+      queuedTiles: tiles.queuedTiles,
+      decodedTiles: tiles.decodedTiles,
+      tileCacheBytes: tiles.cacheBytes,
+      tileCacheBudgetBytes: tiles.cacheBudgetBytes,
       vendor:      gl.getParameter(gl.VENDOR)   as string,
       renderer:    gl.getParameter(gl.RENDERER) as string,
     };
@@ -518,6 +566,8 @@ export class View360Engine {
     }
 
     this.plugins.forEach((p) => p._update(delta));
+    this.pano.setWideView(this.camera.getFov(), this.camera.camera.aspect);
+    this.pano.updateTiles(this.camera.camera, now);
     this.renderer.render(this.scene, this.camera.camera);
   };
 

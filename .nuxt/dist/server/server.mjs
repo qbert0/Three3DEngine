@@ -400,6 +400,18 @@ const matcher = /* @__PURE__ */ (() => {
         r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
       } else if (s[1] === "thumbnails") {
         r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "panoramas") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "panoramas-mobile") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "panorama-previews") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "panorama-tiles") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "panoramas-ktx2") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
+      } else if (s[1] === "basis") {
+        r.unshift({ data: $0, params: { "_": s.slice(2).join("/") } });
       }
     }
     return r;
@@ -526,7 +538,7 @@ const _routes = [
     name: "experience-tourId",
     path: "/experience/:tourId()",
     meta: __nuxt_page_meta$1 || {},
-    component: () => import("./_nuxt/_tourId_-CNr3SsuP.js"),
+    component: () => import("./_nuxt/_tourId_-CLjrWr2T.js"),
     children: [
       {
         name: "experience-tourId-ownerTourId-sceneId",
@@ -540,7 +552,7 @@ const _routes = [
     name: "admin-slug-sceneId",
     path: "/admin/:slug()/:sceneId()",
     meta: __nuxt_page_meta || {},
-    component: () => import("./_nuxt/_sceneId_-gAE41G1x.js")
+    component: () => import("./_nuxt/_sceneId_-81C_-W6x.js")
   }
 ];
 const _wrapInTransition = (props, children) => {

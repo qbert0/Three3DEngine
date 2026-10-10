@@ -17,6 +17,17 @@ scenes:
     title: Sông vân
     subtitle: ''
     panorama: /panoramas/1791363884550-otcz1232qvm-c7d26b3ac3.webp
+    sourcePanorama: /uploads/1791363884550-otcz1232qvm.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791363884550-otcz1232qvm_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
+    ktx2Panorama: /panoramas-ktx2/1791363884550-otcz1232qvm-c7d26b3ac3.ktx2
     previewPanorama: /panorama-previews/1791363884550-otcz1232qvm-c7d26b3ac3.webp
     mobilePanorama: /panoramas-mobile/1791363884550-otcz1232qvm-c7d26b3ac3.webp
     thumbnail: /thumbnails/1791363884550-otcz1232qvm.webp
@@ -69,6 +80,16 @@ scenes:
     title: Bờ sông Vân
     subtitle: ''
     panorama: /panoramas/1791363839591-afu6f9tqbxn-f767b43b82.webp
+    sourcePanorama: /uploads/1791363839591-afu6f9tqbxn.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791363839591-afu6f9tqbxn_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791363839591-afu6f9tqbxn-f767b43b82.webp
     mobilePanorama: /panoramas-mobile/1791363839591-afu6f9tqbxn-f767b43b82.webp
     thumbnail: /thumbnails/1791363839591-afu6f9tqbxn.webp
@@ -110,6 +131,16 @@ scenes:
     title: Ngã ba dinh thự
     subtitle: ''
     panorama: /panoramas/1791363817761-8md8wy2v15q-3bf1c26c2c.webp
+    sourcePanorama: /uploads/1791363817761-8md8wy2v15q.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791363817761-8md8wy2v15q_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791363817761-8md8wy2v15q-3bf1c26c2c.webp
     mobilePanorama: /panoramas-mobile/1791363817761-8md8wy2v15q-3bf1c26c2c.webp
     thumbnail: /thumbnails/1791363817761-8md8wy2v15q.webp
@@ -159,6 +190,16 @@ scenes:
     title: Sảnh tân gia
     subtitle: ''
     panorama: /panoramas/1791364188155-3d3emmjckkg-ce98279577.webp
+    sourcePanorama: /uploads/1791364188155-3d3emmjckkg.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791364188155-3d3emmjckkg_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791364188155-3d3emmjckkg-ce98279577.webp
     mobilePanorama: /panoramas-mobile/1791364188155-3d3emmjckkg-ce98279577.webp
     thumbnail: /thumbnails/1791364188155-3d3emmjckkg.webp
@@ -251,6 +292,7 @@ scenes:
     title: Khu triển lãm 2
     subtitle: ''
     panorama: /panoramas/1791363635779-44yjura05ei-a516f33b3d.webp
+    sourcePanorama: /uploads/1791363635779-44yjura05ei.jpg
     previewPanorama: /panorama-previews/1791363635779-44yjura05ei-a516f33b3d.webp
     mobilePanorama: /panoramas-mobile/1791363635779-44yjura05ei-a516f33b3d.webp
     thumbnail: /thumbnails/1791363635779-44yjura05ei.webp
@@ -288,6 +330,16 @@ scenes:
     title: Trung tâm vườn đá
     subtitle: ''
     panorama: /panoramas/1791365312935-jxwx0865xya-cdf76ad3c8.webp
+    sourcePanorama: /uploads/1791365312935-jxwx0865xya.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791365312935-jxwx0865xya_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791365312935-jxwx0865xya-cdf76ad3c8.webp
     mobilePanorama: /panoramas-mobile/1791365312935-jxwx0865xya-cdf76ad3c8.webp
     thumbnail: /thumbnails/1791365312935-jxwx0865xya.webp
@@ -318,6 +370,16 @@ scenes:
     title: Xưởng chế tác
     subtitle: ''
     panorama: /panoramas/1791365325140-3hi8ecj0hj9-40f20f752c.webp
+    sourcePanorama: /uploads/1791365325140-3hi8ecj0hj9.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791365325140-3hi8ecj0hj9_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791365325140-3hi8ecj0hj9-40f20f752c.webp
     mobilePanorama: /panoramas-mobile/1791365325140-3hi8ecj0hj9-40f20f752c.webp
     thumbnail: /thumbnails/1791365325140-3hi8ecj0hj9.webp
@@ -369,6 +431,16 @@ scenes:
     title: Vườn đá
     subtitle: ''
     panorama: /panoramas/1791365584178-n40gdw9885d-722be813bb.webp
+    sourcePanorama: /uploads/1791365584178-n40gdw9885d.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791365584178-n40gdw9885d_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791365584178-n40gdw9885d-722be813bb.webp
     mobilePanorama: /panoramas-mobile/1791365584178-n40gdw9885d-722be813bb.webp
     thumbnail: /thumbnails/1791365584178-n40gdw9885d.webp
@@ -417,6 +489,16 @@ scenes:
     title: Khu triển lãm 1 (2)
     subtitle: ''
     panorama: /panoramas/1791368261710-snm5n8lytlr-4b0043f6f0.webp
+    sourcePanorama: /uploads/1791368261710-snm5n8lytlr.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791368261710-snm5n8lytlr_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791368261710-snm5n8lytlr-4b0043f6f0.webp
     mobilePanorama: /panoramas-mobile/1791368261710-snm5n8lytlr-4b0043f6f0.webp
     thumbnail: /thumbnails/1791368261710-snm5n8lytlr.webp
@@ -467,6 +549,16 @@ scenes:
     title: Khu triển lãm 1 (1)
     subtitle: ''
     panorama: /panoramas/1791368312299-zfdxc5svjsj-cd51d4e70d.webp
+    sourcePanorama: /uploads/1791368312299-zfdxc5svjsj.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791368312299-zfdxc5svjsj_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791368312299-zfdxc5svjsj-cd51d4e70d.webp
     mobilePanorama: /panoramas-mobile/1791368312299-zfdxc5svjsj-cd51d4e70d.webp
     thumbnail: /thumbnails/1791368312299-zfdxc5svjsj.webp
@@ -497,6 +589,16 @@ scenes:
     title: Khu quan sát
     subtitle: ''
     panorama: /panoramas/1791369505710-lftwo6im5ii-1af6b97344.webp
+    sourcePanorama: /uploads/1791369505710-lftwo6im5ii.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791369505710-lftwo6im5ii_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791369505710-lftwo6im5ii-1af6b97344.webp
     mobilePanorama: /panoramas-mobile/1791369505710-lftwo6im5ii-1af6b97344.webp
     thumbnail: /thumbnails/1791369505710-lftwo6im5ii.webp
@@ -528,6 +630,16 @@ scenes:
     title: Khu chế tác
     subtitle: ''
     panorama: /panoramas/1791369541302-k5x54val0l-2f7a69d79c.webp
+    sourcePanorama: /uploads/1791369541302-k5x54val0l.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791369541302-k5x54val0l_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791369541302-k5x54val0l-2f7a69d79c.webp
     mobilePanorama: /panoramas-mobile/1791369541302-k5x54val0l-2f7a69d79c.webp
     thumbnail: /thumbnails/1791369541302-k5x54val0l.webp
@@ -568,6 +680,16 @@ scenes:
     title: Bên hông xưởng
     subtitle: ''
     panorama: /panoramas/1791370838724-8dg485jluu8-0c5fd0a1b8.webp
+    sourcePanorama: /uploads/1791370838724-8dg485jluu8.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791370838724-8dg485jluu8_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791370838724-8dg485jluu8-0c5fd0a1b8.webp
     mobilePanorama: /panoramas-mobile/1791370838724-8dg485jluu8-0c5fd0a1b8.webp
     thumbnail: /thumbnails/1791370838724-8dg485jluu8.webp
@@ -614,6 +736,16 @@ scenes:
     title: Hành lang triển lãm
     subtitle: ''
     panorama: /panoramas/1791370865551-z0836imf9m-a0c65fa688.webp
+    sourcePanorama: /uploads/1791370865551-z0836imf9m.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791370865551-z0836imf9m_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791370865551-z0836imf9m-a0c65fa688.webp
     mobilePanorama: /panoramas-mobile/1791370865551-z0836imf9m-a0c65fa688.webp
     thumbnail: /thumbnails/1791370865551-z0836imf9m.webp
@@ -672,6 +804,16 @@ scenes:
     title: Góc tân gia
     subtitle: ''
     panorama: /panoramas/1791370873981-zy2t135moj-6eae97d826.webp
+    sourcePanorama: /uploads/1791370873981-zy2t135moj.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791370873981-zy2t135moj_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791370873981-zy2t135moj-6eae97d826.webp
     mobilePanorama: /panoramas-mobile/1791370873981-zy2t135moj-6eae97d826.webp
     thumbnail: /thumbnails/1791370873981-zy2t135moj.webp
@@ -718,6 +860,16 @@ scenes:
     title: Sảnh tiếp khách
     subtitle: ''
     panorama: /panoramas/1791370883431-47q760webjq-e2cb9e4246.webp
+    sourcePanorama: /uploads/1791370883431-47q760webjq.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791370883431-47q760webjq_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791370883431-47q760webjq-e2cb9e4246.webp
     mobilePanorama: /panoramas-mobile/1791370883431-47q760webjq-e2cb9e4246.webp
     thumbnail: /thumbnails/1791370883431-47q760webjq.webp
@@ -764,6 +916,16 @@ scenes:
     title: Triển lãm 3 (1)
     subtitle: ''
     panorama: /panoramas/1791372743999-mc9nfi1vhz-41729234a2.webp
+    sourcePanorama: /uploads/1791372743999-mc9nfi1vhz.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791372743999-mc9nfi1vhz_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791372743999-mc9nfi1vhz-41729234a2.webp
     mobilePanorama: /panoramas-mobile/1791372743999-mc9nfi1vhz-41729234a2.webp
     thumbnail: /thumbnails/1791372743999-mc9nfi1vhz.webp
@@ -822,6 +984,16 @@ scenes:
     title: Triển lãm 3 (3)
     subtitle: ''
     panorama: /panoramas/1791372759191-pm63036bo4h-42459c569a.webp
+    sourcePanorama: /uploads/1791372759191-pm63036bo4h.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791372759191-pm63036bo4h_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791372759191-pm63036bo4h-42459c569a.webp
     mobilePanorama: /panoramas-mobile/1791372759191-pm63036bo4h-42459c569a.webp
     thumbnail: /thumbnails/1791372759191-pm63036bo4h.webp
@@ -880,6 +1052,16 @@ scenes:
     title: triển lãm 3 (4)
     subtitle: ''
     panorama: /panoramas/1791372766244-yirii93ny8e-a89669515a.webp
+    sourcePanorama: /uploads/1791372766244-yirii93ny8e.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791372766244-yirii93ny8e_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791372766244-yirii93ny8e-a89669515a.webp
     mobilePanorama: /panoramas-mobile/1791372766244-yirii93ny8e-a89669515a.webp
     thumbnail: /thumbnails/1791372766244-yirii93ny8e.webp
@@ -926,6 +1108,16 @@ scenes:
     title: Triển lãm 3 (2)
     subtitle: ''
     panorama: /panoramas/1791372780871-9ozia4yzmfj-90c291d8c3.webp
+    sourcePanorama: /uploads/1791372780871-9ozia4yzmfj.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 11968
+      sourceHeight: 5984
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791372780871-9ozia4yzmfj_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 14
     previewPanorama: /panorama-previews/1791372780871-9ozia4yzmfj-90c291d8c3.webp
     mobilePanorama: /panoramas-mobile/1791372780871-9ozia4yzmfj-90c291d8c3.webp
     thumbnail: /thumbnails/1791372780871-9ozia4yzmfj.webp
@@ -984,6 +1176,16 @@ scenes:
     title: Không gian trước
     subtitle: ''
     panorama: /panoramas/1791374679999-qb06gn55i3r-c99a7d39d1.webp
+    sourcePanorama: /uploads/1791374679999-qb06gn55i3r.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 8192
+      sourceHeight: 4096
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791374679999-qb06gn55i3r_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 13
     previewPanorama: /panorama-previews/1791374679999-qb06gn55i3r-c99a7d39d1.webp
     mobilePanorama: /panoramas-mobile/1791374679999-qb06gn55i3r-c99a7d39d1.webp
     thumbnail: /thumbnails/1791374679999-qb06gn55i3r.webp
@@ -1119,6 +1321,16 @@ scenes:
     title: Không gian sông Vân
     subtitle: ''
     panorama: /panoramas/1791374687320-qp74k2s456-67987efee1.webp
+    sourcePanorama: /uploads/1791374687320-qp74k2s456.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 8192
+      sourceHeight: 4096
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791374687320-qp74k2s456_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 13
     previewPanorama: /panorama-previews/1791374687320-qp74k2s456-67987efee1.webp
     mobilePanorama: /panoramas-mobile/1791374687320-qp74k2s456-67987efee1.webp
     thumbnail: /thumbnails/1791374687320-qp74k2s456.webp
@@ -1237,6 +1449,16 @@ scenes:
     title: Không gian xưởng
     subtitle: ''
     panorama: /panoramas/1791374750110-9o5fa6w6uhl-7f201ca019.webp
+    sourcePanorama: /uploads/1791374750110-9o5fa6w6uhl.jpg
+    multiRes:
+      enabled: true
+      sourceWidth: 8192
+      sourceHeight: 4096
+      tileSize: 1024
+      overlap: 2
+      minLevel: 12
+      urlTemplate: /panorama-tiles/1791374750110-9o5fa6w6uhl_files/{level}/{x}_{y}.webp?v=2
+      maxLevel: 13
     previewPanorama: /panorama-previews/1791374750110-9o5fa6w6uhl-7f201ca019.webp
     mobilePanorama: /panoramas-mobile/1791374750110-9o5fa6w6uhl-7f201ca019.webp
     thumbnail: /thumbnails/1791374750110-9o5fa6w6uhl.webp

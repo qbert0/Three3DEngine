@@ -200,10 +200,31 @@ export interface TourScene {
   title: string;
   subtitle: string;
   panorama: string;
+  /** Untouched 8K/12K upload used to generate multi-resolution assets. */
+  sourcePanorama?: string;
   /** Fast 2K panorama shown immediately while the viewer waits for full quality. */
   previewPanorama?: string;
   /** Bandwidth-friendly panorama selected on small/coarse-pointer devices. */
   mobilePanorama?: string;
+  /** Optional GPU-compressed candidate. Benchmark before enabling in production. */
+  ktx2Panorama?: string;
+  /**
+   * Offline-generated Deep Zoom pyramid for viewport-driven 8K–16K streaming.
+   * The engine deliberately ignores it below 8192px source width.
+   */
+  multiRes?: {
+    enabled: boolean;
+    sourceWidth: number;
+    sourceHeight?: number;
+    tileSize?: number;
+    /** Deep Zoom gutter shared by neighbouring tiles. */
+    overlap?: number;
+    /** First pyramid level above the pinned preview panorama. */
+    minLevel?: number;
+    minFov?: number;
+    urlTemplate: string;
+    maxLevel: number;
+  };
   thumbnail: string;
   /** Lower-resolution 2:1 panorama used only by the admin designer. */
   editorPanorama?: string;

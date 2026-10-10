@@ -17,6 +17,12 @@ export default defineNuxtConfig({
     '/images/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/uploads/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/thumbnails/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/panoramas/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/panoramas-mobile/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/panorama-previews/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/panorama-tiles/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/panoramas-ktx2/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/basis/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
   },
 
   app: {
